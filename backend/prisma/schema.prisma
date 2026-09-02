@@ -27,3 +27,23 @@ model CalendarEvent{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+model Movies{
+  id Int @id @default(autoincrement())
+  title String
+  released DateTime
+}
+model TvShow{
+  id Int @id @default(autoincrement())
+  title String
+  released DateTime
+}
+model Games{
+  id Int @id @default(autoincrement())
+  title String
+  released DateTime
+}
+model Birthday{
+  id Int @id @default(autoincrement())
+  name String
+  date DateTime
+}

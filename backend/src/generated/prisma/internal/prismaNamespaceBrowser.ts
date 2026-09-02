@@ -52,7 +52,11 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Todo: 'Todo',
-  CalendarEvent: 'CalendarEvent'
+  CalendarEvent: 'CalendarEvent',
+  Movies: 'Movies',
+  TvShow: 'TvShow',
+  Games: 'Games',
+  Birthday: 'Birthday'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -93,6 +97,42 @@ export const CalendarEventScalarFieldEnum = {
 } as const
 
 export type CalendarEventScalarFieldEnum = (typeof CalendarEventScalarFieldEnum)[keyof typeof CalendarEventScalarFieldEnum]
+
+
+export const MoviesScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  released: 'released'
+} as const
+
+export type MoviesScalarFieldEnum = (typeof MoviesScalarFieldEnum)[keyof typeof MoviesScalarFieldEnum]
+
+
+export const TvShowScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  released: 'released'
+} as const
+
+export type TvShowScalarFieldEnum = (typeof TvShowScalarFieldEnum)[keyof typeof TvShowScalarFieldEnum]
+
+
+export const GamesScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  released: 'released'
+} as const
+
+export type GamesScalarFieldEnum = (typeof GamesScalarFieldEnum)[keyof typeof GamesScalarFieldEnum]
+
+
+export const BirthdayScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  date: 'date'
+} as const
+
+export type BirthdayScalarFieldEnum = (typeof BirthdayScalarFieldEnum)[keyof typeof BirthdayScalarFieldEnum]
 
 
 export const SortOrder = {

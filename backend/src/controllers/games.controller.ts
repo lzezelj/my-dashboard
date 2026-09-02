@@ -1,0 +1,48 @@
+import type{ Request, Response } from "express";
+import { createGameService, deleteGameService, getGameService, getGamesService, updateGameService } from "../services/games.service.js";
+
+export const getGames = async (req: Request, res: Response) => {
+    try {
+        const games = await getGamesService();
+        res.status(200).json(games);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching games", error });
+    }       
+};
+export const getGame = async (req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+        const game = await getGameService(id);
+        res.status(200).json(game);
+    } catch (error) { 
+        res.status(500).json({ message: "Error fetching game", error });
+    }
+};
+export const createGame = async (req: Request, res: Response) => {
+    try {
+        const { title, released } = req.body;
+        const game = await createGameService(title, released);
+        res.status(201).json(game); 
+    } catch (error) {
+        res.status(500).json({ message: "Error creating game", error });
+    }
+};
+export const updateGame = async (req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+        const { title, released } = req.body;
+        const game = await updateGameService(id, title, released);
+        res.status(200).json(game);
+    } catch (error) {
+        res.status(500).json({ message: "Error updating game", error });
+    }
+};
+export const deleteGame = async (req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+        const game = await deleteGameService(id);
+        res.status(200).json(game);
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting game", error });
+    }
+};

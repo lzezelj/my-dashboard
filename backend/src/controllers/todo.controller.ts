@@ -1,6 +1,6 @@
 import type{ Request, Response } from "express";
 import { getTodosService,getTodoService,createTodoService,updateTodoService, deleteTodoService } from "../services/todo.service.js";
-import { prisma } from "../lib/prisma.js";
+
 
 export const getTodos = async (req: Request, res: Response) => {
     try {

@@ -10,4 +10,8 @@
  */
 export type * from './models/Todo.js'
 export type * from './models/CalendarEvent.js'
+export type * from './models/Movies.js'
+export type * from './models/TvShow.js'
+export type * from './models/Games.js'
+export type * from './models/Birthday.js'
 export type * from './commonInputTypes.js'

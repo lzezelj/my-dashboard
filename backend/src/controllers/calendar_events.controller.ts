@@ -1,6 +1,6 @@
 import type{ Request, Response } from "express";
 import { getEventsService,getEventService,createEventService,updateEventService,deleteEventService } from "../services/calendar_events.service.js";
-import { prisma } from "../lib/prisma.js";
+
 
 export const getEvents = async (req: Request, res: Response) => {
     try {
