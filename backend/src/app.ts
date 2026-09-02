@@ -1,9 +1,11 @@
 import express from "express";
+import todoRoutes from "./routes/todo.routes.js";
 
 const app=express();
 const PORT =3000;
 
 app.use(express.json());
+app.use("/api/todos", todoRoutes);
 app.get("/api/health",(_req,res)=>{
     res.json({
         status:"ok",
