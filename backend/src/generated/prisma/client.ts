@@ -46,3 +46,8 @@ export { Prisma }
  * 
  */
 export type Todo = Prisma.TodoModel
+/**
+ * Model CalendarEvent
+ * 
+ */
+export type CalendarEvent = Prisma.CalendarEventModel

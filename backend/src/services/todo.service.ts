@@ -10,20 +10,18 @@ export const getTodoService=async(id :number)=>{
         }
     })
 };
-export const createTodoService=async(title:string,description:string)=>{
+export const createTodoService=async(title:string)=>{
     return prisma.todo.create({
             data: {
-                title,
-                description
+                title
             }
         });
 };
-export const updateTodoService=async(id:number,title:string,description:string)=>{
+export const updateTodoService=async(id:number,title:string)=>{
     return prisma.todo.update({
             where: { id },
             data: {
-                title,
-                description
+                title
             }
         });
 };
