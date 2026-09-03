@@ -1,5 +1,10 @@
 import express from "express";
 import todoRoutes from "./routes/todo.routes.js";
+import movieRoutes from "./routes/movies.routes.js";
+import calendarEventRoutes from "./routes/calendar_events.routes.js";
+import birthdayRoutes from "./routes/birthday.routes.js";
+import gameRoutes from "./routes/games.routes.js";
+import tvShowRoutes from "./routes/tv_shows.routes.js";
 import cors from "cors";
 
 const app=express();
@@ -10,6 +15,11 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use("/api/todos", todoRoutes);
+app.use("/api/movies", movieRoutes);
+app.use("/api/calendarEvents", calendarEventRoutes);
+app.use("/api/birthdays", birthdayRoutes);
+app.use("/api/games", gameRoutes);
+app.use("/api/tvShows", tvShowRoutes);
 app.get("/api/health",(_req,res)=>{
     res.json({
         status:"ok",
