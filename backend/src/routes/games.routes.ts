@@ -7,7 +7,7 @@ const router = Router();
 router.get("/", getGames);
 router.get("/:id",getGame);
 router.post("/", createGame);
-router.put("/:id", updateGame);
+router.patch("/:id", updateGame);
 router.delete("/:id", deleteGame);
 
 export default router;
