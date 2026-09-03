@@ -52,7 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Todo: 'Todo',
-  CalendarEvent: 'CalendarEvent',
+  Event: 'Event',
   Movies: 'Movies',
   TvShow: 'TvShow',
   Games: 'Games',
@@ -86,17 +86,19 @@ export const TodoScalarFieldEnum = {
 export type TodoScalarFieldEnum = (typeof TodoScalarFieldEnum)[keyof typeof TodoScalarFieldEnum]
 
 
-export const CalendarEventScalarFieldEnum = {
+export const EventScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
+  type: 'type',
   startDate: 'startDate',
+  allDay: 'allDay',
   endDate: 'endDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type CalendarEventScalarFieldEnum = (typeof CalendarEventScalarFieldEnum)[keyof typeof CalendarEventScalarFieldEnum]
+export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
 
 
 export const MoviesScalarFieldEnum = {

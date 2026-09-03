@@ -9,7 +9,13 @@
 * 🟢 You can import this file directly.
 */
 
+export const EventType = {
+  APPOINTMENT: 'APPOINTMENT',
+  MOVIE: 'MOVIE',
+  TV_SHOW: 'TV_SHOW',
+  GAME: 'GAME',
+  BIRTHDAY: 'BIRTHDAY',
+  OTHER: 'OTHER'
+} as const
 
-
-// This file is empty because there are no enums in the schema.
-export {}
+export type EventType = (typeof EventType)[keyof typeof EventType]

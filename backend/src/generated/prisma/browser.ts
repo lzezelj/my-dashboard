@@ -23,10 +23,10 @@ export * from './enums.js';
  */
 export type Todo = Prisma.TodoModel
 /**
- * Model CalendarEvent
+ * Model Event
  * 
  */
-export type CalendarEvent = Prisma.CalendarEventModel
+export type Event = Prisma.EventModel
 /**
  * Model Movies
  * 
