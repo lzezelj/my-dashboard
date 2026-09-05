@@ -11,20 +11,20 @@ export const getTvShowService=async(id :number)=>{
         }
     })
 };
-export const createTvShowService=async(title:string,released:Date)=>{
+export const createTvShowService=async(title:string,releaseDate:Date)=>{
     return prisma.tvShow.create({
             data: {
                 title,
-                released
+                releaseDate
             }
         });
 };
-export const updateTvShowService=async(id:number,title:string,released:Date)=>{
+export const updateTvShowService=async(id:number,title:string,releaseDate:Date)=>{
     return prisma.tvShow.update({
             where: { id },
             data: {
                 title,
-                released
+                releaseDate
             }
         });
 };
@@ -34,12 +34,12 @@ export const deleteTvShowService=async(id:number)=>{
     });
 };
 export const createTvShowEventService=async(sourceId:number)=>{
-    const game = await prisma.tvShow.findUnique({
+    const tvShow = await prisma.tvShow.findUnique({
         where: { id: sourceId }
     });
 
-    if (!game) {
-        throw new Error("TvShow not found");
+    if (!tvShow) {
+        throw new Error("TV Show not found");
     }
     return prisma.event.create({
         data: {

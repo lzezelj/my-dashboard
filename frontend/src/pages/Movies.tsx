@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Movies, UpdateMovies } from "../types/movies";
 import { createMovie, deleteMovie, getMovies, updateMovie } from "../services/movies.api.ts";
+import {dateToISOString, isoToDateInputValue, isoToDisplayDate} from "../utils/dateUtils";
 
 export default function Movies() {
     const [movies, setMovies] = useState<Movies[]>([]);
@@ -8,13 +9,9 @@ export default function Movies() {
     const [error, setError] = useState<string | null>(null);
     const [title, setTitle] = useState("");
     const [editTitle, setEditTitle] = useState("");
-    const [editRelease, setEditRelease] = useState(new Date().toISOString().split("T")[0]);
+    const [editReleaseDate, setEditReleaseDate] = useState(new Date().toISOString().split("T")[0]);
     const [editingMovieId, setEditingMovieId] = useState<number | null>(null);
-    const [released, setReleased] = useState(new Date().toISOString().split("T")[0]);
-    const convertedDate = (dateString: Date): string => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString();
-    }
+    const [releaseDate, setReleaseDate] = useState(new Date().toISOString().split("T")[0]);
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (!title.trim()) {
@@ -23,10 +20,10 @@ export default function Movies() {
         }
 
         try {
-            const newMovie = await createMovie({ title, released: new Date(released) });
+            const newMovie = await createMovie({ title, releaseDate:dateToISOString(releaseDate) });
             setMovies((currentMovies) => [...currentMovies, newMovie]);
             setTitle("");
-            setReleased(new Date().toISOString().split("T")[0]);
+            setReleaseDate(new Date().toISOString().split("T")[0]);
         } catch (error) {
             setError("Could not create movie.");
         }
@@ -85,14 +82,14 @@ export default function Movies() {
                     <button type="button" onClick={() => {
                         setEditingMovieId(editingMovieId === movie.id ? null : movie.id);
                         setEditTitle(movie.title);
-                        setEditRelease(movie.released.toISOString().split("T")[0]);
+                        setEditReleaseDate(isoToDateInputValue(movie.releaseDate));
                     }}>
                          {editingMovieId === movie.id ? "Cancel" : "Edit"}
                     </button>
                     {editingMovieId === movie.id && (
-                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(movie.id, { title, released: new Date(editRelease) }); setEditingMovieId(null);}} >
+                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(movie.id, { title:editTitle, releaseDate: dateToISOString(editReleaseDate) }); setEditingMovieId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                            <input name="released" type="date" value={editRelease} onChange={(e) => setEditRelease(e.target.value)} />
+                            <input name="releaseDate" type="date" value={editReleaseDate} onChange={(e) => setEditReleaseDate(e.target.value)} />
                             <button type="submit">Update Movie</button>
                         </form>
                     )}
@@ -100,7 +97,7 @@ export default function Movies() {
                         {movie.title}
                     </p>     
                     <p>
-                        {convertedDate(movie.released)}
+                        {isoToDisplayDate(movie.releaseDate)}
                     </p>
                     
                     <button type="button" onClick={() => handleDelete(movie.id)}>
@@ -110,7 +107,7 @@ export default function Movies() {
             ))}
             <form onSubmit={handleSubmit}>
                 <input name="title" placeholder="Enter a movie" value={title} onChange={(e) => setTitle(e.target.value)} />
-                <input name="released" type="date" value={released} onChange={(e) => setReleased(e.target.value)} />
+                <input name="releaseDate" type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} />
                 <button type="submit">Create Movie</button>
             </form>
         </div>

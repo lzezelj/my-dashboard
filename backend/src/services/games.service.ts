@@ -2,39 +2,39 @@ import  { EventType } from "../generated/prisma/browser.js";
 import {prisma} from "../lib/prisma.js";
 
 export const getGamesService = async () => {
-    return await prisma.games.findMany();
+    return await prisma.game.findMany();
 };
 export const getGameService=async(id :number)=>{
-    return prisma.games.findUnique({
+    return prisma.game.findUnique({
         where:{
             id:id
         }
     })
 };
-export const createGameService=async(title:string,released:Date)=>{
-    return prisma.games.create({
+export const createGameService=async(title:string,releaseDate:Date)=>{
+    return prisma.game.create({
             data: {
                 title,
-                released
+                releaseDate
             }
         });
 };
-export const updateGameService=async(id:number,title:string,released:Date)=>{
-    return prisma.games.update({
+export const updateGameService=async(id:number,title:string,releaseDate:Date)=>{
+    return prisma.game.update({
             where: { id },
             data: {
                 title,
-                released
+                releaseDate
             }
         });
 };
 export const deleteGameService=async(id:number)=>{
-    return prisma.games.delete({
+    return prisma.game.delete({
         where: { id }
     });
 };
 export const createGameEventService=async(sourceId:number)=>{
-    const game = await prisma.games.findUnique({
+    const game = await prisma.game.findUnique({
         where: { id: sourceId }
     });
 

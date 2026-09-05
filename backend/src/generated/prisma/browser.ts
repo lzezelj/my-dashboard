@@ -28,20 +28,20 @@ export type Todo = Prisma.TodoModel
  */
 export type Event = Prisma.EventModel
 /**
- * Model Movies
+ * Model Movie
  * 
  */
-export type Movies = Prisma.MoviesModel
+export type Movie = Prisma.MovieModel
 /**
  * Model TvShow
  * 
  */
 export type TvShow = Prisma.TvShowModel
 /**
- * Model Games
+ * Model Game
  * 
  */
-export type Games = Prisma.GamesModel
+export type Game = Prisma.GameModel
 /**
  * Model Birthday
  * 

@@ -37,19 +37,19 @@ export type TvShowSumAggregateOutputType = {
 export type TvShowMinAggregateOutputType = {
   id: number | null
   title: string | null
-  released: Date | null
+  releaseDate: Date | null
 }
 
 export type TvShowMaxAggregateOutputType = {
   id: number | null
   title: string | null
-  released: Date | null
+  releaseDate: Date | null
 }
 
 export type TvShowCountAggregateOutputType = {
   id: number
   title: number
-  released: number
+  releaseDate: number
   _all: number
 }
 
@@ -65,19 +65,19 @@ export type TvShowSumAggregateInputType = {
 export type TvShowMinAggregateInputType = {
   id?: true
   title?: true
-  released?: true
+  releaseDate?: true
 }
 
 export type TvShowMaxAggregateInputType = {
   id?: true
   title?: true
-  released?: true
+  releaseDate?: true
 }
 
 export type TvShowCountAggregateInputType = {
   id?: true
   title?: true
-  released?: true
+  releaseDate?: true
   _all?: true
 }
 
@@ -170,7 +170,7 @@ export type TvShowGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 export type TvShowGroupByOutputType = {
   id: number
   title: string
-  released: Date
+  releaseDate: Date
   _count: TvShowCountAggregateOutputType | null
   _avg: TvShowAvgAggregateOutputType | null
   _sum: TvShowSumAggregateOutputType | null
@@ -199,13 +199,13 @@ export type TvShowWhereInput = {
   NOT?: Prisma.TvShowWhereInput | Prisma.TvShowWhereInput[]
   id?: Prisma.IntFilter<"TvShow"> | number
   title?: Prisma.StringFilter<"TvShow"> | string
-  released?: Prisma.DateTimeFilter<"TvShow"> | Date | string
+  releaseDate?: Prisma.DateTimeFilter<"TvShow"> | Date | string
 }
 
 export type TvShowOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  released?: Prisma.SortOrder
+  releaseDate?: Prisma.SortOrder
 }
 
 export type TvShowWhereUniqueInput = Prisma.AtLeast<{
@@ -214,13 +214,13 @@ export type TvShowWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.TvShowWhereInput[]
   NOT?: Prisma.TvShowWhereInput | Prisma.TvShowWhereInput[]
   title?: Prisma.StringFilter<"TvShow"> | string
-  released?: Prisma.DateTimeFilter<"TvShow"> | Date | string
+  releaseDate?: Prisma.DateTimeFilter<"TvShow"> | Date | string
 }, "id">
 
 export type TvShowOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  released?: Prisma.SortOrder
+  releaseDate?: Prisma.SortOrder
   _count?: Prisma.TvShowCountOrderByAggregateInput
   _avg?: Prisma.TvShowAvgOrderByAggregateInput
   _max?: Prisma.TvShowMaxOrderByAggregateInput
@@ -234,52 +234,52 @@ export type TvShowScalarWhereWithAggregatesInput = {
   NOT?: Prisma.TvShowScalarWhereWithAggregatesInput | Prisma.TvShowScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"TvShow"> | number
   title?: Prisma.StringWithAggregatesFilter<"TvShow"> | string
-  released?: Prisma.DateTimeWithAggregatesFilter<"TvShow"> | Date | string
+  releaseDate?: Prisma.DateTimeWithAggregatesFilter<"TvShow"> | Date | string
 }
 
 export type TvShowCreateInput = {
   title: string
-  released: Date | string
+  releaseDate: Date | string
 }
 
 export type TvShowUncheckedCreateInput = {
   id?: number
   title: string
-  released: Date | string
+  releaseDate: Date | string
 }
 
 export type TvShowUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  released?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  releaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TvShowUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  released?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  releaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TvShowCreateManyInput = {
   id?: number
   title: string
-  released: Date | string
+  releaseDate: Date | string
 }
 
 export type TvShowUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  released?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  releaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TvShowUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  released?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  releaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TvShowCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  released?: Prisma.SortOrder
+  releaseDate?: Prisma.SortOrder
 }
 
 export type TvShowAvgOrderByAggregateInput = {
@@ -289,13 +289,13 @@ export type TvShowAvgOrderByAggregateInput = {
 export type TvShowMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  released?: Prisma.SortOrder
+  releaseDate?: Prisma.SortOrder
 }
 
 export type TvShowMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  released?: Prisma.SortOrder
+  releaseDate?: Prisma.SortOrder
 }
 
 export type TvShowSumOrderByAggregateInput = {
@@ -307,28 +307,28 @@ export type TvShowSumOrderByAggregateInput = {
 export type TvShowSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
-  released?: boolean
+  releaseDate?: boolean
 }, ExtArgs["result"]["tvShow"]>
 
 export type TvShowSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
-  released?: boolean
+  releaseDate?: boolean
 }, ExtArgs["result"]["tvShow"]>
 
 export type TvShowSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
-  released?: boolean
+  releaseDate?: boolean
 }, ExtArgs["result"]["tvShow"]>
 
 export type TvShowSelectScalar = {
   id?: boolean
   title?: boolean
-  released?: boolean
+  releaseDate?: boolean
 }
 
-export type TvShowOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "released", ExtArgs["result"]["tvShow"]>
+export type TvShowOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "releaseDate", ExtArgs["result"]["tvShow"]>
 
 export type $TvShowPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TvShow"
@@ -336,7 +336,7 @@ export type $TvShowPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     title: string
-    released: Date
+    releaseDate: Date
   }, ExtArgs["result"]["tvShow"]>
   composites: {}
 }
@@ -762,7 +762,7 @@ export interface Prisma__TvShowClient<T, Null = never, ExtArgs extends runtime.T
 export interface TvShowFieldRefs {
   readonly id: Prisma.FieldRef<"TvShow", 'Int'>
   readonly title: Prisma.FieldRef<"TvShow", 'String'>
-  readonly released: Prisma.FieldRef<"TvShow", 'DateTime'>
+  readonly releaseDate: Prisma.FieldRef<"TvShow", 'DateTime'>
 }
     
 

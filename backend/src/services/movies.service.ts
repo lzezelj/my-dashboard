@@ -2,39 +2,39 @@ import { EventType } from "../generated/prisma/browser.js";
 import {prisma} from "../lib/prisma.js";
 
 export const getMoviesService = async () => {
-    return await prisma.movies.findMany();
+    return await prisma.movie.findMany();
 };
 export const getMovieService=async(id :number)=>{
-    return prisma.movies.findUnique({
+    return prisma.movie.findUnique({
         where:{
             id:id
         }
     })
 };
-export const createMovieService=async(title:string,released:Date)=>{
-    return prisma.movies.create({
+export const createMovieService=async(title:string,releaseDate:Date)=>{
+    return prisma.movie.create({
             data: {
                 title,
-                released
+                releaseDate
             }
         });
 };
-export const updateMovieService=async(id:number,title:string,released:Date)=>{
-    return prisma.movies.update({
+export const updateMovieService=async(id:number,title:string,releaseDate:Date)=>{
+    return prisma.movie.update({
             where: { id },
             data: {
                 title,
-                released
+                releaseDate
             }
         });
 };
 export const deleteMovieService=async(id:number)=>{
-    return prisma.movies.delete({
+    return prisma.movie.delete({
         where: { id }
     });
 };
 export const createMovieEventService=async(sourceId:number)=>{
-    const movie = await prisma.movies.findUnique({
+    const movie = await prisma.movie.findUnique({
         where: { id: sourceId }
     });
 

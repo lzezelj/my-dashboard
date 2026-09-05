@@ -39,6 +39,8 @@ export type AppointmentMinAggregateOutputType = {
   title: string | null
   startTime: Date | null
   endTime: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type AppointmentMaxAggregateOutputType = {
@@ -46,6 +48,8 @@ export type AppointmentMaxAggregateOutputType = {
   title: string | null
   startTime: Date | null
   endTime: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type AppointmentCountAggregateOutputType = {
@@ -53,6 +57,8 @@ export type AppointmentCountAggregateOutputType = {
   title: number
   startTime: number
   endTime: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -70,6 +76,8 @@ export type AppointmentMinAggregateInputType = {
   title?: true
   startTime?: true
   endTime?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type AppointmentMaxAggregateInputType = {
@@ -77,6 +85,8 @@ export type AppointmentMaxAggregateInputType = {
   title?: true
   startTime?: true
   endTime?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type AppointmentCountAggregateInputType = {
@@ -84,6 +94,8 @@ export type AppointmentCountAggregateInputType = {
   title?: true
   startTime?: true
   endTime?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -178,6 +190,8 @@ export type AppointmentGroupByOutputType = {
   title: string
   startTime: Date
   endTime: Date
+  createdAt: Date
+  updatedAt: Date
   _count: AppointmentCountAggregateOutputType | null
   _avg: AppointmentAvgAggregateOutputType | null
   _sum: AppointmentSumAggregateOutputType | null
@@ -208,6 +222,8 @@ export type AppointmentWhereInput = {
   title?: Prisma.StringFilter<"Appointment"> | string
   startTime?: Prisma.DateTimeFilter<"Appointment"> | Date | string
   endTime?: Prisma.DateTimeFilter<"Appointment"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"Appointment"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Appointment"> | Date | string
 }
 
 export type AppointmentOrderByWithRelationInput = {
@@ -215,6 +231,8 @@ export type AppointmentOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type AppointmentWhereUniqueInput = Prisma.AtLeast<{
@@ -225,6 +243,8 @@ export type AppointmentWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"Appointment"> | string
   startTime?: Prisma.DateTimeFilter<"Appointment"> | Date | string
   endTime?: Prisma.DateTimeFilter<"Appointment"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"Appointment"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Appointment"> | Date | string
 }, "id">
 
 export type AppointmentOrderByWithAggregationInput = {
@@ -232,6 +252,8 @@ export type AppointmentOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.AppointmentCountOrderByAggregateInput
   _avg?: Prisma.AppointmentAvgOrderByAggregateInput
   _max?: Prisma.AppointmentMaxOrderByAggregateInput
@@ -247,12 +269,16 @@ export type AppointmentScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Appointment"> | string
   startTime?: Prisma.DateTimeWithAggregatesFilter<"Appointment"> | Date | string
   endTime?: Prisma.DateTimeWithAggregatesFilter<"Appointment"> | Date | string
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Appointment"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Appointment"> | Date | string
 }
 
 export type AppointmentCreateInput = {
   title: string
   startTime: Date | string
   endTime: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type AppointmentUncheckedCreateInput = {
@@ -260,12 +286,16 @@ export type AppointmentUncheckedCreateInput = {
   title: string
   startTime: Date | string
   endTime: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type AppointmentUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AppointmentUncheckedUpdateInput = {
@@ -273,6 +303,8 @@ export type AppointmentUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AppointmentCreateManyInput = {
@@ -280,12 +312,16 @@ export type AppointmentCreateManyInput = {
   title: string
   startTime: Date | string
   endTime: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type AppointmentUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AppointmentUncheckedUpdateManyInput = {
@@ -293,6 +329,8 @@ export type AppointmentUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AppointmentCountOrderByAggregateInput = {
@@ -300,6 +338,8 @@ export type AppointmentCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type AppointmentAvgOrderByAggregateInput = {
@@ -311,6 +351,8 @@ export type AppointmentMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type AppointmentMinOrderByAggregateInput = {
@@ -318,6 +360,8 @@ export type AppointmentMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type AppointmentSumOrderByAggregateInput = {
@@ -331,6 +375,8 @@ export type AppointmentSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   title?: boolean
   startTime?: boolean
   endTime?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["appointment"]>
 
 export type AppointmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -338,6 +384,8 @@ export type AppointmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   title?: boolean
   startTime?: boolean
   endTime?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["appointment"]>
 
 export type AppointmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -345,6 +393,8 @@ export type AppointmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   title?: boolean
   startTime?: boolean
   endTime?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["appointment"]>
 
 export type AppointmentSelectScalar = {
@@ -352,9 +402,11 @@ export type AppointmentSelectScalar = {
   title?: boolean
   startTime?: boolean
   endTime?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type AppointmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "startTime" | "endTime", ExtArgs["result"]["appointment"]>
+export type AppointmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "startTime" | "endTime" | "createdAt" | "updatedAt", ExtArgs["result"]["appointment"]>
 
 export type $AppointmentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Appointment"
@@ -364,6 +416,8 @@ export type $AppointmentPayload<ExtArgs extends runtime.Types.Extensions.Interna
     title: string
     startTime: Date
     endTime: Date
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["appointment"]>
   composites: {}
 }
@@ -791,6 +845,8 @@ export interface AppointmentFieldRefs {
   readonly title: Prisma.FieldRef<"Appointment", 'String'>
   readonly startTime: Prisma.FieldRef<"Appointment", 'DateTime'>
   readonly endTime: Prisma.FieldRef<"Appointment", 'DateTime'>
+  readonly createdAt: Prisma.FieldRef<"Appointment", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Appointment", 'DateTime'>
 }
     
 

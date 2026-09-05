@@ -53,9 +53,9 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Todo: 'Todo',
   Event: 'Event',
-  Movies: 'Movies',
+  Movie: 'Movie',
   TvShow: 'TvShow',
-  Games: 'Games',
+  Game: 'Game',
   Birthday: 'Birthday',
   Appointment: 'Appointment'
 } as const
@@ -80,6 +80,7 @@ export const TodoScalarFieldEnum = {
   id: 'id',
   title: 'title',
   completed: 'completed',
+  deadline: 'deadline',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -98,31 +99,31 @@ export const EventScalarFieldEnum = {
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
 
 
-export const MoviesScalarFieldEnum = {
+export const MovieScalarFieldEnum = {
   id: 'id',
   title: 'title',
-  released: 'released'
+  releaseDate: 'releaseDate'
 } as const
 
-export type MoviesScalarFieldEnum = (typeof MoviesScalarFieldEnum)[keyof typeof MoviesScalarFieldEnum]
+export type MovieScalarFieldEnum = (typeof MovieScalarFieldEnum)[keyof typeof MovieScalarFieldEnum]
 
 
 export const TvShowScalarFieldEnum = {
   id: 'id',
   title: 'title',
-  released: 'released'
+  releaseDate: 'releaseDate'
 } as const
 
 export type TvShowScalarFieldEnum = (typeof TvShowScalarFieldEnum)[keyof typeof TvShowScalarFieldEnum]
 
 
-export const GamesScalarFieldEnum = {
+export const GameScalarFieldEnum = {
   id: 'id',
   title: 'title',
-  released: 'released'
+  releaseDate: 'releaseDate'
 } as const
 
-export type GamesScalarFieldEnum = (typeof GamesScalarFieldEnum)[keyof typeof GamesScalarFieldEnum]
+export type GameScalarFieldEnum = (typeof GameScalarFieldEnum)[keyof typeof GameScalarFieldEnum]
 
 
 export const BirthdayScalarFieldEnum = {
@@ -138,7 +139,9 @@ export const AppointmentScalarFieldEnum = {
   id: 'id',
   title: 'title',
   startTime: 'startTime',
-  endTime: 'endTime'
+  endTime: 'endTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
@@ -158,4 +161,12 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

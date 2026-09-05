@@ -296,10 +296,11 @@ code {
 
 .navbar {
     display: flex;
-    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
     padding: 15px;
 }
 
 .navbar a {
-    text-decoration: none !important;
+    text-decoration: none;
 }

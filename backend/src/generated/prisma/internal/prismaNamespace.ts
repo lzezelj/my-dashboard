@@ -399,9 +399,9 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Todo: 'Todo',
   Event: 'Event',
-  Movies: 'Movies',
+  Movie: 'Movie',
   TvShow: 'TvShow',
-  Games: 'Games',
+  Game: 'Game',
   Birthday: 'Birthday',
   Appointment: 'Appointment'
 } as const
@@ -419,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "todo" | "event" | "movies" | "tvShow" | "games" | "birthday" | "appointment"
+    modelProps: "todo" | "event" | "movie" | "tvShow" | "game" | "birthday" | "appointment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -571,77 +571,77 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    Movies: {
-      payload: Prisma.$MoviesPayload<ExtArgs>
-      fields: Prisma.MoviesFieldRefs
+    Movie: {
+      payload: Prisma.$MoviePayload<ExtArgs>
+      fields: Prisma.MovieFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.MoviesFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviesPayload> | null
+          args: Prisma.MovieFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviePayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.MoviesFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviesPayload>
+          args: Prisma.MovieFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviePayload>
         }
         findFirst: {
-          args: Prisma.MoviesFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviesPayload> | null
+          args: Prisma.MovieFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviePayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.MoviesFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviesPayload>
+          args: Prisma.MovieFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviePayload>
         }
         findMany: {
-          args: Prisma.MoviesFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviesPayload>[]
+          args: Prisma.MovieFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviePayload>[]
         }
         create: {
-          args: Prisma.MoviesCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviesPayload>
+          args: Prisma.MovieCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviePayload>
         }
         createMany: {
-          args: Prisma.MoviesCreateManyArgs<ExtArgs>
+          args: Prisma.MovieCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.MoviesCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviesPayload>[]
+          args: Prisma.MovieCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviePayload>[]
         }
         delete: {
-          args: Prisma.MoviesDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviesPayload>
+          args: Prisma.MovieDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviePayload>
         }
         update: {
-          args: Prisma.MoviesUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviesPayload>
+          args: Prisma.MovieUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviePayload>
         }
         deleteMany: {
-          args: Prisma.MoviesDeleteManyArgs<ExtArgs>
+          args: Prisma.MovieDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.MoviesUpdateManyArgs<ExtArgs>
+          args: Prisma.MovieUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.MoviesUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviesPayload>[]
+          args: Prisma.MovieUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviePayload>[]
         }
         upsert: {
-          args: Prisma.MoviesUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviesPayload>
+          args: Prisma.MovieUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MoviePayload>
         }
         aggregate: {
-          args: Prisma.MoviesAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateMovies>
+          args: Prisma.MovieAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMovie>
         }
         groupBy: {
-          args: Prisma.MoviesGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MoviesGroupByOutputType>[]
+          args: Prisma.MovieGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MovieGroupByOutputType>[]
         }
         count: {
-          args: Prisma.MoviesCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MoviesCountAggregateOutputType> | number
+          args: Prisma.MovieCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MovieCountAggregateOutputType> | number
         }
       }
     }
@@ -719,77 +719,77 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    Games: {
-      payload: Prisma.$GamesPayload<ExtArgs>
-      fields: Prisma.GamesFieldRefs
+    Game: {
+      payload: Prisma.$GamePayload<ExtArgs>
+      fields: Prisma.GameFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.GamesFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamesPayload> | null
+          args: Prisma.GameFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.GamesFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamesPayload>
+          args: Prisma.GameFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePayload>
         }
         findFirst: {
-          args: Prisma.GamesFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamesPayload> | null
+          args: Prisma.GameFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.GamesFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamesPayload>
+          args: Prisma.GameFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePayload>
         }
         findMany: {
-          args: Prisma.GamesFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamesPayload>[]
+          args: Prisma.GameFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePayload>[]
         }
         create: {
-          args: Prisma.GamesCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamesPayload>
+          args: Prisma.GameCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePayload>
         }
         createMany: {
-          args: Prisma.GamesCreateManyArgs<ExtArgs>
+          args: Prisma.GameCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.GamesCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamesPayload>[]
+          args: Prisma.GameCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePayload>[]
         }
         delete: {
-          args: Prisma.GamesDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamesPayload>
+          args: Prisma.GameDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePayload>
         }
         update: {
-          args: Prisma.GamesUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamesPayload>
+          args: Prisma.GameUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePayload>
         }
         deleteMany: {
-          args: Prisma.GamesDeleteManyArgs<ExtArgs>
+          args: Prisma.GameDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.GamesUpdateManyArgs<ExtArgs>
+          args: Prisma.GameUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.GamesUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamesPayload>[]
+          args: Prisma.GameUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePayload>[]
         }
         upsert: {
-          args: Prisma.GamesUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamesPayload>
+          args: Prisma.GameUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePayload>
         }
         aggregate: {
-          args: Prisma.GamesAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateGames>
+          args: Prisma.GameAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGame>
         }
         groupBy: {
-          args: Prisma.GamesGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.GamesGroupByOutputType>[]
+          args: Prisma.GameGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GameGroupByOutputType>[]
         }
         count: {
-          args: Prisma.GamesCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.GamesCountAggregateOutputType> | number
+          args: Prisma.GameCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GameCountAggregateOutputType> | number
         }
       }
     }
@@ -984,6 +984,7 @@ export const TodoScalarFieldEnum = {
   id: 'id',
   title: 'title',
   completed: 'completed',
+  deadline: 'deadline',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1002,31 +1003,31 @@ export const EventScalarFieldEnum = {
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
 
 
-export const MoviesScalarFieldEnum = {
+export const MovieScalarFieldEnum = {
   id: 'id',
   title: 'title',
-  released: 'released'
+  releaseDate: 'releaseDate'
 } as const
 
-export type MoviesScalarFieldEnum = (typeof MoviesScalarFieldEnum)[keyof typeof MoviesScalarFieldEnum]
+export type MovieScalarFieldEnum = (typeof MovieScalarFieldEnum)[keyof typeof MovieScalarFieldEnum]
 
 
 export const TvShowScalarFieldEnum = {
   id: 'id',
   title: 'title',
-  released: 'released'
+  releaseDate: 'releaseDate'
 } as const
 
 export type TvShowScalarFieldEnum = (typeof TvShowScalarFieldEnum)[keyof typeof TvShowScalarFieldEnum]
 
 
-export const GamesScalarFieldEnum = {
+export const GameScalarFieldEnum = {
   id: 'id',
   title: 'title',
-  released: 'released'
+  releaseDate: 'releaseDate'
 } as const
 
-export type GamesScalarFieldEnum = (typeof GamesScalarFieldEnum)[keyof typeof GamesScalarFieldEnum]
+export type GameScalarFieldEnum = (typeof GameScalarFieldEnum)[keyof typeof GameScalarFieldEnum]
 
 
 export const BirthdayScalarFieldEnum = {
@@ -1042,7 +1043,9 @@ export const AppointmentScalarFieldEnum = {
   id: 'id',
   title: 'title',
   startTime: 'startTime',
-  endTime: 'endTime'
+  endTime: 'endTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
@@ -1062,6 +1065,14 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
 
@@ -1299,9 +1310,9 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   todo?: Prisma.TodoOmit
   event?: Prisma.EventOmit
-  movies?: Prisma.MoviesOmit
+  movie?: Prisma.MovieOmit
   tvShow?: Prisma.TvShowOmit
-  games?: Prisma.GamesOmit
+  game?: Prisma.GameOmit
   birthday?: Prisma.BirthdayOmit
   appointment?: Prisma.AppointmentOmit
 }

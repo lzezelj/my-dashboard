@@ -1,15 +1,17 @@
-import {Link} from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
-export default function Navbar() { 
+export default function Navbar() {
+    const location = useLocation();
+
+    const isEditPage = location.pathname.startsWith("/edit");
+
     return (
         <nav className="navbar">
-            <Link to="/">Home </Link>
-            <Link to="/todos">Todos </Link>
-            <Link to="/movies">Movies </Link>
-            <Link to="/events">Events </Link>
-            <Link to="/birthdays">Birthdays </Link>
-            <Link to="/games">Games </Link>
-            <Link to="/tv-shows">TV Shows </Link>
+            <Link to="/">Home</Link>
+
+            {!isEditPage && (
+                <Link to="/edit">Edit</Link>
+            )}
         </nav>
     );
 }

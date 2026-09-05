@@ -5,6 +5,7 @@ import calendarEventRoutes from "./routes/events.routes.js";
 import birthdayRoutes from "./routes/birthday.routes.js";
 import gameRoutes from "./routes/games.routes.js";
 import tvShowRoutes from "./routes/tv_shows.routes.js";
+import appointmentRoutes from "./routes/appointments.routes.js"
 import cors from "cors";
 
 const app=express();
@@ -20,6 +21,7 @@ app.use("/api/calendarEvents", calendarEventRoutes);
 app.use("/api/birthdays", birthdayRoutes);
 app.use("/api/games", gameRoutes);
 app.use("/api/tvShows", tvShowRoutes);
+app.use("/api/appointments",appointmentRoutes)
 app.get("/api/health",(_req,res)=>{
     res.json({
         status:"ok",

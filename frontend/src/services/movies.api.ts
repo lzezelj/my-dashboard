@@ -10,6 +10,7 @@ export async function getMovies(): Promise<Movies[]> {
     return response.json();
 }
 export async function createMovie(movie: CreateMovies): Promise<Movies> {
+    console.log(movie);
     const response = await fetch("http://localhost:3000/api/movies", {
         method: "POST",
         headers: {
@@ -35,12 +36,11 @@ export async function updateMovie(id: number, movie: UpdateMovies): Promise<Movi
     }
     return response.json();
 }
-export async function deleteMovie(id: number): Promise<Movies> {
+export async function deleteMovie(id: number): Promise<void> {
     const response = await fetch(`http://localhost:3000/api/movies/${id}`, {
         method: "DELETE",
     });
     if (!response.ok) {
         throw new Error("Failed to delete movie");
     }
-    return response.json();
 }

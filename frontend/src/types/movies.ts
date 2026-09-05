@@ -1,13 +1,13 @@
 export interface Movies {
     id: number;
     title: string;
-    released: Date
+    releaseDate: string
 }
 export interface CreateMovies{
     title: string;
-    released: Date;
+    releaseDate: string;
 }
 export interface UpdateMovies{
     title?: string;
-    released?: Date;
+    releaseDate?: string;
 }

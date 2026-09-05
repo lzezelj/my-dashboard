@@ -90,7 +90,7 @@ export default function Games() {
                          {editingGameId === game.id ? "Cancel" : "Edit"}
                     </button>
                     {editingGameId === game.id && (
-                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(game.id, { title, released: new Date(editRelease) }); setEditingGameId(null);}} >
+                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(game.id, { title:editTitle, released: new Date(editRelease) }); setEditingGameId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                             <input name="released" type="date" value={editRelease} onChange={(e) => setEditRelease(e.target.value)} />
                             <button type="submit">Update Game</button>

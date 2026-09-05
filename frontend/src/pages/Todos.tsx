@@ -82,7 +82,7 @@ export default function Todos() {
                          {editingTodoId === todo.id ? "Cancel" : "Edit"}
                     </button>
                     {editingTodoId === todo.id && (
-                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(todo.id, { title }); setEditingTodoId(null);}} >
+                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(todo.id, { title:editTitle }); setEditingTodoId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                             <button type="submit">Update Todo</button>
                         </form>

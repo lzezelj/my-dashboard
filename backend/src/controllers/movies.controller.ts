@@ -20,8 +20,8 @@ export const getMovie = async (req: Request, res: Response) => {
 };
 export const createMovie = async (req: Request, res: Response) => {
     try {
-        const { title, released } = req.body;
-        const movie = await createMovieService(title, released);
+        const { title, releaseDate } = req.body;
+        const movie = await createMovieService(title, new Date(releaseDate));
         res.status(201).json(movie);
     } catch (error) {
         res.status(500).json({ message: "Error creating movie", error });
@@ -30,8 +30,8 @@ export const createMovie = async (req: Request, res: Response) => {
 export const updateMovie = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
-        const { title, released } = req.body;
-        const movie = await updateMovieService(id, title, released);
+        const { title, releaseDate } = req.body;
+        const movie = await updateMovieService(id, title, new Date(releaseDate));
         res.status(200).json(movie);
     } catch (error) {
         res.status(500).json({ message: "Error updating movie", error });

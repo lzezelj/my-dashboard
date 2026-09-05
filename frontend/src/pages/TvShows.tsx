@@ -26,6 +26,7 @@ export default function TvShows() {
             const newTvShow = await createTvShow({ title, released: new Date(released) });
             setTvShows((currentTvShows) => [...currentTvShows, newTvShow]);
             setTitle("");
+            setError("");
             setReleased(new Date().toISOString().split("T")[0]);
         } catch (error) {
             setError("Could not create TV show.");
@@ -90,7 +91,7 @@ export default function TvShows() {
                          {editingTvShowId === tvShow.id ? "Cancel" : "Edit"}
                     </button>
                     {editingTvShowId === tvShow.id && (
-                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(tvShow.id, { title, released: new Date(editRelease) }); setEditingTvShowId(null);}} >
+                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(tvShow.id, { title:editTitle, released: new Date(editRelease) }); setEditingTvShowId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                             <input name="released" type="date" value={editRelease} onChange={(e) => setEditRelease(e.target.value)} />
                             <button type="submit">Update TV Show</button>

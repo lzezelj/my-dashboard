@@ -1,5 +1,4 @@
 import {Router} from "express";
-import { } from "../controllers/games.controller.js";
 import { createAppointment, createAppointmentEvent, deleteAppointment, deleteAppointmentEvent, getAppointment, getAppointments, updateAppointment } from "../controllers/appointments.controller.js";
 
 
