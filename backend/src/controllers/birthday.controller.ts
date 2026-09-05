@@ -1,5 +1,5 @@
 import type{ Request, Response } from "express";
-import { createBirthdayService, deleteBirthdayService, getBirthdayService, getBirthdaysService, updateBirthdayService } from "../services/birthday.services.js";
+import { createBirthdayEventService, createBirthdayService, deleteBirthdayEventService, deleteBirthdayService, getBirthdayService, getBirthdaysService, updateBirthdayService } from "../services/birthday.services.js";
 
 export const getBirthdays = async (req: Request, res: Response) => {
     try {
@@ -44,5 +44,24 @@ export const deleteBirthday = async (req: Request, res: Response) => {
         res.status(200).json(birthday);
     } catch (error) {
         res.status(500).json({ message: "Error deleting birthday", error });
+    }
+};
+export const createBirthdayEvent = async (req: Request, res: Response) => {
+    try {
+        const sourceId = Number(req.params.id);
+        const { type } = req.body;
+        const event = await createBirthdayEventService(sourceId, type);
+        res.status(201).json(event);
+    } catch (error) {
+        res.status(500).json({ message: "Error creating event", error });
+    }
+};
+export const deleteBirthdayEvent = async (req: Request, res: Response) => {
+    try {
+        const eventId = Number(req.params.eventId);
+        const event = await deleteBirthdayEventService(eventId);
+        res.status(200).json(event);
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting event", error });
     }
 };

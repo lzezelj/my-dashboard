@@ -27,12 +27,8 @@ model Todo{
 }
 model Event{
   id Int @id @default(autoincrement())
-  title String
-  description String?
   type EventType
-  startDate DateTime
-  allDay Boolean @default(false)
-  endDate DateTime?
+  sourceId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -55,4 +51,10 @@ model Birthday{
   id Int @id @default(autoincrement())
   name String
   date DateTime
+}
+model Appointment{
+  id Int @id @default(autoincrement())
+  title String
+  startTime DateTime
+  endTime DateTime
 }

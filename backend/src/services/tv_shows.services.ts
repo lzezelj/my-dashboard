@@ -1,3 +1,4 @@
+import type { EventType } from "../generated/prisma/client.js";
 import {prisma} from "../lib/prisma.js";
 
 export const getTvShowsService = async () => {
@@ -32,3 +33,16 @@ export const deleteTvShowService=async(id:number)=>{
         where: { id }
     });
 };
+export const createTvShowEventService=async(sourceId:number,type:EventType)=>{
+    return prisma.event.create({
+        data: {
+            type,
+            sourceId
+        }
+    });
+}
+export const deleteTvShowEventService=async(eventId:number)=>{
+    return prisma.event.delete({
+        where: { id:eventId }
+    });
+}

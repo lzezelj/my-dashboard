@@ -1,5 +1,5 @@
 import {Router} from "express";
-import { createMovie, deleteMovie, getMovie, getMovies, updateMovie } from "../controllers/movies.controller.js";
+import { createMovie, createMovieEvent, deleteMovie, getMovie, getMovies, updateMovie , deleteMovieEvent} from "../controllers/movies.controller.js";
 
 
 const router = Router();
@@ -9,5 +9,8 @@ router.get("/:id",getMovie);
 router.post("/", createMovie);
 router.patch("/:id", updateMovie);
 router.delete("/:id", deleteMovie);
+
+router.post("/:id/event",createMovieEvent);
+router.delete("/:id/event/:eventId",deleteMovieEvent);
 
 export default router;

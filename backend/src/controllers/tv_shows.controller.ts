@@ -1,5 +1,5 @@
 import type{ Request, Response } from "express";
-import { deleteTvShowService, getTvShowsService,getTvShowService, updateTvShowService,createTvShowService} from "../services/tv_shows.services.js";
+import { deleteTvShowService, getTvShowsService,getTvShowService, updateTvShowService,createTvShowService, createTvShowEventService, deleteTvShowEventService} from "../services/tv_shows.services.js";
 
 export const getTvShows = async (req: Request, res: Response) => {
     try {
@@ -44,5 +44,24 @@ export const deleteTvShow = async (req: Request, res: Response) => {
         res.status(200).json(tvShow);
     } catch (error) {
         res.status(500).json({ message: "Error deleting tv show", error });
+    }
+};
+export const createTvShowEvent = async (req: Request, res: Response) => {
+    try {
+        const sourceId = Number(req.params.id);
+        const { type } = req.body;
+        const event = await createTvShowEventService(sourceId, type);
+        res.status(201).json(event);
+    } catch (error) {
+        res.status(500).json({ message: "Error creating event", error });
+    }
+};
+export const deleteTvShowEvent = async (req: Request, res: Response) => {
+    try {
+        const eventId = Number(req.params.eventId);
+        const event = await deleteTvShowEventService(eventId);
+        res.status(200).json(event);
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting event", error });
     }
 };

@@ -1,5 +1,5 @@
 import type{ Request, Response } from "express";
-import { getTodosService,getTodoService,createTodoService,updateTodoService, deleteTodoService } from "../services/todo.service.js";
+import { getTodosService,getTodoService,createTodoService,updateTodoService, deleteTodoService, createTodoEventService, deleteTodoEventService } from "../services/todo.service.js";
 
 
 export const getTodos = async (req: Request, res: Response) => {
@@ -45,5 +45,24 @@ export const deleteTodo = async (req: Request, res: Response) => {
         res.status(200).json(todo);
     } catch (error) {
         res.status(500).json({ message: "Error deleting todo", error });
+    }
+};
+export const createTodoEvent = async (req: Request, res: Response) => {
+    try {
+        const sourceId = Number(req.params.id);
+        const { type } = req.body;
+        const event = await createTodoEventService(sourceId, type);
+        res.status(201).json(event);
+    } catch (error) {
+        res.status(500).json({ message: "Error creating event", error });
+    }
+};
+export const deleteTodoEvent = async (req: Request, res: Response) => {
+    try {
+        const eventId = Number(req.params.eventId);
+        const event = await deleteTodoEventService(eventId);
+        res.status(200).json(event);
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting event", error });
     }
 };

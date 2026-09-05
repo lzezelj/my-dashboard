@@ -1,5 +1,5 @@
 import type{ Request, Response } from "express";
-import { createGameService, deleteGameService, getGameService, getGamesService, updateGameService } from "../services/games.service.js";
+import { createGameEventService, createGameService, deleteGameEventService, deleteGameService, getGameService, getGamesService, updateGameService } from "../services/games.service.js";
 
 export const getGames = async (req: Request, res: Response) => {
     try {
@@ -44,5 +44,24 @@ export const deleteGame = async (req: Request, res: Response) => {
         res.status(200).json(game);
     } catch (error) {
         res.status(500).json({ message: "Error deleting game", error });
+    }
+};
+export const createGameEvent = async (req: Request, res: Response) => {
+    try {
+        const sourceId = Number(req.params.id);
+        const { type } = req.body;
+        const event = await createGameEventService(sourceId, type);
+        res.status(201).json(event);
+    } catch (error) {
+        res.status(500).json({ message: "Error creating event", error });
+    }
+};
+export const deleteGameEvent = async (req: Request, res: Response) => {
+    try {
+        const eventId = Number(req.params.eventId);
+        const event = await deleteGameEventService(eventId);
+        res.status(200).json(event);
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting event", error });
     }
 };

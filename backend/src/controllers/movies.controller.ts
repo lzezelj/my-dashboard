@@ -1,5 +1,5 @@
 import type{ Request, Response } from "express";
-import { createMovieService, deleteMovieService, getMovieService, getMoviesService, updateMovieService } from "../services/movies.service.js";
+import { createMovieEventService, createMovieService, deleteMovieEventService, deleteMovieService, getMovieService, getMoviesService, updateMovieService } from "../services/movies.service.js";
 
 export const getMovies = async (req: Request, res: Response) => {
     try {
@@ -44,5 +44,24 @@ export const deleteMovie = async (req: Request, res: Response) => {
         res.status(200).json(movie);
     } catch (error) {
         res.status(500).json({ message: "Error deleting movie", error });
+    }
+};
+export const createMovieEvent = async (req: Request, res: Response) => {
+    try {
+        const sourceId = Number(req.params.id);
+        const { type } = req.body;
+        const event = await createMovieEventService(sourceId, type);
+        res.status(201).json(event);
+    } catch (error) {
+        res.status(500).json({ message: "Error creating event", error });
+    }
+};
+export const deleteMovieEvent = async (req: Request, res: Response) => {
+    try {
+        const eventId = Number(req.params.eventId);
+        const event = await deleteMovieEventService(eventId);
+        res.status(200).json(event);
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting event", error });
     }
 };

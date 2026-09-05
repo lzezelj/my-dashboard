@@ -56,7 +56,8 @@ export const ModelName = {
   Movies: 'Movies',
   TvShow: 'TvShow',
   Games: 'Games',
-  Birthday: 'Birthday'
+  Birthday: 'Birthday',
+  Appointment: 'Appointment'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -88,12 +89,8 @@ export type TodoScalarFieldEnum = (typeof TodoScalarFieldEnum)[keyof typeof Todo
 
 export const EventScalarFieldEnum = {
   id: 'id',
-  title: 'title',
-  description: 'description',
   type: 'type',
-  startDate: 'startDate',
-  allDay: 'allDay',
-  endDate: 'endDate',
+  sourceId: 'sourceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -137,6 +134,16 @@ export const BirthdayScalarFieldEnum = {
 export type BirthdayScalarFieldEnum = (typeof BirthdayScalarFieldEnum)[keyof typeof BirthdayScalarFieldEnum]
 
 
+export const AppointmentScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  startTime: 'startTime',
+  endTime: 'endTime'
+} as const
+
+export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -151,12 +158,4 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
-
-
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

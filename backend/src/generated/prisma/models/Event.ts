@@ -28,44 +28,34 @@ export type AggregateEvent = {
 
 export type EventAvgAggregateOutputType = {
   id: number | null
+  sourceId: number | null
 }
 
 export type EventSumAggregateOutputType = {
   id: number | null
+  sourceId: number | null
 }
 
 export type EventMinAggregateOutputType = {
   id: number | null
-  title: string | null
-  description: string | null
   type: $Enums.EventType | null
-  startDate: Date | null
-  allDay: boolean | null
-  endDate: Date | null
+  sourceId: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type EventMaxAggregateOutputType = {
   id: number | null
-  title: string | null
-  description: string | null
   type: $Enums.EventType | null
-  startDate: Date | null
-  allDay: boolean | null
-  endDate: Date | null
+  sourceId: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type EventCountAggregateOutputType = {
   id: number
-  title: number
-  description: number
   type: number
-  startDate: number
-  allDay: number
-  endDate: number
+  sourceId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -74,44 +64,34 @@ export type EventCountAggregateOutputType = {
 
 export type EventAvgAggregateInputType = {
   id?: true
+  sourceId?: true
 }
 
 export type EventSumAggregateInputType = {
   id?: true
+  sourceId?: true
 }
 
 export type EventMinAggregateInputType = {
   id?: true
-  title?: true
-  description?: true
   type?: true
-  startDate?: true
-  allDay?: true
-  endDate?: true
+  sourceId?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type EventMaxAggregateInputType = {
   id?: true
-  title?: true
-  description?: true
   type?: true
-  startDate?: true
-  allDay?: true
-  endDate?: true
+  sourceId?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type EventCountAggregateInputType = {
   id?: true
-  title?: true
-  description?: true
   type?: true
-  startDate?: true
-  allDay?: true
-  endDate?: true
+  sourceId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -205,12 +185,8 @@ export type EventGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 
 export type EventGroupByOutputType = {
   id: number
-  title: string
-  description: string | null
   type: $Enums.EventType
-  startDate: Date
-  allDay: boolean
-  endDate: Date | null
+  sourceId: number
   createdAt: Date
   updatedAt: Date
   _count: EventCountAggregateOutputType | null
@@ -240,24 +216,16 @@ export type EventWhereInput = {
   OR?: Prisma.EventWhereInput[]
   NOT?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
   id?: Prisma.IntFilter<"Event"> | number
-  title?: Prisma.StringFilter<"Event"> | string
-  description?: Prisma.StringNullableFilter<"Event"> | string | null
   type?: Prisma.EnumEventTypeFilter<"Event"> | $Enums.EventType
-  startDate?: Prisma.DateTimeFilter<"Event"> | Date | string
-  allDay?: Prisma.BoolFilter<"Event"> | boolean
-  endDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  sourceId?: Prisma.IntFilter<"Event"> | number
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
 }
 
 export type EventOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  title?: Prisma.SortOrder
-  description?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
-  startDate?: Prisma.SortOrder
-  allDay?: Prisma.SortOrder
-  endDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -267,24 +235,16 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
   OR?: Prisma.EventWhereInput[]
   NOT?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
-  title?: Prisma.StringFilter<"Event"> | string
-  description?: Prisma.StringNullableFilter<"Event"> | string | null
   type?: Prisma.EnumEventTypeFilter<"Event"> | $Enums.EventType
-  startDate?: Prisma.DateTimeFilter<"Event"> | Date | string
-  allDay?: Prisma.BoolFilter<"Event"> | boolean
-  endDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  sourceId?: Prisma.IntFilter<"Event"> | number
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
 }, "id">
 
 export type EventOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  title?: Prisma.SortOrder
-  description?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
-  startDate?: Prisma.SortOrder
-  allDay?: Prisma.SortOrder
-  endDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.EventCountOrderByAggregateInput
@@ -299,216 +259,146 @@ export type EventScalarWhereWithAggregatesInput = {
   OR?: Prisma.EventScalarWhereWithAggregatesInput[]
   NOT?: Prisma.EventScalarWhereWithAggregatesInput | Prisma.EventScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Event"> | number
-  title?: Prisma.StringWithAggregatesFilter<"Event"> | string
-  description?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
   type?: Prisma.EnumEventTypeWithAggregatesFilter<"Event"> | $Enums.EventType
-  startDate?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
-  allDay?: Prisma.BoolWithAggregatesFilter<"Event"> | boolean
-  endDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
+  sourceId?: Prisma.IntWithAggregatesFilter<"Event"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
 }
 
 export type EventCreateInput = {
-  title: string
-  description?: string | null
   type: $Enums.EventType
-  startDate: Date | string
-  allDay?: boolean
-  endDate?: Date | string | null
+  sourceId: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type EventUncheckedCreateInput = {
   id?: number
-  title: string
-  description?: string | null
   type: $Enums.EventType
-  startDate: Date | string
-  allDay?: boolean
-  endDate?: Date | string | null
+  sourceId: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type EventUpdateInput = {
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumEventTypeFieldUpdateOperationsInput | $Enums.EventType
-  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type EventUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumEventTypeFieldUpdateOperationsInput | $Enums.EventType
-  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type EventCreateManyInput = {
   id?: number
-  title: string
-  description?: string | null
   type: $Enums.EventType
-  startDate: Date | string
-  allDay?: boolean
-  endDate?: Date | string | null
+  sourceId: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type EventUpdateManyMutationInput = {
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumEventTypeFieldUpdateOperationsInput | $Enums.EventType
-  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type EventUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumEventTypeFieldUpdateOperationsInput | $Enums.EventType
-  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type EventCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  title?: Prisma.SortOrder
-  description?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  startDate?: Prisma.SortOrder
-  allDay?: Prisma.SortOrder
-  endDate?: Prisma.SortOrder
+  sourceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type EventAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  sourceId?: Prisma.SortOrder
 }
 
 export type EventMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  title?: Prisma.SortOrder
-  description?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  startDate?: Prisma.SortOrder
-  allDay?: Prisma.SortOrder
-  endDate?: Prisma.SortOrder
+  sourceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type EventMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  title?: Prisma.SortOrder
-  description?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  startDate?: Prisma.SortOrder
-  allDay?: Prisma.SortOrder
-  endDate?: Prisma.SortOrder
+  sourceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type EventSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
-}
-
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
+  sourceId?: Prisma.SortOrder
 }
 
 export type EnumEventTypeFieldUpdateOperationsInput = {
   set?: $Enums.EventType
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 
 
 export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  title?: boolean
-  description?: boolean
   type?: boolean
-  startDate?: boolean
-  allDay?: boolean
-  endDate?: boolean
+  sourceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  title?: boolean
-  description?: boolean
   type?: boolean
-  startDate?: boolean
-  allDay?: boolean
-  endDate?: boolean
+  sourceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  title?: boolean
-  description?: boolean
   type?: boolean
-  startDate?: boolean
-  allDay?: boolean
-  endDate?: boolean
+  sourceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectScalar = {
   id?: boolean
-  title?: boolean
-  description?: boolean
   type?: boolean
-  startDate?: boolean
-  allDay?: boolean
-  endDate?: boolean
+  sourceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "type" | "startDate" | "allDay" | "endDate" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
+export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "sourceId" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
 
 export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Event"
   objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    title: string
-    description: string | null
     type: $Enums.EventType
-    startDate: Date
-    allDay: boolean
-    endDate: Date | null
+    sourceId: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["event"]>
@@ -935,12 +825,8 @@ export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Ty
  */
 export interface EventFieldRefs {
   readonly id: Prisma.FieldRef<"Event", 'Int'>
-  readonly title: Prisma.FieldRef<"Event", 'String'>
-  readonly description: Prisma.FieldRef<"Event", 'String'>
   readonly type: Prisma.FieldRef<"Event", 'EventType'>
-  readonly startDate: Prisma.FieldRef<"Event", 'DateTime'>
-  readonly allDay: Prisma.FieldRef<"Event", 'Boolean'>
-  readonly endDate: Prisma.FieldRef<"Event", 'DateTime'>
+  readonly sourceId: Prisma.FieldRef<"Event", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Event", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Event", 'DateTime'>
 }

@@ -47,3 +47,8 @@ export type Games = Prisma.GamesModel
  * 
  */
 export type Birthday = Prisma.BirthdayModel
+/**
+ * Model Appointment
+ * 
+ */
+export type Appointment = Prisma.AppointmentModel

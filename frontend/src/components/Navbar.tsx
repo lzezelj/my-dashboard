@@ -6,7 +6,7 @@ export default function Navbar() {
             <Link to="/">Home </Link>
             <Link to="/todos">Todos </Link>
             <Link to="/movies">Movies </Link>
-            <Link to="/calendar-events">Calendar Events </Link>
+            <Link to="/events">Events </Link>
             <Link to="/birthdays">Birthdays </Link>
             <Link to="/games">Games </Link>
             <Link to="/tv-shows">TV Shows </Link>
