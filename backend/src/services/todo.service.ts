@@ -1,4 +1,4 @@
-import type { EventType } from "../generated/prisma/browser.js";
+import { EventType } from "../generated/prisma/browser.js";
 import {prisma} from "../lib/prisma.js";
 
 export const getTodosService = async () => {
@@ -32,16 +32,28 @@ export const deleteTodoService=async(id:number)=>{
         where: { id }
     });
 };
-export const createTodoEventService=async(sourceId:number,type:EventType)=>{
+export const createTodoEventService=async(sourceId:number)=>{
+    const todo = await prisma.todo.findUnique({
+        where: { id: sourceId }
+    });
+
+    if (!todo) {
+        throw new Error("Todo not found");
+    }
     return prisma.event.create({
         data: {
-            type,
+            type: EventType.TODO,
             sourceId
         }
     });
 }
-export const deleteTodoEventService=async(eventId:number)=>{
+export const deleteTodoEventService=async(sourceId:number)=>{
     return prisma.event.delete({
-        where: { id:eventId }
+        where: { 
+            type_sourceId: {
+                type: EventType.TODO,
+                sourceId
+            }
+        }
     });
 }

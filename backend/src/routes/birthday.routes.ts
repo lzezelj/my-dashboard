@@ -11,6 +11,6 @@ router.patch("/:id", updateBirthday);
 router.delete("/:id", deleteBirthday);
 
 router.post("/:id/event",createBirthdayEvent);
-router.delete("/:id/event/:eventId",deleteBirthdayEvent);
+router.delete("/:id/event",deleteBirthdayEvent);
 
 export default router;

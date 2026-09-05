@@ -10,6 +10,6 @@ router.patch("/:id", updateTodo);
 router.delete("/:id", deleteTodo);
 
 router.post("/:id/event",createTodoEvent);
-router.delete("/:id/event/:eventId",deleteTodoEvent);
+router.delete("/:id/event",deleteTodoEvent);
 
 export default router;

@@ -11,6 +11,6 @@ router.patch("/:id", updateMovie);
 router.delete("/:id", deleteMovie);
 
 router.post("/:id/event",createMovieEvent);
-router.delete("/:id/event/:eventId",deleteMovieEvent);
+router.delete("/:id/event",deleteMovieEvent);
 
 export default router;

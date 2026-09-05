@@ -1,4 +1,4 @@
-import type { EventType } from "../generated/prisma/browser.js";
+import { EventType } from "../generated/prisma/browser.js";
 import {prisma} from "../lib/prisma.js";
 
 export const getMoviesService = async () => {
@@ -33,16 +33,29 @@ export const deleteMovieService=async(id:number)=>{
         where: { id }
     });
 };
-export const createMovieEventService=async(sourceId:number,type:EventType)=>{
+export const createMovieEventService=async(sourceId:number)=>{
+    const movie = await prisma.movies.findUnique({
+        where: { id: sourceId }
+    });
+
+    if (!movie) {
+        throw new Error("Movie not found");
+    }
+
     return prisma.event.create({
         data: {
-            type,
+            type: EventType.MOVIE,
             sourceId
         }
     });
 }
-export const deleteMovieEventService=async(eventId:number)=>{
+export const deleteMovieEventService=async(sourceId:number)=>{
     return prisma.event.delete({
-        where: { id:eventId }
+        where: { 
+            type_sourceId: {
+                type: EventType.MOVIE,
+                sourceId
+            }
+        }
     });
 }

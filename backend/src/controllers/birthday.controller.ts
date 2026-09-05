@@ -41,7 +41,7 @@ export const deleteBirthday = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const birthday = await deleteBirthdayService(id);
-        res.status(200).json(birthday);
+        res.status(204).json(birthday);
     } catch (error) {
         res.status(500).json({ message: "Error deleting birthday", error });
     }
@@ -49,18 +49,17 @@ export const deleteBirthday = async (req: Request, res: Response) => {
 export const createBirthdayEvent = async (req: Request, res: Response) => {
     try {
         const sourceId = Number(req.params.id);
-        const { type } = req.body;
-        const event = await createBirthdayEventService(sourceId, type);
+        const event = await createBirthdayEventService(sourceId);
         res.status(201).json(event);
     } catch (error) {
-        res.status(500).json({ message: "Error creating event", error });
+        res.status(409).json({ message: "Error creating event", error });
     }
 };
 export const deleteBirthdayEvent = async (req: Request, res: Response) => {
     try {
-        const eventId = Number(req.params.eventId);
-        const event = await deleteBirthdayEventService(eventId);
-        res.status(200).json(event);
+        const sourceId = Number(req.params.id);
+        const event = await deleteBirthdayEventService(sourceId);
+        res.status(204).json(event);
     } catch (error) {
         res.status(500).json({ message: "Error deleting event", error });
     }

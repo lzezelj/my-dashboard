@@ -41,7 +41,7 @@ export const deleteGame = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const game = await deleteGameService(id);
-        res.status(200).json(game);
+        res.status(204).json(game);
     } catch (error) {
         res.status(500).json({ message: "Error deleting game", error });
     }
@@ -49,8 +49,7 @@ export const deleteGame = async (req: Request, res: Response) => {
 export const createGameEvent = async (req: Request, res: Response) => {
     try {
         const sourceId = Number(req.params.id);
-        const { type } = req.body;
-        const event = await createGameEventService(sourceId, type);
+        const event = await createGameEventService(sourceId);
         res.status(201).json(event);
     } catch (error) {
         res.status(500).json({ message: "Error creating event", error });
@@ -58,9 +57,9 @@ export const createGameEvent = async (req: Request, res: Response) => {
 };
 export const deleteGameEvent = async (req: Request, res: Response) => {
     try {
-        const eventId = Number(req.params.eventId);
-        const event = await deleteGameEventService(eventId);
-        res.status(200).json(event);
+        const sourceId = Number(req.params.id);
+        const event = await deleteGameEventService(sourceId);
+        res.status(204).json(event);
     } catch (error) {
         res.status(500).json({ message: "Error deleting event", error });
     }

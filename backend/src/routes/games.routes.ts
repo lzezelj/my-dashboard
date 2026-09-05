@@ -11,6 +11,6 @@ router.patch("/:id", updateGame);
 router.delete("/:id", deleteGame);
 
 router.post("/:id/event",createGameEvent);
-router.delete("/:id/event/:eventId",deleteGameEvent);
+router.delete("/:id/event",deleteGameEvent);
 
 export default router;

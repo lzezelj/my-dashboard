@@ -41,7 +41,7 @@ export const deleteTvShow = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const tvShow = await deleteTvShowService(id);
-        res.status(200).json(tvShow);
+        res.status(204).json(tvShow);
     } catch (error) {
         res.status(500).json({ message: "Error deleting tv show", error });
     }
@@ -49,18 +49,17 @@ export const deleteTvShow = async (req: Request, res: Response) => {
 export const createTvShowEvent = async (req: Request, res: Response) => {
     try {
         const sourceId = Number(req.params.id);
-        const { type } = req.body;
-        const event = await createTvShowEventService(sourceId, type);
+        const event = await createTvShowEventService(sourceId);
         res.status(201).json(event);
     } catch (error) {
-        res.status(500).json({ message: "Error creating event", error });
+        res.status(409).json({ message: "Error creating event", error });
     }
 };
 export const deleteTvShowEvent = async (req: Request, res: Response) => {
     try {
-        const eventId = Number(req.params.eventId);
-        const event = await deleteTvShowEventService(eventId);
-        res.status(200).json(event);
+        const sourceId = Number(req.params.id);
+        const event = await deleteTvShowEventService(sourceId);
+        res.status(204).json(event);
     } catch (error) {
         res.status(500).json({ message: "Error deleting event", error });
     }

@@ -1,4 +1,4 @@
-import type { EventType } from "../generated/prisma/browser.js";
+import { EventType } from "../generated/prisma/browser.js";
 import {prisma} from "../lib/prisma.js";
 
 export const getAppointmentsService = async () => {
@@ -35,16 +35,29 @@ export const deleteAppointmentService=async(id:number)=>{
         where: { id }
     });
 };
-export const createAppointmentEventService=async(sourceId:number,type:EventType)=>{
+export const createAppointmentEventService=async(sourceId:number)=>{
+    const appointment = await prisma.appointment.findUnique({
+        where: { id: sourceId }
+    });
+
+    if (!appointment) {
+        throw new Error("Appointment not found");
+    }
+
     return prisma.event.create({
         data: {
-            type,
+            type: EventType.APPOINTMENT,
             sourceId
         }
     });
 }
-export const deleteAppointmentEventService=async(eventId:number)=>{
+export const deleteAppointmentEventService=async(sourceId:number)=>{
     return prisma.event.delete({
-        where: { id:eventId }
+        where: { 
+            type_sourceId: {
+                type: EventType.APPOINTMENT,
+                sourceId
+            }
+        }
     });
 }

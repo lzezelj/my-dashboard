@@ -41,7 +41,7 @@ export const deleteMovie = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const movie = await deleteMovieService(id);
-        res.status(200).json(movie);
+        res.status(204).json(movie);
     } catch (error) {
         res.status(500).json({ message: "Error deleting movie", error });
     }
@@ -49,18 +49,17 @@ export const deleteMovie = async (req: Request, res: Response) => {
 export const createMovieEvent = async (req: Request, res: Response) => {
     try {
         const sourceId = Number(req.params.id);
-        const { type } = req.body;
-        const event = await createMovieEventService(sourceId, type);
+        const event = await createMovieEventService(sourceId);
         res.status(201).json(event);
     } catch (error) {
-        res.status(500).json({ message: "Error creating event", error });
+        res.status(409).json({ message: "Error creating event", error });
     }
 };
 export const deleteMovieEvent = async (req: Request, res: Response) => {
     try {
-        const eventId = Number(req.params.eventId);
-        const event = await deleteMovieEventService(eventId);
-        res.status(200).json(event);
+        const sourceId = Number(req.params.id);
+        const event = await deleteMovieEventService(sourceId);
+        res.status(204).json(event);
     } catch (error) {
         res.status(500).json({ message: "Error deleting event", error });
     }

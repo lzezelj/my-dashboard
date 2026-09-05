@@ -1,4 +1,4 @@
-import type { EventType } from "../generated/prisma/client.js";
+import { EventType } from "../generated/prisma/client.js";
 import {prisma} from "../lib/prisma.js";
 
 export const getTvShowsService = async () => {
@@ -33,16 +33,28 @@ export const deleteTvShowService=async(id:number)=>{
         where: { id }
     });
 };
-export const createTvShowEventService=async(sourceId:number,type:EventType)=>{
+export const createTvShowEventService=async(sourceId:number)=>{
+    const game = await prisma.tvShow.findUnique({
+        where: { id: sourceId }
+    });
+
+    if (!game) {
+        throw new Error("TvShow not found");
+    }
     return prisma.event.create({
         data: {
-            type,
+            type: EventType.TV_SHOW,
             sourceId
         }
     });
 }
-export const deleteTvShowEventService=async(eventId:number)=>{
+export const deleteTvShowEventService=async(sourceId:number)=>{
     return prisma.event.delete({
-        where: { id:eventId }
+        where: { 
+            type_sourceId: {
+                type: EventType.TV_SHOW,
+                sourceId
+            }
+        }
     });
 }

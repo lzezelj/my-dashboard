@@ -12,6 +12,6 @@ router.patch("/:id", updateAppointment);
 router.delete("/:id", deleteAppointment);
 
 router.post("/:id/event",createAppointmentEvent);
-router.delete("/:id/event/:eventId",deleteAppointmentEvent);
+router.delete("/:id/event",deleteAppointmentEvent);
 
 export default router;

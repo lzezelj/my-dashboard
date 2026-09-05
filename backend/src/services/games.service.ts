@@ -1,4 +1,4 @@
-import type { EventType } from "../generated/prisma/browser.js";
+import  { EventType } from "../generated/prisma/browser.js";
 import {prisma} from "../lib/prisma.js";
 
 export const getGamesService = async () => {
@@ -33,16 +33,29 @@ export const deleteGameService=async(id:number)=>{
         where: { id }
     });
 };
-export const createGameEventService=async(sourceId:number,type:EventType)=>{
+export const createGameEventService=async(sourceId:number)=>{
+    const game = await prisma.games.findUnique({
+        where: { id: sourceId }
+    });
+
+    if (!game) {
+        throw new Error("Game not found");
+    }
+
     return prisma.event.create({
         data: {
-            type,
+            type: EventType.GAME,
             sourceId
         }
     });
 }
-export const deleteGameEventService=async(eventId:number)=>{
+export const deleteGameEventService=async(sourceId:number)=>{
     return prisma.event.delete({
-        where: { id:eventId }
+        where: { 
+            type_sourceId: {
+                type: EventType.GAME,
+                sourceId
+            }
+        }
     });
 }

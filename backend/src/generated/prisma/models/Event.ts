@@ -232,6 +232,7 @@ export type EventOrderByWithRelationInput = {
 
 export type EventWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  type_sourceId?: Prisma.EventTypeSourceIdCompoundUniqueInput
   AND?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
   OR?: Prisma.EventWhereInput[]
   NOT?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
@@ -239,7 +240,7 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   sourceId?: Prisma.IntFilter<"Event"> | number
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
-}, "id">
+}, "id" | "type_sourceId">
 
 export type EventOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -316,6 +317,11 @@ export type EventUncheckedUpdateManyInput = {
   sourceId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type EventTypeSourceIdCompoundUniqueInput = {
+  type: $Enums.EventType
+  sourceId: number
 }
 
 export type EventCountOrderByAggregateInput = {

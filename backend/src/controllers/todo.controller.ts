@@ -42,7 +42,7 @@ export const deleteTodo = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const todo = await deleteTodoService(id);
-        res.status(200).json(todo);
+        res.status(204).json(todo);
     } catch (error) {
         res.status(500).json({ message: "Error deleting todo", error });
     }
@@ -50,18 +50,17 @@ export const deleteTodo = async (req: Request, res: Response) => {
 export const createTodoEvent = async (req: Request, res: Response) => {
     try {
         const sourceId = Number(req.params.id);
-        const { type } = req.body;
-        const event = await createTodoEventService(sourceId, type);
+        const event = await createTodoEventService(sourceId);
         res.status(201).json(event);
     } catch (error) {
-        res.status(500).json({ message: "Error creating event", error });
+        res.status(409).json({ message: "Error creating event", error });
     }
 };
 export const deleteTodoEvent = async (req: Request, res: Response) => {
     try {
-        const eventId = Number(req.params.eventId);
-        const event = await deleteTodoEventService(eventId);
-        res.status(200).json(event);
+        const sourceId = Number(req.params.id);
+        const event = await deleteTodoEventService(sourceId);
+        res.status(204).json(event);
     } catch (error) {
         res.status(500).json({ message: "Error deleting event", error });
     }

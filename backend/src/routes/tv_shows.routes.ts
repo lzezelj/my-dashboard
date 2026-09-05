@@ -11,6 +11,6 @@ router.patch("/:id", updateTvShow);
 router.delete("/:id", deleteTvShow);
 
 router.post("/:id/event",createTvShowEvent);
-router.delete("/:id/event/:eventId",deleteTvShowEvent);
+router.delete("/:id/event",deleteTvShowEvent);
 
 export default router;

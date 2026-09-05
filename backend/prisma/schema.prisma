@@ -9,6 +9,7 @@ enum EventType {
   GAME
   BIRTHDAY
   OTHER
+  TODO
 }
 generator client {
   provider = "prisma-client"
@@ -31,6 +32,8 @@ model Event{
   sourceId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([type, sourceId])
 }
 model Movies{
   id Int @id @default(autoincrement())

@@ -15,7 +15,8 @@ export const EventType = {
   TV_SHOW: 'TV_SHOW',
   GAME: 'GAME',
   BIRTHDAY: 'BIRTHDAY',
-  OTHER: 'OTHER'
+  OTHER: 'OTHER',
+  TODO: 'TODO'
 } as const
 
 export type EventType = (typeof EventType)[keyof typeof EventType]
