@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type {  TvShows, UpdateTvShows  } from "../types/tv_shows";
 import { createTvShow, getTvShows, updateTvShow, deleteTvShow} from "../services/tv_shows.api.ts";
+import {dateToISOString, isoToDateInputValue, isoToDisplayDate} from "../utils/dateUtils";
 
 export default function TvShows() {
     const [tvShows, setTvShows] = useState<TvShows[]>([]);
@@ -8,13 +9,11 @@ export default function TvShows() {
     const [error, setError] = useState<string | null>(null);
     const [title, setTitle] = useState("");
     const [editTitle, setEditTitle] = useState("");
-    const [editRelease, setEditRelease] = useState(new Date().toISOString().split("T")[0]);
+    const [editReleaseDate, setEditReleaseDate] = useState(new Date().toISOString().split("T")[0]);
     const [editingTvShowId, setEditingTvShowId] = useState<number | null>(null);
-    const [released, setReleased] = useState(new Date().toISOString().split("T")[0]);
-    const convertedDate = (dateString: Date): string => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString();
-    }
+    const [releaseDate, setReleaseDate] = useState(new Date().toISOString().split("T")[0]);
+
+
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (!title.trim()) {
@@ -23,11 +22,11 @@ export default function TvShows() {
         }
 
         try {
-            const newTvShow = await createTvShow({ title, released: new Date(released) });
+            const newTvShow = await createTvShow({ title, releaseDate: dateToISOString(releaseDate) });
             setTvShows((currentTvShows) => [...currentTvShows, newTvShow]);
             setTitle("");
             setError("");
-            setReleased(new Date().toISOString().split("T")[0]);
+            setReleaseDate(new Date().toISOString().split("T")[0]);
         } catch (error) {
             setError("Could not create TV show.");
         }
@@ -86,14 +85,14 @@ export default function TvShows() {
                     <button type="button" onClick={() => {
                         setEditingTvShowId(editingTvShowId === tvShow.id ? null : tvShow.id);
                         setEditTitle(tvShow.title);
-                        setEditRelease(tvShow.released.toISOString().split("T")[0]);
+                        setEditReleaseDate(isoToDateInputValue(tvShow.releaseDate));
                     }}>
                          {editingTvShowId === tvShow.id ? "Cancel" : "Edit"}
                     </button>
                     {editingTvShowId === tvShow.id && (
-                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(tvShow.id, { title:editTitle, released: new Date(editRelease) }); setEditingTvShowId(null);}} >
+                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(tvShow.id, { title:editTitle, releaseDate:  dateToISOString(editReleaseDate) }); setEditingTvShowId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                            <input name="released" type="date" value={editRelease} onChange={(e) => setEditRelease(e.target.value)} />
+                            <input name="releaseDate" type="date" min={new Date().toISOString().split("T")[0]} value={editReleaseDate} onChange={(e) => setEditReleaseDate(e.target.value)} />
                             <button type="submit">Update TV Show</button>
                         </form>
                     )}
@@ -101,7 +100,7 @@ export default function TvShows() {
                         {tvShow.title}
                     </p>     
                     <p>
-                        {convertedDate(tvShow.released)}
+                        {isoToDisplayDate(tvShow.releaseDate)}
                     </p>
                     
                     <button type="button" onClick={() => handleDelete(tvShow.id)}>
@@ -111,7 +110,7 @@ export default function TvShows() {
             ))}
             <form onSubmit={handleSubmit}>
                 <input name="title" placeholder="Enter a TV show" value={title} onChange={(e) => setTitle(e.target.value)} />
-                <input name="released" type="date" value={released} onChange={(e) => setReleased(e.target.value)} />
+                <input name="releaseDate" type="date" min={new Date().toISOString().split("T")[0]} value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} />
                 <button type="submit">Create TV Show</button>
             </form>
         </div>

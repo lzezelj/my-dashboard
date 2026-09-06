@@ -20,3 +20,15 @@ export function isoToTimeInputValue(iso: string): string {
 export function isoToDisplayDate(iso: string): string {
     return new Date(iso).toLocaleDateString();
 }
+export function getCurrentTime() {
+    const now = new Date();
+
+    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}
+
+export function getTimePlusOneMinute() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 1);
+
+    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}

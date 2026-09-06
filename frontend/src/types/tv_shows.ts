@@ -1,13 +1,13 @@
 export interface TvShows {
     id: number;
     title: string;
-    released: Date
+    releaseDate: string
 }
 export interface CreateTvShows{
     title: string;
-    released: Date;
+    releaseDate: string;
 }
 export interface UpdateTvShows{
     title?: string;
-    released?: Date;
+    releaseDate?: string;
 }

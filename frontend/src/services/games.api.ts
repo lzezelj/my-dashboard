@@ -31,16 +31,16 @@ export async function updateGame(id: number, game: UpdateGames): Promise<Games> 
         body: JSON.stringify(game),
     });
     if (!response.ok) {
-        throw new Error("Failed to update movie");
+        throw new Error("Failed to update game");
     }
     return response.json();
 }
-export async function deleteGame(id: number): Promise<Games> {
+export async function deleteGame(id: number): Promise<void> {
     const response = await fetch(`http://localhost:3000/api/games/${id}`, {
         method: "DELETE",
     });
     if (!response.ok) {
         throw new Error("Failed to delete game");
     }
-    return response.json();
+    return;
 }

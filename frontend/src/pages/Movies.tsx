@@ -23,6 +23,7 @@ export default function Movies() {
             const newMovie = await createMovie({ title, releaseDate:dateToISOString(releaseDate) });
             setMovies((currentMovies) => [...currentMovies, newMovie]);
             setTitle("");
+            setError("");
             setReleaseDate(new Date().toISOString().split("T")[0]);
         } catch (error) {
             setError("Could not create movie.");
@@ -89,7 +90,7 @@ export default function Movies() {
                     {editingMovieId === movie.id && (
                         <form onSubmit={(event) => {event.preventDefault(); handleUpdate(movie.id, { title:editTitle, releaseDate: dateToISOString(editReleaseDate) }); setEditingMovieId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                            <input name="releaseDate" type="date" value={editReleaseDate} onChange={(e) => setEditReleaseDate(e.target.value)} />
+                            <input name="releaseDate" min={new Date().toISOString().split("T")[0]} type="date" value={editReleaseDate} onChange={(e) => setEditReleaseDate(e.target.value)} />
                             <button type="submit">Update Movie</button>
                         </form>
                     )}
@@ -107,7 +108,7 @@ export default function Movies() {
             ))}
             <form onSubmit={handleSubmit}>
                 <input name="title" placeholder="Enter a movie" value={title} onChange={(e) => setTitle(e.target.value)} />
-                <input name="releaseDate" type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} />
+                <input name="releaseDate" min={new Date().toISOString().split("T")[0]} type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} />
                 <button type="submit">Create Movie</button>
             </form>
         </div>

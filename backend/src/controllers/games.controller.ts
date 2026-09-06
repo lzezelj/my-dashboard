@@ -20,8 +20,8 @@ export const getGame = async (req: Request, res: Response) => {
 };
 export const createGame = async (req: Request, res: Response) => {
     try {
-        const { title, released } = req.body;
-        const game = await createGameService(title, released);
+        const { title, releaseDate } = req.body;
+        const game = await createGameService(title, new Date(releaseDate));
         res.status(201).json(game); 
     } catch (error) {
         res.status(500).json({ message: "Error creating game", error });
@@ -30,8 +30,8 @@ export const createGame = async (req: Request, res: Response) => {
 export const updateGame = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
-        const { title, released } = req.body;
-        const game = await updateGameService(id, title, released);
+        const { title, releaseDate } = req.body;
+        const game = await updateGameService(id, title, new Date(releaseDate));
         res.status(200).json(game);
     } catch (error) {
         res.status(500).json({ message: "Error updating game", error });

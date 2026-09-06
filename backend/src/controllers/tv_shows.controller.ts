@@ -20,8 +20,9 @@ export const getTvShow = async (req: Request, res: Response) => {
 };
 export const createTvShow = async (req: Request, res: Response) => {
     try {
-        const { title, released } = req.body;
-        const tvShow = await createTvShowService(title, released);
+        const { title, releaseDate } = req.body;
+        console.log(title, releaseDate);
+        const tvShow = await createTvShowService(title, releaseDate);
         res.status(201).json(tvShow);
     } catch (error) {
         res.status(500).json({ message: "Error creating tv show", error });
@@ -30,8 +31,8 @@ export const createTvShow = async (req: Request, res: Response) => {
 export const updateTvShow = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
-        const { title, released } = req.body;
-        const tvShow = await updateTvShowService(id, title, released);
+        const { title, releaseDate } = req.body;
+        const tvShow = await updateTvShowService(id, title, new Date(releaseDate));
         res.status(200).json(tvShow );
     } catch (error) {
         res.status(500).json({ message: "Error updating tv show", error });

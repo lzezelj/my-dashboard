@@ -35,12 +35,12 @@ export async function updateTodo(id: number, todo: UpdateTodo): Promise<Todo> {
     }
     return response.json();
 }
-export async function deleteTodo(id: number): Promise<Todo> {
+export async function deleteTodo(id: number): Promise<void> {
     const response = await fetch(`http://localhost:3000/api/todos/${id}`, {
         method: "DELETE",
     });
     if (!response.ok) {
         throw new Error("Failed to delete todo");
     }
-    return response.json();
+    return;
 }

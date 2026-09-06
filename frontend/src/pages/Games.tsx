@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Games, UpdateGames } from "../types/games";
 import { createGame, deleteGame, getGames, updateGame } from "../services/games.api.ts";
+import {dateToISOString, isoToDateInputValue, isoToDisplayDate} from "../utils/dateUtils";
 
 export default function Games() {
     const [games, setGames] = useState<Games[]>([]);
@@ -8,13 +9,10 @@ export default function Games() {
     const [error, setError] = useState<string | null>(null);
     const [title, setTitle] = useState("");
     const [editTitle, setEditTitle] = useState("");
-    const [editRelease, setEditRelease] = useState(new Date().toISOString().split("T")[0]);
+    const [editReleaseDate, setEditReleaseDate] = useState(new Date().toISOString().split("T")[0]);
     const [editingGameId, setEditingGameId] = useState<number | null>(null);
-    const [released, setReleased] = useState(new Date().toISOString().split("T")[0]);
-    const convertedDate = (dateString: Date): string => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString();
-    }
+    const [releaseDate, setReleaseDate] = useState(new Date().toISOString().split("T")[0]);
+    
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (!title.trim()) {
@@ -23,10 +21,10 @@ export default function Games() {
         }
 
         try {
-            const newGame = await createGame({ title, released: new Date(released) });
+            const newGame = await createGame({ title, releaseDate: dateToISOString(releaseDate) });
             setGames((currentGames) => [...currentGames, newGame]);
             setTitle("");
-            setReleased(new Date().toISOString().split("T")[0]);
+            setReleaseDate(new Date().toISOString().split("T")[0]);
         } catch (error) {
             setError("Could not create game.");
         }
@@ -85,14 +83,14 @@ export default function Games() {
                     <button type="button" onClick={() => {
                         setEditingGameId(editingGameId === game.id ? null : game.id);
                         setEditTitle(game.title);
-                        setEditRelease(game.released.toISOString().split("T")[0]);
+                        setEditReleaseDate(isoToDateInputValue(game.releaseDate));
                     }}>
                          {editingGameId === game.id ? "Cancel" : "Edit"}
                     </button>
                     {editingGameId === game.id && (
-                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(game.id, { title:editTitle, released: new Date(editRelease) }); setEditingGameId(null);}} >
+                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(game.id, { title:editTitle, releaseDate: dateToISOString(editReleaseDate) }); setEditingGameId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                            <input name="released" type="date" value={editRelease} onChange={(e) => setEditRelease(e.target.value)} />
+                            <input name="releaseDate" min={new Date().toISOString().split("T")[0]}type="date" value={editReleaseDate} onChange={(e) => setEditReleaseDate(e.target.value)} />
                             <button type="submit">Update Game</button>
                         </form>
                     )}
@@ -100,7 +98,7 @@ export default function Games() {
                         {game.title}
                     </p>     
                     <p>
-                        {convertedDate(game.released)}
+                        {isoToDisplayDate(game.releaseDate)}
                     </p>
                     
                     <button type="button" onClick={() => handleDelete(game.id)}>
@@ -110,7 +108,7 @@ export default function Games() {
             ))}
             <form onSubmit={handleSubmit}>
                 <input name="title" placeholder="Enter a game" value={title} onChange={(e) => setTitle(e.target.value)} />
-                <input name="released" type="date" value={released} onChange={(e) => setReleased(e.target.value)} />
+                <input name="releaseDate" min={new Date().toISOString().split("T")[0]} type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} />
                 <button type="submit">Create Game</button>
             </form>
         </div>

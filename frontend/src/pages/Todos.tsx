@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import type { Todo, UpdateTodo } from "../types/todo";
 import { createTodo, deleteTodo, getTodos, updateTodo } from "../services/todo.api.ts";
+import {dateToISOString, isoToDateInputValue, isoToDisplayDate} from "../utils/dateUtils";
 
 export default function Todos() {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [title, setTitle] = useState("");
+    const [deadline, setDeadline] = useState(new Date().toISOString().split("T")[0]);
     const [editTitle, setEditTitle] = useState("");
+    const [editDeadline, setEditDeadline] = useState("");
     const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -17,9 +20,10 @@ export default function Todos() {
         }
 
         try {
-            const newTodo = await createTodo({ title });
+            const newTodo = await createTodo({ title, deadline:dateToISOString(deadline) });
             setTodos((currentTodos) => [...currentTodos, newTodo]);
             setTitle("");
+            setDeadline("");
         } catch (error) {
             setError("Could not create todo.");
         }
@@ -78,16 +82,21 @@ export default function Todos() {
                     <button type="button" onClick={() => {
                         setEditingTodoId(editingTodoId === todo.id ? null : todo.id);
                         setEditTitle(todo.title);
+                        setEditDeadline(isoToDateInputValue(todo.deadline));
                     }}>
                          {editingTodoId === todo.id ? "Cancel" : "Edit"}
                     </button>
                     {editingTodoId === todo.id && (
-                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(todo.id, { title:editTitle }); setEditingTodoId(null);}} >
+                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(todo.id, { title:editTitle, deadline: dateToISOString(editDeadline) }); setEditingTodoId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+                            <input name="deadline" type="date" min={new Date().toISOString().split("T")[0]} value={editDeadline} onChange={(e) => setEditDeadline(e.target.value)} />
                             <button type="submit">Update Todo</button>
                         </form>
                     )}
                         <p>{todo.title}</p>
+                    <p>
+                        {isoToDisplayDate(todo.deadline)}
+                    </p>
                                          
                     <p>
                         {todo.completed ? "Completed" : "Not completed"}
@@ -104,6 +113,7 @@ export default function Todos() {
             ))}
             <form onSubmit={handleSubmit}>
                 <input name="title" placeholder="Enter a to do" value={title} onChange={(e) => setTitle(e.target.value)} />
+                <input name="deadline" type="date" min={new Date().toISOString().split("T")[0]} value={deadline} onChange={(e) => setDeadline(e.target.value)} />
                 <button type="submit">Create Todo</button>
             </form>
         </div>

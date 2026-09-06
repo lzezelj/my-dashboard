@@ -1,13 +1,13 @@
 export interface Games {
     id: number;
     title: string;
-    released: Date
+    releaseDate: string
 }
 export interface CreateGames{
     title: string;
-    released: Date;
+    releaseDate: string;
 }
 export interface UpdateGames{
     title?: string;
-    released?: Date;
+    releaseDate?: string;
 }

@@ -35,12 +35,12 @@ export async function updateBirthday(id: number, birthday: UpdateBirthdays): Pro
     }
     return response.json();
 }
-export async function deleteBirthday(id: number): Promise<Birthdays> {
+export async function deleteBirthday(id: number): Promise<void> {
     const response = await fetch(`http://localhost:3000/api/birthdays/${id}`, {
         method: "DELETE",
     });
     if (!response.ok) {
         throw new Error("Failed to delete birthday");
     }
-    return response.json();
+    return;
 }

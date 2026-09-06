@@ -11,19 +11,21 @@ export const getTodoService=async(id :number)=>{
         }
     })
 };
-export const createTodoService=async(title:string)=>{
+export const createTodoService=async(title:string, deadline:string)=>{
     return prisma.todo.create({
             data: {
-                title
+                title,
+                deadline
             }
         });
 };
-export const updateTodoService=async(id:number,title:string,completed:boolean)=>{
+export const updateTodoService=async(id:number,title:string,completed:boolean,deadline:string)=>{
     return prisma.todo.update({
             where: { id },
             data: {
                 title,
-                completed
+                completed,
+                deadline
             }
         });
 };

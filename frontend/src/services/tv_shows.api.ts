@@ -35,12 +35,12 @@ export async function updateTvShow(id: number, tvShow: UpdateTvShows): Promise<T
     }
     return response.json();
 }
-export async function deleteTvShow(id: number): Promise<TvShows> {
+export async function deleteTvShow(id: number): Promise<void> {
     const response = await fetch(`http://localhost:3000/api/tvShows/${id}`, {
         method: "DELETE",
     });
     if (!response.ok) {
         throw new Error("Failed to delete TV show");
     }
-    return response.json();
+    return;
 }
