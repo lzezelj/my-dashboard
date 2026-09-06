@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Birthdays, UpdateBirthdays } from "../types/birthdays";
-import { createBirthday, deleteBirthday, getBirthdays, updateBirthday } from "../services/birthdays.api.ts";
+import { createBirthday, deleteBirthday, getBirthdays, updateBirthday, addToCalendar, removeFromCalendar } from "../services/birthdays.api.ts";
 
 export default function Birthdays() {
     const [birthdays, setBirthdays] = useState<Birthdays[]>([]);
@@ -51,7 +51,20 @@ export default function Birthdays() {
             setError("Could not delete birthday.");
         }
     }
-
+    async function handleAddToCalendar(sourceId: number) {
+        try {
+            await addToCalendar(sourceId);
+        } catch (error) {
+            setError("Could not add birthday to calendar.");
+        }
+    }
+    async function handleRemoveFromCalendar(sourceId: number) {
+        try {
+            await removeFromCalendar(sourceId);
+        } catch (error) {
+            setError("Could not remove birthday from calendar.");
+        }
+    }
 
     useEffect(() => {
         async function loadBirthdays() {
@@ -93,6 +106,8 @@ export default function Birthdays() {
                         <form onSubmit={(event) => {event.preventDefault(); handleUpdate(birthday.id, { name: editName, date: new Date(editDate) }); setEditingBirthdayId(null);}} >
                             <input name="name"  value={editName} onChange={(e) => setEditName(e.target.value)} />
                             <input name="date" type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
+                            <button type="button" onClick={() => handleAddToCalendar(birthday.id)}>Add to calendar</button>
+                            <button type="button" onClick={() => handleRemoveFromCalendar(birthday.id)}>Remove from calendar</button>
                             <button type="submit">Update Birthday</button>
                         </form>
                     )}
@@ -109,7 +124,7 @@ export default function Birthdays() {
                 </div>
             ))}
             <form onSubmit={handleSubmit}>
-                <input name="name" placeholder="Enter a birthday" value={name} onChange={(e) => setName(e.target.value)} />
+                <input name="name" placeholder="Enter the name of the person" value={name} onChange={(e) => setName(e.target.value)} />
                 <input name="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
                 <button type="submit">Create Birthday</button>
             </form>

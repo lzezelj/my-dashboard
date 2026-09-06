@@ -44,3 +44,21 @@ export async function deleteBirthday(id: number): Promise<void> {
     }
     return;
 }
+export async function addToCalendar(sourceId:number): Promise<void> {
+    const response = await fetch(`http://localhost:3000/api/birthdays/${sourceId}/event`, {
+        method: "POST",
+    });
+    if (!response.ok) {
+        throw new Error("Failed to add birthday to calendar");
+    }
+    return;
+}
+export async function removeFromCalendar(sourceId:number): Promise<void> {
+    const response = await fetch(`http://localhost:3000/api/birthdays/${sourceId}/event`, {
+        method: "DELETE",
+    });
+    if (!response.ok) {
+        throw new Error("Failed to remove birthday from calendar");
+    }
+    return;
+}

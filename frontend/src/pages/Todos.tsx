@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Todo, UpdateTodo } from "../types/todo";
-import { createTodo, deleteTodo, getTodos, updateTodo } from "../services/todo.api.ts";
+import { addToCalendar, createTodo, deleteTodo, getTodos, removeFromCalendar, updateTodo } from "../services/todos.api.ts";
 import {dateToISOString, isoToDateInputValue, isoToDisplayDate} from "../utils/dateUtils";
 
 export default function Todos() {
@@ -48,6 +48,20 @@ export default function Todos() {
             setError("Could not delete todo.");
         }
     }
+    async function handleAddToCalendar(sourceId: number) {
+        try {
+            await addToCalendar(sourceId);
+        } catch (error) {
+            setError("Could not add todo to calendar.");
+        }
+    }
+    async function handleRemoveFromCalendar(sourceId: number) {
+        try {
+            await removeFromCalendar(sourceId);
+        } catch (error) {
+            setError("Could not remove todo from calendar.");
+        }
+    }
 
 
     useEffect(() => {
@@ -90,6 +104,8 @@ export default function Todos() {
                         <form onSubmit={(event) => {event.preventDefault(); handleUpdate(todo.id, { title:editTitle, deadline: dateToISOString(editDeadline) }); setEditingTodoId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                             <input name="deadline" type="date" min={new Date().toISOString().split("T")[0]} value={editDeadline} onChange={(e) => setEditDeadline(e.target.value)} />
+                            <button type="button" onClick={() => handleAddToCalendar(todo.id)}>Add to Calendar</button>
+                            <button type="button" onClick={() => handleRemoveFromCalendar(todo.id)}>Remove from Calendar</button>
                             <button type="submit">Update Todo</button>
                         </form>
                     )}

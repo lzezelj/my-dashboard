@@ -44,3 +44,21 @@ export async function deleteTvShow(id: number): Promise<void> {
     }
     return;
 }
+export async function addToCalendar(sourceId:number): Promise<void> {
+    const response = await fetch(`http://localhost:3000/api/tvShows/${sourceId}/event`, {
+        method: "POST",
+    });
+    if (!response.ok) {
+        throw new Error("Failed to add TV show to calendar");
+    }
+    return;
+}
+export async function removeFromCalendar(sourceId:number): Promise<void> {
+    const response = await fetch(`http://localhost:3000/api/tvShows/${sourceId}/event`, {
+        method: "DELETE",
+    });
+    if (!response.ok) {
+        throw new Error("Failed to remove TV show from calendar");
+    }
+    return;
+}

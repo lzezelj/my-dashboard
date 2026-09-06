@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Appointment, UpdateAppointment} from "../types/appointments.ts";
-import { createAppointment, getAppointments,deleteAppointment,updateAppointment } from "../services/Appointments.api.ts";
+import { createAppointment, getAppointments,deleteAppointment,updateAppointment } from "../services/appointments.api.ts";
 import { isoToTimeInputValue,isoToDisplayDate, isoToDateInputValue, dateTimeToISOString,getCurrentTime,getTimePlusOneMinute } from "../utils/dateUtils.ts";
+import { addToCalendar, removeFromCalendar } from "../services/appointments.api.ts";
 export default function Appointments() {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -58,7 +59,20 @@ export default function Appointments() {
             setError("Could not delete appointment.");
         }
     }
-
+        async function handleAddToCalendar(sourceId: number) {
+            try {
+                await addToCalendar(sourceId);
+            } catch (error) {
+                setError("Could not add appointment to calendar.");
+            }
+        }
+        async function handleRemoveFromCalendar(sourceId: number) {
+            try {
+                await removeFromCalendar(sourceId);
+            } catch (error) {
+                setError("Could not remove appointment from calendar.");
+            }
+        }
 
     useEffect(() => {
         async function loadAppointments() {
@@ -106,6 +120,8 @@ export default function Appointments() {
                             <input type="date" min={new Date().toISOString().split("T")[0]} value={editDate} onChange={(e)=>setEditDate(e.target.value)}/>
                             <input type="time" min ={editDate===new Date().toISOString().split("T")[0] ? getCurrentTime() : undefined} value={editStartTime} onChange={(e) => setEditStartTime(e.target.value)} />
                             <input type="time"  min ={editDate===new Date().toISOString().split("T")[0] ? editStartTime : undefined} value={editEndTime} onChange={(e) => setEditEndTime(e.target.value)} />
+                            <button type="button" onClick={() => handleAddToCalendar(appointment.id)}>Add to calendar</button>
+                            <button type="button" onClick={() => handleRemoveFromCalendar(appointment.id)}>Remove from calendar</button>
                             <button type="submit">Update appointment</button>
                         </form>
                     )}

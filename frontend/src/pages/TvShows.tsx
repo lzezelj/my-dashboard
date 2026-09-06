@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type {  TvShows, UpdateTvShows  } from "../types/tv_shows";
-import { createTvShow, getTvShows, updateTvShow, deleteTvShow} from "../services/tv_shows.api.ts";
+import { createTvShow, getTvShows, updateTvShow, deleteTvShow, addToCalendar, removeFromCalendar} from "../services/tv_shows.api.ts";
 import {dateToISOString, isoToDateInputValue, isoToDisplayDate} from "../utils/dateUtils";
 
 export default function TvShows() {
@@ -51,6 +51,20 @@ export default function TvShows() {
             setError("Could not delete TV show.");
         }
     }
+    async function handleAddToCalendar(sourceId: number) {
+        try {
+            await addToCalendar(sourceId);
+        } catch (error) {
+            setError("Could not add TV show to calendar.");
+        }
+    }
+    async function handleRemoveFromCalendar(sourceId: number) {
+        try {
+            await removeFromCalendar(sourceId);
+        } catch (error) {
+            setError("Could not remove TV show from calendar.");
+        }
+    }
 
 
     useEffect(() => {
@@ -93,6 +107,8 @@ export default function TvShows() {
                         <form onSubmit={(event) => {event.preventDefault(); handleUpdate(tvShow.id, { title:editTitle, releaseDate:  dateToISOString(editReleaseDate) }); setEditingTvShowId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                             <input name="releaseDate" type="date" min={new Date().toISOString().split("T")[0]} value={editReleaseDate} onChange={(e) => setEditReleaseDate(e.target.value)} />
+                            <button type="button" onClick={() => handleAddToCalendar(tvShow.id)}>Add to Calendar</button>
+                            <button type="button" onClick={() => handleRemoveFromCalendar(tvShow.id)}>Remove from Calendar</button>
                             <button type="submit">Update TV Show</button>
                         </form>
                     )}

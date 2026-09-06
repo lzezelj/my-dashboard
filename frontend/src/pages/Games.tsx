@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Games, UpdateGames } from "../types/games";
-import { createGame, deleteGame, getGames, updateGame } from "../services/games.api.ts";
+import { addToCalendar, createGame, deleteGame, getGames, removeFromCalendar, updateGame } from "../services/games.api.ts";
 import {dateToISOString, isoToDateInputValue, isoToDisplayDate} from "../utils/dateUtils";
 
 export default function Games() {
@@ -38,7 +38,7 @@ export default function Games() {
                 )
             );
         } catch (error) {
-            setError("Could not update movie.");
+            setError("Could not update game.");
         }
     }
     async function handleDelete(id: number) {
@@ -49,7 +49,21 @@ export default function Games() {
             setError("Could not delete game.");
         }
     }
-
+        async function handleAddToCalendar(sourceId: number) {
+            try {
+                await addToCalendar(sourceId);
+            } catch (error) {
+                setError("Could not add game to calendar.");
+            }
+        }
+        async function handleRemoveFromCalendar(sourceId: number) {
+            try {
+                await removeFromCalendar(sourceId);
+            } catch (error) {
+                setError("Could not remove game from calendar.");
+            }
+        }
+    
 
     useEffect(() => {
         async function loadGames() {
@@ -90,6 +104,8 @@ export default function Games() {
                     {editingGameId === game.id && (
                         <form onSubmit={(event) => {event.preventDefault(); handleUpdate(game.id, { title:editTitle, releaseDate: dateToISOString(editReleaseDate) }); setEditingGameId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+                            <button type="button" onClick={() => handleAddToCalendar(game.id)}>Add to calendar</button>
+                            <button type="button" onClick={() => handleRemoveFromCalendar(game.id)}>Remove from calendar</button>
                             <input name="releaseDate" min={new Date().toISOString().split("T")[0]}type="date" value={editReleaseDate} onChange={(e) => setEditReleaseDate(e.target.value)} />
                             <button type="submit">Update Game</button>
                         </form>

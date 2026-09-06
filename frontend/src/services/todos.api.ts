@@ -44,3 +44,21 @@ export async function deleteTodo(id: number): Promise<void> {
     }
     return;
 }
+export async function addToCalendar(sourceId:number): Promise<void> {
+    const response = await fetch(`http://localhost:3000/api/todos/${sourceId}/event`, {
+        method: "POST",
+    });
+    if (!response.ok) {
+        throw new Error("Failed to add todo to calendar");
+    }
+    return;
+}
+export async function removeFromCalendar(sourceId:number): Promise<void> {
+    const response = await fetch(`http://localhost:3000/api/todos/${sourceId}/event`, {
+        method: "DELETE",
+    });
+    if (!response.ok) {
+        throw new Error("Failed to remove todo from calendar");
+    }
+    return;
+}

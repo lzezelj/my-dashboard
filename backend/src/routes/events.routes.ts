@@ -1,10 +1,11 @@
 import {Router} from "express";
-import { getEvents, getEvent } from "../controllers/events.controller.js";
+import { getCalendarEvent, getCalendarEvents, getSourceEvent } from "../controllers/events.controller.js";
 
 
 const router = Router();
 
-router.get("/", getEvents);
-router.get("/:id",getEvent);
+router.get("/", getCalendarEvents);
+router.get("/:type/:sourceId",getCalendarEvent);
+router.get("/:id/:type/:sourceId", getSourceEvent);
 
 export default router;

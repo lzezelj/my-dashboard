@@ -7,13 +7,14 @@ import Games from "./pages/Games.tsx";
 import Birthdays from "./pages/Birthdays.tsx";
 import Edit from "./pages/Edit.tsx";
 import Appointments from "./pages/Appointments.tsx";
+import Home from "./pages/Home.tsx";
 
 function App() {
   return(
     <>
       <Navbar />
       <Routes>
-        <Route path="/" element={<h1>Home</h1>} />
+        <Route path="/home" element={<Home />} />
         <Route path="/edit" element={<Edit />}>
           <Route index element={<h1></h1>} />
           <Route path="movies" element={<Movies />} />

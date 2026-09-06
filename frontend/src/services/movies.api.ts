@@ -44,3 +44,21 @@ export async function deleteMovie(id: number): Promise<void> {
     }
     return;
 }
+export async function addToCalendar(sourceId:number): Promise<void> {
+    const response = await fetch(`http://localhost:3000/api/movies/${sourceId}/event`, {
+        method: "POST",
+    });
+    if (!response.ok) {
+        throw new Error("Failed to add movie to calendar");
+    }
+    return;
+}
+export async function removeFromCalendar(sourceId:number): Promise<void> {
+    const response = await fetch(`http://localhost:3000/api/movies/${sourceId}/event`, {
+        method: "DELETE",
+    });
+    if (!response.ok) {
+        throw new Error("Failed to remove movie from calendar");
+    }
+    return;
+}

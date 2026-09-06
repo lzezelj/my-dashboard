@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Movies, UpdateMovies } from "../types/movies";
-import { createMovie, deleteMovie, getMovies, updateMovie } from "../services/movies.api.ts";
+import { addToCalendar, createMovie, deleteMovie, getMovies, removeFromCalendar, updateMovie } from "../services/movies.api.ts";
 import {dateToISOString, isoToDateInputValue, isoToDisplayDate} from "../utils/dateUtils";
 
 export default function Movies() {
@@ -49,7 +49,21 @@ export default function Movies() {
             setError("Could not delete movie.");
         }
     }
-
+     async function handleAddToCalendar(sourceId: number) {
+         try {
+             await addToCalendar(sourceId);
+         } catch (error) {
+             setError("Could not add movie to calendar.");
+         }
+     }
+     async function handleRemoveFromCalendar(sourceId: number) {
+         try {
+             await removeFromCalendar(sourceId);
+         } catch (error) {
+             setError("Could not remove movie from calendar.");
+         }
+     }
+    
 
     useEffect(() => {
         async function loadMovies() {
@@ -91,6 +105,8 @@ export default function Movies() {
                         <form onSubmit={(event) => {event.preventDefault(); handleUpdate(movie.id, { title:editTitle, releaseDate: dateToISOString(editReleaseDate) }); setEditingMovieId(null);}} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                             <input name="releaseDate" min={new Date().toISOString().split("T")[0]} type="date" value={editReleaseDate} onChange={(e) => setEditReleaseDate(e.target.value)} />
+                            <button type="button" onClick={() => handleAddToCalendar(movie.id)}>Add to Calendar</button>
+                            <button type="button" onClick={() => handleRemoveFromCalendar(movie.id)}>Remove from Calendar</button>
                             <button type="submit">Update Movie</button>
                         </form>
                     )}
