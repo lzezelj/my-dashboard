@@ -1,4 +1,4 @@
-import type { Todo, CreateTodo, UpdateTodo } from "../types/todo";
+import type { Todo, CreateTodo, UpdateTodo } from "../types/todos";
 
 
 export async function getTodos(): Promise<Todo[]> {

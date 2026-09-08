@@ -1,0 +1,1 @@
+Fix updatedAt in events

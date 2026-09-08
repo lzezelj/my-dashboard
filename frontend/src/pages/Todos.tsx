@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Todo, UpdateTodo } from "../types/todo";
+import type { Todo, UpdateTodo } from "../types/todos.ts";
 import { addToCalendar, createTodo, deleteTodo, getTodos, removeFromCalendar, updateTodo } from "../services/todos.api.ts";
 import {dateToISOString, isoToDateInputValue, isoToDisplayDate} from "../utils/dateUtils";
 

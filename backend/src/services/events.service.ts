@@ -4,7 +4,7 @@ import {EventType} from "../generated/prisma/client.js";
 export const getEventsService = async () => {
     return await prisma.event.findMany();
 };
-export const getCalendarEventService=async(event: { type: EventType; sourceId: number })=>{
+export const getCalendarEventService=async(event: { type: EventType; sourceId: number, id:number })=>{
     
     switch (event.type) {
     case EventType.MOVIE: {
@@ -13,9 +13,10 @@ export const getCalendarEventService=async(event: { type: EventType; sourceId: n
             });
 
             return {
-                id: event.sourceId,
+                id: event.id,
                 title: source!.title,
-                date: source!.releaseDate
+                date: source!.releaseDate,
+                sourceId: event.sourceId,
             };
         }
 
@@ -23,11 +24,11 @@ export const getCalendarEventService=async(event: { type: EventType; sourceId: n
             const source = await prisma.tvShow.findUnique({
                 where: { id: event.sourceId }
             });
-
             return {
-                id: event.sourceId,
+                id: event.id,
                 title: source!.title,
-                date: source!.releaseDate
+                date: source!.releaseDate,
+                sourceId: event.sourceId,
             };
         }
 
@@ -37,9 +38,10 @@ export const getCalendarEventService=async(event: { type: EventType; sourceId: n
             });
 
             return {
-                id: event.sourceId,
+                id: event.id,
                 title: source!.title,
-                date: source!.releaseDate
+                date: source!.releaseDate,
+                sourceId: event.sourceId,
             };
         }
 
@@ -49,9 +51,10 @@ export const getCalendarEventService=async(event: { type: EventType; sourceId: n
             });
 
             return {
-                id: event.sourceId,
+                id: event.id,
                 title: source!.name,
-                date: source!.date
+                date: source!.date,
+                sourceId: event.sourceId,
             };
         }
 
@@ -59,11 +62,11 @@ export const getCalendarEventService=async(event: { type: EventType; sourceId: n
             const source = await prisma.appointment.findUnique({
                 where: { id: event.sourceId }
             });
-
             return {
-                id: event.sourceId,
+                id: event.id,
                 title: source!.title,
-                date: source!.startTime
+                date: source!.startTime,
+                sourceId: event.sourceId,
             };
         }
 

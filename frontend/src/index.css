@@ -295,12 +295,42 @@ code {
 }
 
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
 }
 
 .navbar a {
-    text-decoration: none;
+  text-decoration: none;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  border: 13px solid #292c28;
+  min-height: 100px;
+}
+.calendar-grid > span {
+  border: 1px solid #ccc;
+  min-height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.calendar-day {
+    position: relative;
+    border: 1px solid #ccc;
+    min-height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.event-count {
+    position: absolute;
+    color:#a00;
+    top: 10px;
+    right: 15px;
 }

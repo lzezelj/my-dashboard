@@ -1,4 +1,4 @@
-import type { CalendarEvent } from "../types/events";
+import type { CalendarEvent, SourceEvents } from "../types/events";
 
 export async function getCalendarEvents(): Promise<CalendarEvent[]> {
     const response = await fetch("http://localhost:3000/api/events");
@@ -8,10 +8,10 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
 
     return response.json();
 }
-export async function getFullEvent(id: string): Promise<CalendarEvent> {
-    const response = await fetch(`http://localhost:3000/api/events/${id}`);
+export async function getSourceEvents(): Promise<SourceEvents[]> {
+    const response = await fetch("http://localhost:3000/api/events/source");
     if (!response.ok) {
-        throw new Error("Failed to fetch event");
+        throw new Error("Failed to fetch source events");
     }
 
     return response.json();
