@@ -1,5 +1,5 @@
-import type{ Request, Response } from "express";
-import { deleteTvShowService, getTvShowsService,getTvShowService, updateTvShowService,createTvShowService, createTvShowEventService, deleteTvShowEventService} from "../services/tv_shows.services.js";
+import type { Request, Response } from "express";
+import { deleteTvShowService, getTvShowsService, getTvShowService, updateTvShowService, createTvShowService, createTvShowEventService, deleteTvShowEventService } from "../services/tv_shows.services.js";
 
 export const getTvShows = async (req: Request, res: Response) => {
     try {
@@ -7,21 +7,20 @@ export const getTvShows = async (req: Request, res: Response) => {
         res.status(200).json(tvShows);
     } catch (error) {
         res.status(500).json({ message: "Error fetching tv shows", error });
-    }       
+    }
 };
 export const getTvShow = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const tvShow = await getTvShowService(id);
         res.status(200).json(tvShow);
-    } catch (error) { 
+    } catch (error) {
         res.status(500).json({ message: "Error fetching tv show", error });
     }
 };
 export const createTvShow = async (req: Request, res: Response) => {
     try {
         const { title, releaseDate } = req.body;
-        console.log(title, releaseDate);
         const tvShow = await createTvShowService(title, releaseDate);
         res.status(201).json(tvShow);
     } catch (error) {
@@ -33,7 +32,7 @@ export const updateTvShow = async (req: Request, res: Response) => {
         const id = Number(req.params.id);
         const { title, releaseDate } = req.body;
         const tvShow = await updateTvShowService(id, title, new Date(releaseDate));
-        res.status(200).json(tvShow );
+        res.status(200).json(tvShow);
     } catch (error) {
         res.status(500).json({ message: "Error updating tv show", error });
     }

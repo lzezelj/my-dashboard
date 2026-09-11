@@ -1,12 +1,13 @@
-import {Outlet} from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import EditNavbar from "../components/EditNavbar";
 export default function Edit() {
     return (
-        <div>
-            <h1>Edit</h1>
+        <main className="edit-page">
             <EditNavbar />
-            <Outlet />
-        </div>
-        
+            <section className="edit-content">
+                <Outlet />
+            </section>
+        </main>
+
     );
 }

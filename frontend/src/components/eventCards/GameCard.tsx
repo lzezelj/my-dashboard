@@ -1,8 +1,10 @@
+import { isoToDisplayDate } from "../../utils/dateUtils";
+
 export default function GameCard({ event }: { event: any }) {
     return (
-        <div className="game-card">
+        <div className="game-card event-card">
             <h3>{event.title}</h3>
-            <p>{event.date}</p>
+            <p>{isoToDisplayDate(event.date)}</p>
         </div>
     );
 }

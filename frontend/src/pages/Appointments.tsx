@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import type { Appointment, UpdateAppointment} from "../types/appointments.ts";
-import { createAppointment, getAppointments,deleteAppointment,updateAppointment } from "../services/appointments.api.ts";
-import { isoToTimeInputValue,isoToDisplayDate, isoToDateInputValue, dateTimeToISOString,getCurrentTime,getTimePlusOneMinute } from "../utils/dateUtils.ts";
+import type { Appointment, UpdateAppointment } from "../types/appointments.ts";
+import { createAppointment, getAppointments, deleteAppointment, updateAppointment } from "../services/appointments.api.ts";
+import { isoToTimeInputValue, isoToDisplayDate, isoToDateInputValue, dateTimeToISOString, getCurrentTime, getTimePlusOneMinute } from "../utils/dateUtils.ts";
 import { addToCalendar, removeFromCalendar } from "../services/appointments.api.ts";
+import Modal from "../components/Modal";
+import useCalendarStatus from "../hooks/useCalendarStatus";
 export default function Appointments() {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
-    const [startTime,setStartTime]=useState(getCurrentTime());
-    const [endTime,setEndTime]=useState(getTimePlusOneMinute());
+    const [startTime, setStartTime] = useState(getCurrentTime());
+    const [endTime, setEndTime] = useState(getTimePlusOneMinute());
     const [error, setError] = useState<string | null>(null);
     const [title, setTitle] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -16,6 +18,9 @@ export default function Appointments() {
     const [editDate, setEditDate] = useState("");
     const [editEndTime, setEditEndTime] = useState("");
     const [editingAppointmentId, setEditingAppointmentId] = useState<number | null>(null);
+    const [addToCalendarOnCreate, setAddToCalendarOnCreate] = useState(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+    const { calendarSourceIds, refreshCalendarStatus } = useCalendarStatus("APPOINTMENT");
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (!title.trim()) {
@@ -28,13 +33,15 @@ export default function Appointments() {
         }
 
         try {
-            const newAppointment = await createAppointment({title,startTime: new Date(`${date}T${startTime}`).toISOString(),endTime: new Date(`${date}T${endTime}`).toISOString()});
+            const newAppointment = await createAppointment({ title, startTime: new Date(`${date}T${startTime}`).toISOString(), endTime: new Date(`${date}T${endTime}`).toISOString() });
             setAppointments((currentAppointments) => [...currentAppointments, newAppointment]);
+            if (addToCalendarOnCreate) { await addToCalendar(newAppointment.id); await refreshCalendarStatus(); }
             setTitle("");
             setDate(new Date().toISOString().split("T")[0]);
             setStartTime(getCurrentTime());
             setEndTime(getTimePlusOneMinute());
             setError(null);
+            setAddToCalendarOnCreate(false);
         } catch (error) {
             setError("Could not create appointment.");
         }
@@ -59,20 +66,22 @@ export default function Appointments() {
             setError("Could not delete appointment.");
         }
     }
-        async function handleAddToCalendar(sourceId: number) {
-            try {
-                await addToCalendar(sourceId);
-            } catch (error) {
-                setError("Could not add appointment to calendar.");
-            }
+    async function handleAddToCalendar(sourceId: number) {
+        try {
+            await addToCalendar(sourceId);
+            await refreshCalendarStatus();
+        } catch (error) {
+            setError("Could not add appointment to calendar.");
         }
-        async function handleRemoveFromCalendar(sourceId: number) {
-            try {
-                await removeFromCalendar(sourceId);
-            } catch (error) {
-                setError("Could not remove appointment from calendar.");
-            }
+    }
+    async function handleRemoveFromCalendar(sourceId: number) {
+        try {
+            await removeFromCalendar(sourceId);
+            await refreshCalendarStatus();
+        } catch (error) {
+            setError("Could not remove appointment from calendar.");
         }
+    }
 
     useEffect(() => {
         async function loadAppointments() {
@@ -104,43 +113,44 @@ export default function Appointments() {
             {appointments.map((appointment) => (
                 <div key={appointment.id}>
                     <button
-                    type="button"
-                    onClick={() => {
-                        setEditingAppointmentId(appointment.id);
-                        setEditTitle(appointment.title);
-                        setEditDate(isoToDateInputValue(appointment.startTime));
-                        setEditStartTime(isoToTimeInputValue(appointment.startTime));
-                        setEditEndTime(isoToTimeInputValue(appointment.endTime));
-                    }}>
-                         {editingAppointmentId === appointment.id ? "Cancel" : "Edit"}
+                        type="button"
+                        onClick={() => {
+                            setEditingAppointmentId(appointment.id);
+                            setEditTitle(appointment.title);
+                            setEditDate(isoToDateInputValue(appointment.startTime));
+                            setEditStartTime(isoToTimeInputValue(appointment.startTime));
+                            setEditEndTime(isoToTimeInputValue(appointment.endTime));
+                        }}>
+                        {editingAppointmentId === appointment.id ? "Cancel" : "Edit"}
                     </button>
                     {editingAppointmentId === appointment.id && (
-                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(appointment.id, { title:editTitle, startTime: dateTimeToISOString(editDate, editStartTime),endTime: dateTimeToISOString(editDate, editEndTime) }); setEditingAppointmentId(null);}} >
-                            <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                            <input type="date" min={new Date().toISOString().split("T")[0]} value={editDate} onChange={(e)=>setEditDate(e.target.value)}/>
-                            <input type="time" min ={editDate===new Date().toISOString().split("T")[0] ? getCurrentTime() : undefined} value={editStartTime} onChange={(e) => setEditStartTime(e.target.value)} />
-                            <input type="time"  min ={editDate===new Date().toISOString().split("T")[0] ? editStartTime : undefined} value={editEndTime} onChange={(e) => setEditEndTime(e.target.value)} />
-                            <button type="button" onClick={() => handleAddToCalendar(appointment.id)}>Add to calendar</button>
-                            <button type="button" onClick={() => handleRemoveFromCalendar(appointment.id)}>Remove from calendar</button>
+                        <form onSubmit={(event) => { event.preventDefault(); handleUpdate(appointment.id, { title: editTitle, startTime: dateTimeToISOString(editDate, editStartTime), endTime: dateTimeToISOString(editDate, editEndTime) }); setEditingAppointmentId(null); }} >
+                            <input name="title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+                            <input type="date" min={new Date().toISOString().split("T")[0]} value={editDate} onChange={(e) => setEditDate(e.target.value)} />
+                            <input type="time" min={editDate === new Date().toISOString().split("T")[0] ? getCurrentTime() : undefined} value={editStartTime} onChange={(e) => setEditStartTime(e.target.value)} />
+                            <input type="time" min={editDate === new Date().toISOString().split("T")[0] ? editStartTime : undefined} value={editEndTime} onChange={(e) => setEditEndTime(e.target.value)} />
+                            {calendarSourceIds.has(appointment.id) ? <><span className="calendar-status">On calendar</span><button type="button" onClick={() => handleRemoveFromCalendar(appointment.id)}>Remove from calendar</button></> : <button type="button" onClick={() => handleAddToCalendar(appointment.id)}>Add to calendar</button>}
                             <button type="submit">Update appointment</button>
                         </form>
                     )}
-                        <p>{appointment.title}</p>
-                        <p>{isoToTimeInputValue(appointment.startTime)} - {isoToTimeInputValue(appointment.endTime)} </p>
-                        <p>{isoToDisplayDate(appointment.startTime)} </p>
-                    <button type="button" onClick={() => handleDelete(appointment.id)}>
+                    <p>{appointment.title}</p>
+                    <p>{isoToTimeInputValue(appointment.startTime)} - {isoToTimeInputValue(appointment.endTime)} </p>
+                    <p>{isoToDisplayDate(appointment.startTime)} </p>
+                    <button type="button" className="danger-button" onClick={() => setPendingDeleteId(appointment.id)}>
                         Delete appointment
                     </button>
                 </div>
             ))}
             <form onSubmit={handleSubmit}>
                 <input name="title" placeholder="Enter a appointment" value={title} onChange={(e) => setTitle(e.target.value)} />
-                <input type="date" value={date} min={new Date().toISOString().split("T")[0]} onChange={(e) => setDate(e.target.value)}/>
-                <input type="time" min ={date===new Date().toISOString().split("T")[0] ? getCurrentTime() : undefined} value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-                <input type="time"  min ={date===new Date().toISOString().split("T")[0] ? startTime : undefined} value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+                <input type="date" value={date} min={new Date().toISOString().split("T")[0]} onChange={(e) => setDate(e.target.value)} />
+                <input type="time" min={date === new Date().toISOString().split("T")[0] ? getCurrentTime() : undefined} value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+                <input type="time" min={date === new Date().toISOString().split("T")[0] ? startTime : undefined} value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+                <label className="calendar-checkbox"><input type="checkbox" checked={addToCalendarOnCreate} onChange={(e) => setAddToCalendarOnCreate(e.target.checked)} /> Add to calendar</label>
                 <button type="submit">Create appointment</button>
             </form>
+            <Modal isOpen={pendingDeleteId !== null} title="Delete appointment?" confirmLabel="Delete appointment" destructive onCancel={() => setPendingDeleteId(null)} onConfirm={() => { if (pendingDeleteId !== null) { handleDelete(pendingDeleteId); setPendingDeleteId(null); } }}><p>This permanently removes the appointment.</p></Modal>
         </div>
-       
+
     );
 }

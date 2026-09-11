@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Birthdays, UpdateBirthdays } from "../types/birthdays";
 import { createBirthday, deleteBirthday, getBirthdays, updateBirthday, addToCalendar, removeFromCalendar } from "../services/birthdays.api.ts";
+import Modal from "../components/Modal";
+import useCalendarStatus from "../hooks/useCalendarStatus";
 
 export default function Birthdays() {
     const [birthdays, setBirthdays] = useState<Birthdays[]>([]);
@@ -11,6 +13,9 @@ export default function Birthdays() {
     const [editDate, setEditDate] = useState(new Date().toISOString().split("T")[0]);
     const [editingBirthdayId, setEditingBirthdayId] = useState<number | null>(null);
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+    const [addToCalendarOnCreate, setAddToCalendarOnCreate] = useState(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+    const { calendarSourceIds, refreshCalendarStatus } = useCalendarStatus("BIRTHDAY");
     const convertedDate = (dateString: Date): string => {
         const date = new Date(dateString);
         return date.toLocaleDateString();
@@ -25,8 +30,10 @@ export default function Birthdays() {
         try {
             const newBirthday = await createBirthday({ name, date: new Date(date) });
             setBirthdays((currentBirthdays) => [...currentBirthdays, newBirthday]);
+            if (addToCalendarOnCreate) { await addToCalendar(newBirthday.id); await refreshCalendarStatus(); }
             setName("");
             setDate(new Date().toISOString().split("T")[0]);
+            setAddToCalendarOnCreate(false);
         } catch (error) {
             setError("Could not create birthday.");
         }
@@ -54,6 +61,7 @@ export default function Birthdays() {
     async function handleAddToCalendar(sourceId: number) {
         try {
             await addToCalendar(sourceId);
+            await refreshCalendarStatus();
         } catch (error) {
             setError("Could not add birthday to calendar.");
         }
@@ -61,6 +69,7 @@ export default function Birthdays() {
     async function handleRemoveFromCalendar(sourceId: number) {
         try {
             await removeFromCalendar(sourceId);
+            await refreshCalendarStatus();
         } catch (error) {
             setError("Could not remove birthday from calendar.");
         }
@@ -100,25 +109,24 @@ export default function Birthdays() {
                         setEditName(birthday.name);
                         setEditDate(birthday.date.toISOString().split("T")[0]);
                     }}>
-                         {editingBirthdayId === birthday.id ? "Cancel" : "Edit"}
+                        {editingBirthdayId === birthday.id ? "Cancel" : "Edit"}
                     </button>
                     {editingBirthdayId === birthday.id && (
-                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(birthday.id, { name: editName, date: new Date(editDate) }); setEditingBirthdayId(null);}} >
-                            <input name="name"  value={editName} onChange={(e) => setEditName(e.target.value)} />
+                        <form onSubmit={(event) => { event.preventDefault(); handleUpdate(birthday.id, { name: editName, date: new Date(editDate) }); setEditingBirthdayId(null); }} >
+                            <input name="name" value={editName} onChange={(e) => setEditName(e.target.value)} />
                             <input name="date" type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
-                            <button type="button" onClick={() => handleAddToCalendar(birthday.id)}>Add to calendar</button>
-                            <button type="button" onClick={() => handleRemoveFromCalendar(birthday.id)}>Remove from calendar</button>
+                            {calendarSourceIds.has(birthday.id) ? <><span className="calendar-status">On calendar</span><button type="button" onClick={() => handleRemoveFromCalendar(birthday.id)}>Remove from calendar</button></> : <button type="button" onClick={() => handleAddToCalendar(birthday.id)}>Add to calendar</button>}
                             <button type="submit">Update Birthday</button>
                         </form>
                     )}
                     <p>
                         {birthday.name}
-                    </p>     
+                    </p>
                     <p>
                         {convertedDate(birthday.date)}
                     </p>
-                    
-                    <button type="button" onClick={() => handleDelete(birthday.id)}>
+
+                    <button type="button" className="danger-button" onClick={() => setPendingDeleteId(birthday.id)}>
                         Delete Birthday
                     </button>
                 </div>
@@ -126,9 +134,11 @@ export default function Birthdays() {
             <form onSubmit={handleSubmit}>
                 <input name="name" placeholder="Enter the name of the person" value={name} onChange={(e) => setName(e.target.value)} />
                 <input name="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                <label className="calendar-checkbox"><input type="checkbox" checked={addToCalendarOnCreate} onChange={(e) => setAddToCalendarOnCreate(e.target.checked)} /> Add to calendar</label>
                 <button type="submit">Create Birthday</button>
             </form>
+            <Modal isOpen={pendingDeleteId !== null} title="Delete birthday?" confirmLabel="Delete birthday" destructive onCancel={() => setPendingDeleteId(null)} onConfirm={() => { if (pendingDeleteId !== null) { handleDelete(pendingDeleteId); setPendingDeleteId(null); } }}><p>This permanently removes the birthday.</p></Modal>
         </div>
-       
+
     );
 }

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 export default function EditNavbar() {
     return (
-        <nav className="navbar">
+        <nav className="edit-navbar" aria-label="Edit categories">
             <Link to="/edit/movies">Movies</Link>
             <Link to="/edit/tv-shows">TV Shows</Link>
             <Link to="/edit/games">Games</Link>

@@ -62,3 +62,12 @@ export async function removeFromCalendar(sourceId:number): Promise<void> {
     }
     return;
 }
+export async function updateCalendar(sourceId:number): Promise<void> {
+    const response = await fetch(`http://localhost:3000/api/appointments/${sourceId}/event`, {
+        method: "PATCH",
+    });
+    if (!response.ok) {
+        throw new Error("Failed to update appointment in calendar");
+    }
+    return;
+}

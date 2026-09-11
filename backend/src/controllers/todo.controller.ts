@@ -1,5 +1,5 @@
-import type{ Request, Response } from "express";
-import { getTodosService,getTodoService,createTodoService,updateTodoService, deleteTodoService, createTodoEventService, deleteTodoEventService } from "../services/todo.service.js";
+import type { Request, Response } from "express";
+import { getTodosService, getTodoService, createTodoService, updateTodoService, deleteTodoService, createTodoEventService, deleteTodoEventService } from "../services/todo.service.js";
 
 
 export const getTodos = async (req: Request, res: Response) => {
@@ -8,21 +8,20 @@ export const getTodos = async (req: Request, res: Response) => {
         res.status(200).json(todos);
     } catch (error) {
         res.status(500).json({ message: "Error fetching todos", error });
-    }       
+    }
 };
 export const getTodo = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const todo = await getTodoService(id);
         res.status(200).json(todo);
-    } catch (error) { 
+    } catch (error) {
         res.status(500).json({ message: "Error fetching todo", error });
     }
 };
 export const createTodo = async (req: Request, res: Response) => {
     try {
         const { title, deadline } = req.body;
-        console.log(title, deadline);
         const todo = await createTodoService(title, deadline);
         res.status(201).json(todo);
     } catch (error) {

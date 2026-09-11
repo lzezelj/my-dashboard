@@ -1,4 +1,4 @@
-import type{ Request, Response } from "express";
+import type { Request, Response } from "express";
 import { createBirthdayEventService, createBirthdayService, deleteBirthdayEventService, deleteBirthdayService, getBirthdayService, getBirthdaysService, updateBirthdayService } from "../services/birthday.services.js";
 
 export const getBirthdays = async (req: Request, res: Response) => {
@@ -7,15 +7,15 @@ export const getBirthdays = async (req: Request, res: Response) => {
         res.status(200).json(birthdays);
     } catch (error) {
         res.status(500).json({ message: "Error fetching birthdays", error });
-    }       
+    }
 };
 export const getBirthday = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const birthday = await getBirthdayService(id);
         res.status(200).json(birthday);
-    } catch (error) { 
-        res.status(500).json({ message: "Error fet  ching movie", error });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching birthday", error });
     }
 };
 export const createBirthday = async (req: Request, res: Response) => {
@@ -31,7 +31,7 @@ export const updateBirthday = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const { name, date } = req.body;
-        const birthday = await updateBirthdayService(id,name,date);
+        const birthday = await updateBirthdayService(id, name, date);
         res.status(200).json(birthday);
     } catch (error) {
         res.status(500).json({ message: "Error updating birthday", error });

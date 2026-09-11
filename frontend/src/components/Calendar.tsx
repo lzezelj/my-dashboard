@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import type {CalendarEvent, SourceEvents} from "../types/events";
+import type { CalendarEvent, SourceEvents } from "../types/events";
 import { getCalendarEvents, getSourceEvents } from "../services/home.api";
 import CardSwitch from "./eventCards/CardSwitch";
 
 export default function Calendar() {
-    interface MonthDay{
+    interface MonthDay {
         days: number;
         month: number;
     }
@@ -30,7 +30,7 @@ export default function Calendar() {
     };
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const leapYear = (year: number) => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-    const numberOfDays = (year:number): MonthDay[] => [
+    const numberOfDays = (year: number): MonthDay[] => [
         { days: 31, month: 0 },
         { days: leapYear(year) ? 29 : 28, month: 1 }, // February
         { days: 31, month: 2 },
@@ -47,10 +47,10 @@ export default function Calendar() {
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-    const [selectedDate, setSelectedDate] = useState<Date| null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [sourceEvents, setSourceEvents] = useState<SourceEvents[]>([]);
     const monthDays = createMonthDays(currentYear, currentMonth);
-    const eventsByDate=new Map<string,number>();
+    const eventsByDate = new Map<string, number>();
     const dayCalendarEvents = calendarEvents.filter((event) => {
         const eventDate = new Date(event.date);
         return (
@@ -64,9 +64,9 @@ export default function Calendar() {
     });
     calendarEvents.forEach(event => {
         const eventDate = new Date(event.date);
-        if(eventDate.getFullYear() === currentYear && eventDate.getMonth() === currentMonth) {
-            const dateKey = `${eventDate.getFullYear()}-${eventDate.getMonth()+1}-${eventDate.getDate()}`;
-            eventsByDate.set(dateKey, (eventsByDate.get(dateKey) || 0)+1);
+        if (eventDate.getFullYear() === currentYear && eventDate.getMonth() === currentMonth) {
+            const dateKey = `${eventDate.getFullYear()}-${eventDate.getMonth() + 1}-${eventDate.getDate()}`;
+            eventsByDate.set(dateKey, (eventsByDate.get(dateKey) || 0) + 1);
         }
     });
     useEffect(() => {
@@ -78,7 +78,7 @@ export default function Calendar() {
                 console.error(error);
             }
         }
-        async function loadSourceEvents(){
+        async function loadSourceEvents() {
             try {
                 const data = await getSourceEvents();
                 setSourceEvents(data);
@@ -88,11 +88,10 @@ export default function Calendar() {
         }
         loadCalendarEvents();
         loadSourceEvents();
-    }, 
-    []);
+    },
+        []);
     return (
         <div className="calendar">
-            <h3>WIP Calendar</h3>
             <input type="month" value={`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`} onChange={(e) => {
                 const [year, month] = e.target.value.split('-').map(Number);
                 setCurrentYear(year);
@@ -103,19 +102,29 @@ export default function Calendar() {
                     <span key={day}>{day}</span>
                 ))}
                 {monthDays.map((monthDay, index) => {
-                    if(monthDay.days===0){
+                    if (monthDay.days === 0) {
                         return (
                             <span key={index}></span>
                         );
                     }
-                
-                return (
-                    <button key={index} className="calendar-day" onClick={() => setSelectedDate(new Date(currentYear, currentMonth, monthDay.days))}>
-                        <span>{monthDay.days}</span>
-                        <span className="event-count">{eventsByDate.get(`${currentYear}-${currentMonth+1}-${monthDay.days}`)}</span>
+                    const dateKey = `${currentYear}-${currentMonth + 1}-${monthDay.days}`;
+                    const eventCount = eventsByDate.get(dateKey);
+                    const isSelected = selectedDate?.getFullYear() === currentYear
+                        && selectedDate.getMonth() === currentMonth
+                        && selectedDate.getDate() === monthDay.days;
 
-                    </button>
-                );
+                    return (
+                        <button
+                            key={index}
+                            className={`calendar-day${isSelected ? " selected" : ""}`}
+                            aria-pressed={isSelected}
+                            onClick={() => setSelectedDate(new Date(currentYear, currentMonth, monthDay.days))}
+                        >
+                            <span>{monthDay.days}</span>
+                            {eventCount && <span className="event-count">{eventCount}</span>}
+
+                        </button>
+                    );
                 })}
             </div>
             {selectedDate && (

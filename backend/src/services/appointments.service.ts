@@ -61,3 +61,17 @@ export const deleteAppointmentEventService=async(sourceId:number)=>{
         }
     });
 }
+export const updateAppointmentEventService=async(sourceId:number)=>{
+    return prisma.event.update({
+        where: { 
+            type_sourceId: {
+                type: EventType.APPOINTMENT,
+                sourceId
+            }
+        },
+        data: {
+            type: EventType.APPOINTMENT,
+            sourceId
+        }
+    });
+}

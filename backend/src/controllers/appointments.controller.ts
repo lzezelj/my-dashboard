@@ -1,5 +1,5 @@
-import type{ Request, Response } from "express";
-import { createAppointmentEventService, createAppointmentService, deleteAppointmentEventService, deleteAppointmentService, getAppointmentService, getAppointmentsService, updateAppointmentService } from "../services/appointments.service.js";
+import type { Request, Response } from "express";
+import { createAppointmentEventService, createAppointmentService, deleteAppointmentEventService, deleteAppointmentService, getAppointmentService, getAppointmentsService, updateAppointmentEventService, updateAppointmentService } from "../services/appointments.service.js";
 
 export const getAppointments = async (req: Request, res: Response) => {
     try {
@@ -7,14 +7,14 @@ export const getAppointments = async (req: Request, res: Response) => {
         res.status(200).json(appointments);
     } catch (error) {
         res.status(500).json({ message: "Error fetching appointments", error });
-    }       
+    }
 };
 export const getAppointment = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const appointment = await getAppointmentService(id);
         res.status(200).json(appointment);
-    } catch (error) { 
+    } catch (error) {
         res.status(500).json({ message: "Error fetching appointment", error });
     }
 };
@@ -22,7 +22,7 @@ export const createAppointment = async (req: Request, res: Response) => {
     try {
         const { title, startTime, endTime } = req.body;
         const appointment = await createAppointmentService(title, startTime, endTime);
-        res.status(201).json(appointment); 
+        res.status(201).json(appointment);
     } catch (error) {
         res.status(500).json({ message: "Error creating appointment", error });
     }
@@ -62,5 +62,14 @@ export const deleteAppointmentEvent = async (req: Request, res: Response) => {
         res.status(204).json(event);
     } catch (error) {
         res.status(500).json({ message: "Error deleting event", error });
+    }
+};
+export const updateAppointmentEvent = async (req: Request, res: Response) => {
+    try {
+        const sourceId = Number(req.params.id);
+        const event = await updateAppointmentEventService(sourceId);
+        res.status(200).json(event);
+    } catch (error) {
+        res.status(500).json({ message: "Error updating event", error });
     }
 };

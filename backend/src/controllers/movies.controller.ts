@@ -1,4 +1,4 @@
-import type{ Request, Response } from "express";
+import type { Request, Response } from "express";
 import { createMovieEventService, createMovieService, deleteMovieEventService, deleteMovieService, getMovieService, getMoviesService, updateMovieService } from "../services/movies.service.js";
 
 export const getMovies = async (req: Request, res: Response) => {
@@ -7,14 +7,14 @@ export const getMovies = async (req: Request, res: Response) => {
         res.status(200).json(movies);
     } catch (error) {
         res.status(500).json({ message: "Error fetching movies", error });
-    }       
+    }
 };
 export const getMovie = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const movie = await getMovieService(id);
         res.status(200).json(movie);
-    } catch (error) { 
+    } catch (error) {
         res.status(500).json({ message: "Error fetching movie", error });
     }
 };

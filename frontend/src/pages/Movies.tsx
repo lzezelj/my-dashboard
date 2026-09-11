@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import type { Movies, UpdateMovies } from "../types/movies";
 import { addToCalendar, createMovie, deleteMovie, getMovies, removeFromCalendar, updateMovie } from "../services/movies.api.ts";
+
 import {dateToISOString, isoToDateInputValue, isoToDisplayDate} from "../utils/dateUtils";
+import Modal from "../components/Modal";
+import useCalendarStatus from "../hooks/useCalendarStatus";
 
 export default function Movies() {
     const [movies, setMovies] = useState<Movies[]>([]);
@@ -12,6 +15,9 @@ export default function Movies() {
     const [editReleaseDate, setEditReleaseDate] = useState(new Date().toISOString().split("T")[0]);
     const [editingMovieId, setEditingMovieId] = useState<number | null>(null);
     const [releaseDate, setReleaseDate] = useState(new Date().toISOString().split("T")[0]);
+    const [addToCalendarOnCreate, setAddToCalendarOnCreate] = useState(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+    const { calendarSourceIds, refreshCalendarStatus } = useCalendarStatus("MOVIE");
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (!title.trim()) {
@@ -22,9 +28,14 @@ export default function Movies() {
         try {
             const newMovie = await createMovie({ title, releaseDate:dateToISOString(releaseDate) });
             setMovies((currentMovies) => [...currentMovies, newMovie]);
+            if (addToCalendarOnCreate) {
+                await addToCalendar(newMovie.id);
+                await refreshCalendarStatus();
+            }
             setTitle("");
             setError("");
             setReleaseDate(new Date().toISOString().split("T")[0]);
+            setAddToCalendarOnCreate(false);
         } catch (error) {
             setError("Could not create movie.");
         }
@@ -49,9 +60,10 @@ export default function Movies() {
             setError("Could not delete movie.");
         }
     }
-     async function handleAddToCalendar(sourceId: number) {
+    async function handleAddToCalendar(sourceId: number) {
          try {
              await addToCalendar(sourceId);
+             await refreshCalendarStatus();
          } catch (error) {
              setError("Could not add movie to calendar.");
          }
@@ -59,11 +71,11 @@ export default function Movies() {
      async function handleRemoveFromCalendar(sourceId: number) {
          try {
              await removeFromCalendar(sourceId);
+             await refreshCalendarStatus();
          } catch (error) {
              setError("Could not remove movie from calendar.");
          }
      }
-    
 
     useEffect(() => {
         async function loadMovies() {
@@ -102,11 +114,12 @@ export default function Movies() {
                          {editingMovieId === movie.id ? "Cancel" : "Edit"}
                     </button>
                     {editingMovieId === movie.id && (
-                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(movie.id, { title:editTitle, releaseDate: dateToISOString(editReleaseDate) }); setEditingMovieId(null);}} >
+                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(movie.id, { title:editTitle, releaseDate: dateToISOString(editReleaseDate) }); setEditingMovieId(null); }} >
                             <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                             <input name="releaseDate" min={new Date().toISOString().split("T")[0]} type="date" value={editReleaseDate} onChange={(e) => setEditReleaseDate(e.target.value)} />
-                            <button type="button" onClick={() => handleAddToCalendar(movie.id)}>Add to Calendar</button>
-                            <button type="button" onClick={() => handleRemoveFromCalendar(movie.id)}>Remove from Calendar</button>
+                            {calendarSourceIds.has(movie.id) ? (
+                                <><span className="calendar-status">On calendar</span><button type="button" onClick={() => handleRemoveFromCalendar(movie.id)}>Remove from Calendar</button></>
+                            ) : <button type="button" onClick={() => handleAddToCalendar(movie.id)}>Add to Calendar</button>}
                             <button type="submit">Update Movie</button>
                         </form>
                     )}
@@ -117,7 +130,7 @@ export default function Movies() {
                         {isoToDisplayDate(movie.releaseDate)}
                     </p>
                     
-                    <button type="button" onClick={() => handleDelete(movie.id)}>
+                    <button type="button" className="danger-button" onClick={() => setPendingDeleteId(movie.id)}>
                         Delete Movie
                     </button>
                 </div>
@@ -125,8 +138,10 @@ export default function Movies() {
             <form onSubmit={handleSubmit}>
                 <input name="title" placeholder="Enter a movie" value={title} onChange={(e) => setTitle(e.target.value)} />
                 <input name="releaseDate" min={new Date().toISOString().split("T")[0]} type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} />
+                <label className="calendar-checkbox"><input type="checkbox" checked={addToCalendarOnCreate} onChange={(e) => setAddToCalendarOnCreate(e.target.checked)} /> Add to calendar</label>
                 <button type="submit">Create Movie</button>
             </form>
+            <Modal isOpen={pendingDeleteId !== null} title="Delete movie?" confirmLabel="Delete movie" destructive onCancel={() => setPendingDeleteId(null)} onConfirm={() => { if (pendingDeleteId !== null) { handleDelete(pendingDeleteId); setPendingDeleteId(null); } }}><p>This permanently removes the movie.</p></Modal>
         </div>
        
     );
