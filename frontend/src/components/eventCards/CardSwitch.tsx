@@ -5,7 +5,7 @@ import BirthdayCard from "./BirthdayCard";
 import AppointmentCard from "./AppointmentCard";
 import TodoCard from "./TodoCard";
 
-export default function CardSwitch({ event }: { event: any }) {
+export default function CardSwitch({ event, onToggleTodoComplete }: { event: any; onToggleTodoComplete?: (todoId: number, completed: boolean) => void }) {
     switch (event.eventType) {
         case "MOVIE":
             return <MovieCard event={event} />;
@@ -23,7 +23,7 @@ export default function CardSwitch({ event }: { event: any }) {
             return <AppointmentCard event={event} />;
 
         case "TODO":
-            return <TodoCard event={event} />;
+            return <TodoCard event={event} onToggleComplete={onToggleTodoComplete} />;
         default:
             return null;
     }

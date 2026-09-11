@@ -6,6 +6,7 @@ import type { EventType } from "../generated/prisma/client.js";
 export const getCalendarEvents = async (req: Request, res: Response) => {
     try {
         const events = await getEventsService();
+        console.log("events", events);
         const calendarEvents = await Promise.all(events.map((event) => {
             return getCalendarEventService({ type: event.type, sourceId: event.sourceId, id: event.id });
         }));

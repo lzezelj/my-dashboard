@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { CalendarEvent, SourceEvents } from "../types/events";
 import { getCalendarEvents, getSourceEvents } from "../services/home.api";
 import CardSwitch from "./eventCards/CardSwitch";
+import { isoToDisplayDate } from "../utils/dateUtils";
 
 export default function Calendar() {
     interface MonthDay {
@@ -30,6 +31,7 @@ export default function Calendar() {
     };
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const leapYear = (year: number) => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    const today = new Date();
     const numberOfDays = (year: number): MonthDay[] => [
         { days: 31, month: 0 },
         { days: leapYear(year) ? 29 : 28, month: 1 }, // February
@@ -43,14 +45,15 @@ export default function Calendar() {
         { days: 31, month: 9 },
         { days: 30, month: 10 },
         { days: 31, month: 11 }
-    ]
+    ];
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(today);
     const [sourceEvents, setSourceEvents] = useState<SourceEvents[]>([]);
     const monthDays = createMonthDays(currentYear, currentMonth);
     const eventsByDate = new Map<string, number>();
+
     const dayCalendarEvents = calendarEvents.filter((event) => {
         const eventDate = new Date(event.date);
         return (
@@ -62,6 +65,9 @@ export default function Calendar() {
     const daySourceEvents = sourceEvents.filter((event) => {
         return dayCalendarEvents.some(calendarEvent => calendarEvent.id === event.calendarEventId);
     });
+    console.log(dayCalendarEvents);
+    console.log(daySourceEvents);
+    console.log(sourceEvents);
     calendarEvents.forEach(event => {
         const eventDate = new Date(event.date);
         if (eventDate.getFullYear() === currentYear && eventDate.getMonth() === currentMonth) {
@@ -121,7 +127,7 @@ export default function Calendar() {
                             onClick={() => setSelectedDate(new Date(currentYear, currentMonth, monthDay.days))}
                         >
                             <span>{monthDay.days}</span>
-                            {eventCount && <span className="event-count">{eventCount}</span>}
+                            {eventCount !== undefined && <span className="event-count">{eventCount}</span>}
 
                         </button>
                     );
@@ -129,7 +135,7 @@ export default function Calendar() {
             </div>
             {selectedDate && (
                 <div className="selected-date-events">
-                    <h4>Events for {selectedDate.toDateString()}</h4>
+                    <h4>Events for {selectedDate.getDate()}/{selectedDate.getMonth() + 1}/{selectedDate.getFullYear()}</h4>
                     <ul>
                         {daySourceEvents.map((event) => (
                             <CardSwitch

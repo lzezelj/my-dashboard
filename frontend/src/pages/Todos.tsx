@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import type { Todo, UpdateTodo } from "../types/todos.ts";
 import { addToCalendar, createTodo, deleteTodo, getTodos, removeFromCalendar, updateTodo } from "../services/todos.api.ts";
-import {dateToISOString, isoToDateInputValue, isoToDisplayDate} from "../utils/dateUtils";
+import { dateToISOString, isoToDateInputValue, isoToDisplayDate } from "../utils/dateUtils";
 import Modal from "../components/Modal";
 import useCalendarStatus from "../hooks/useCalendarStatus";
+import type { EditOutletContext } from "./Edit";
 
 export default function Todos() {
+    const { showToast } = useOutletContext<EditOutletContext>();
     const [todos, setTodos] = useState<Todo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -25,12 +28,13 @@ export default function Todos() {
         }
 
         try {
-            const newTodo = await createTodo({ title, deadline:dateToISOString(deadline) });
+            const newTodo = await createTodo({ title, deadline: dateToISOString(deadline) });
             setTodos((currentTodos) => [...currentTodos, newTodo]);
             if (addToCalendarOnCreate) { await addToCalendar(newTodo.id); await refreshCalendarStatus(); }
             setTitle("");
             setDeadline("");
             setAddToCalendarOnCreate(false);
+            showToast("Todo created successfully.");
         } catch (error) {
             setError("Could not create todo.");
         }
@@ -48,6 +52,7 @@ export default function Todos() {
         }
     }
     async function handleDelete(id: number) {
+        await handleRemoveFromCalendar(id);
         try {
             await deleteTodo(id);
             setTodos((currentTodos) => currentTodos.filter((todo) => todo.id !== id));
@@ -107,21 +112,21 @@ export default function Todos() {
                         setEditTitle(todo.title);
                         setEditDeadline(isoToDateInputValue(todo.deadline));
                     }}>
-                         {editingTodoId === todo.id ? "Cancel" : "Edit"}
+                        {editingTodoId === todo.id ? "Cancel" : "Edit"}
                     </button>
                     {editingTodoId === todo.id && (
-                        <form onSubmit={(event) => {event.preventDefault(); handleUpdate(todo.id, { title:editTitle, deadline: dateToISOString(editDeadline) }); setEditingTodoId(null);}} >
-                            <input name="title"  value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                            <input name="deadline" type="date" min={new Date().toISOString().split("T")[0]} value={editDeadline} onChange={(e) => setEditDeadline(e.target.value)} />
+                        <form onSubmit={(event) => { event.preventDefault(); handleUpdate(todo.id, { title: editTitle, deadline: dateToISOString(editDeadline) }); setEditingTodoId(null); }} >
+                            <label className="form-field">Title<input name="title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} /></label>
+                            <label className="form-field">Deadline<input name="deadline" type="date" value={editDeadline} onChange={(e) => setEditDeadline(e.target.value)} /></label>
                             {calendarSourceIds.has(todo.id) ? <><span className="calendar-status">On calendar</span><button type="button" onClick={() => handleRemoveFromCalendar(todo.id)}>Remove from Calendar</button></> : <button type="button" onClick={() => handleAddToCalendar(todo.id)}>Add to Calendar</button>}
                             <button type="submit">Update Todo</button>
                         </form>
                     )}
-                        <p>{todo.title}</p>
+                    <p>{todo.title}</p>
                     <p>
                         {isoToDisplayDate(todo.deadline)}
                     </p>
-                                         
+
                     <p>
                         {todo.completed ? "Completed" : "Not completed"}
                     </p>
@@ -136,13 +141,13 @@ export default function Todos() {
                 </div>
             ))}
             <form onSubmit={handleSubmit}>
-                <input name="title" placeholder="Enter a to do" value={title} onChange={(e) => setTitle(e.target.value)} />
-                <input name="deadline" type="date" min={new Date().toISOString().split("T")[0]} value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+                <label className="form-field">Todo title<input name="title" placeholder="Enter a to do" value={title} onChange={(e) => setTitle(e.target.value)} /></label>
+                <label className="form-field">Deadline<input name="deadline" type="date" min={new Date().toISOString().split("T")[0]} value={deadline} onChange={(e) => setDeadline(e.target.value)} /></label>
                 <label className="calendar-checkbox"><input type="checkbox" checked={addToCalendarOnCreate} onChange={(e) => setAddToCalendarOnCreate(e.target.checked)} /> Add to calendar</label>
                 <button type="submit">Create Todo</button>
             </form>
             <Modal isOpen={pendingDeleteId !== null} title="Delete todo?" confirmLabel="Delete todo" destructive onCancel={() => setPendingDeleteId(null)} onConfirm={() => { if (pendingDeleteId !== null) { handleDelete(pendingDeleteId); setPendingDeleteId(null); } }}><p>This permanently removes the todo.</p></Modal>
         </div>
-       
+
     );
 }

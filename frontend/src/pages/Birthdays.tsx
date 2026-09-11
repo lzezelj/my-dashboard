@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import type { Birthdays, UpdateBirthdays } from "../types/birthdays";
 import { createBirthday, deleteBirthday, getBirthdays, updateBirthday, addToCalendar, removeFromCalendar } from "../services/birthdays.api.ts";
 import Modal from "../components/Modal";
 import useCalendarStatus from "../hooks/useCalendarStatus";
+import type { EditOutletContext } from "./Edit";
 
 export default function Birthdays() {
+    const { showToast } = useOutletContext<EditOutletContext>();
     const [birthdays, setBirthdays] = useState<Birthdays[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -18,7 +21,7 @@ export default function Birthdays() {
     const { calendarSourceIds, refreshCalendarStatus } = useCalendarStatus("BIRTHDAY");
     const convertedDate = (dateString: Date): string => {
         const date = new Date(dateString);
-        return date.toLocaleDateString();
+        return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     }
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -34,6 +37,7 @@ export default function Birthdays() {
             setName("");
             setDate(new Date().toISOString().split("T")[0]);
             setAddToCalendarOnCreate(false);
+            showToast("Birthday created successfully.");
         } catch (error) {
             setError("Could not create birthday.");
         }
@@ -51,6 +55,7 @@ export default function Birthdays() {
         }
     }
     async function handleDelete(id: number) {
+        await handleRemoveFromCalendar(id);
         try {
             await deleteBirthday(id);
             setBirthdays((currentBirthdays) => currentBirthdays.filter((birthday) => birthday.id !== id));
@@ -113,8 +118,8 @@ export default function Birthdays() {
                     </button>
                     {editingBirthdayId === birthday.id && (
                         <form onSubmit={(event) => { event.preventDefault(); handleUpdate(birthday.id, { name: editName, date: new Date(editDate) }); setEditingBirthdayId(null); }} >
-                            <input name="name" value={editName} onChange={(e) => setEditName(e.target.value)} />
-                            <input name="date" type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
+                            <label className="form-field">Name<input name="name" value={editName} onChange={(e) => setEditName(e.target.value)} /></label>
+                            <label className="form-field">Birthday date<input name="date" type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} /></label>
                             {calendarSourceIds.has(birthday.id) ? <><span className="calendar-status">On calendar</span><button type="button" onClick={() => handleRemoveFromCalendar(birthday.id)}>Remove from calendar</button></> : <button type="button" onClick={() => handleAddToCalendar(birthday.id)}>Add to calendar</button>}
                             <button type="submit">Update Birthday</button>
                         </form>
@@ -132,8 +137,8 @@ export default function Birthdays() {
                 </div>
             ))}
             <form onSubmit={handleSubmit}>
-                <input name="name" placeholder="Enter the name of the person" value={name} onChange={(e) => setName(e.target.value)} />
-                <input name="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                <label className="form-field">Name<input name="name" placeholder="Enter the name of the person" value={name} onChange={(e) => setName(e.target.value)} /></label>
+                <label className="form-field">Birthday date<input name="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></label>
                 <label className="calendar-checkbox"><input type="checkbox" checked={addToCalendarOnCreate} onChange={(e) => setAddToCalendarOnCreate(e.target.checked)} /> Add to calendar</label>
                 <button type="submit">Create Birthday</button>
             </form>

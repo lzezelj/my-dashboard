@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import type { Games, UpdateGames } from "../types/games";
 import { addToCalendar, createGame, deleteGame, getGames, removeFromCalendar, updateGame } from "../services/games.api.ts";
 import { dateToISOString, isoToDateInputValue, isoToDisplayDate } from "../utils/dateUtils";
 import Modal from "../components/Modal";
 import useCalendarStatus from "../hooks/useCalendarStatus";
+import type { EditOutletContext } from "./Edit";
 
 export default function Games() {
+    const { showToast } = useOutletContext<EditOutletContext>();
     const [games, setGames] = useState<Games[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -32,6 +35,7 @@ export default function Games() {
             setTitle("");
             setReleaseDate(new Date().toISOString().split("T")[0]);
             setAddToCalendarOnCreate(false);
+            showToast("Game created successfully.");
         } catch (error) {
             setError("Could not create game.");
         }
@@ -49,6 +53,7 @@ export default function Games() {
         }
     }
     async function handleDelete(id: number) {
+        await handleRemoveFromCalendar(id);
         try {
             await deleteGame(id);
             setGames((currentGames) => currentGames.filter((game) => game.id !== id));
@@ -112,9 +117,9 @@ export default function Games() {
                     </button>
                     {editingGameId === game.id && (
                         <form onSubmit={(event) => { event.preventDefault(); handleUpdate(game.id, { title: editTitle, releaseDate: dateToISOString(editReleaseDate) }); setEditingGameId(null); }} >
-                            <input name="title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+                            <label className="form-field">Title<input name="title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} /></label>
                             {calendarSourceIds.has(game.id) ? <><span className="calendar-status">On calendar</span><button type="button" onClick={() => handleRemoveFromCalendar(game.id)}>Remove from calendar</button></> : <button type="button" onClick={() => handleAddToCalendar(game.id)}>Add to calendar</button>}
-                            <input name="releaseDate" min={new Date().toISOString().split("T")[0]} type="date" value={editReleaseDate} onChange={(e) => setEditReleaseDate(e.target.value)} />
+                            <label className="form-field">Release date<input name="releaseDate" type="date" value={editReleaseDate} onChange={(e) => setEditReleaseDate(e.target.value)} /></label>
                             <button type="submit">Update Game</button>
                         </form>
                     )}
@@ -131,8 +136,8 @@ export default function Games() {
                 </div>
             ))}
             <form onSubmit={handleSubmit}>
-                <input name="title" placeholder="Enter a game" value={title} onChange={(e) => setTitle(e.target.value)} />
-                <input name="releaseDate" min={new Date().toISOString().split("T")[0]} type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} />
+                <label className="form-field">Game title<input name="title" placeholder="Enter a game" value={title} onChange={(e) => setTitle(e.target.value)} /></label>
+                <label className="form-field">Release date<input name="releaseDate" min={new Date().toISOString().split("T")[0]} type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} /></label>
                 <label className="calendar-checkbox"><input type="checkbox" checked={addToCalendarOnCreate} onChange={(e) => setAddToCalendarOnCreate(e.target.checked)} /> Add to calendar</label>
                 <button type="submit">Create Game</button>
             </form>

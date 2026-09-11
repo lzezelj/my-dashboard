@@ -1,8 +1,9 @@
 import { isoToDisplayDate } from "../../utils/dateUtils";
+import { getEventTimePeriod } from "../../utils/eventTimePeriod";
 
 export default function MovieCard({ event }: { event: any }) {
     return (
-        <div className="movie-card event-card">
+        <div className={`movie-card event-card event-${getEventTimePeriod(event.calendarDate)}`}>
             <h3>{event.title}</h3>
             <p>{isoToDisplayDate(event.releaseDate)}</p>
         </div>

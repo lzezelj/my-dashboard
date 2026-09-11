@@ -1,25 +1,32 @@
 export function dateToISOString(date: string): string {
-    return new Date(`${date}T00:00:00`).toISOString();
+    return new Date(`${date}T00:00:00Z`).toISOString();
 }
+
 export function isoToDateInputValue(iso: string): string {
     const date = new Date(iso);
 
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
 }
+
 export function dateTimeToISOString(
     date: string,
     time: string
 ): string {
     return new Date(`${date}T${time}`).toISOString();
 }
+
 export function isoToTimeInputValue(iso: string): string {
     const date = new Date(iso);
 
     return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 }
+
 export function isoToDisplayDate(iso: string): string {
-    return new Date(iso).toLocaleDateString();
+    const date = new Date(iso);
+
+    return `${date.getUTCDate()}/${date.getUTCMonth() + 1}/${date.getUTCFullYear()}`;
 }
+
 export function getCurrentTime() {
     const now = new Date();
 

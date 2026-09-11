@@ -1,4 +1,5 @@
 import { isoToDisplayDate } from "../../utils/dateUtils";
+import { getEventTimePeriod } from "../../utils/eventTimePeriod";
 
 export default function BirthdayCard({ event }: { event: any }) {
     const date = new Date(event.date);
@@ -9,7 +10,7 @@ export default function BirthdayCard({ event }: { event: any }) {
 
 
     return (
-        <div className="birthday-card event-card">
+        <div className={`birthday-card event-card event-${getEventTimePeriod(event.calendarDate)}`}>
             <h3>{event.name}</h3>
             <p>{isoToDisplayDate(date.toISOString())}</p>
         </div>
