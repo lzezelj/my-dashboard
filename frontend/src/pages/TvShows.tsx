@@ -122,6 +122,7 @@ export default function TvShows() {
             await refreshCalendarStatus();
         } catch (error) {
             setError("Could not remove TV show from calendar.");
+            throw error;
         }
     }
 
