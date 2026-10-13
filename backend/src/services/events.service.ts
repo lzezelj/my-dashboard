@@ -76,7 +76,8 @@ export function validateEventInput(input: EventInput, partial = false): EventInp
   return { ...input, title: input.title?.trim() };
 }
 const toData = (input: EventInput) => ({
-  ...input,
+  category: input.category,
+  title: input.title,
   date: input.date === undefined ? undefined : input.date === null ? null : parseDate(input.date),
   startTime:
     input.startTime === undefined
@@ -90,15 +91,20 @@ const toData = (input: EventInput) => ({
       : input.endTime === null
         ? null
         : parseTimestamp(input.endTime, 'endTime'),
+  description: input.description,
+  recurring: input.recurring,
+  numberOfRecurrences: input.numberOfRecurrences,
+  allowCompletion: input.allowCompletion,
+  completed: input.completed,
 });
 
 export async function getEventsService(
   filters: { category?: EventCategory; from?: string; to?: string },
-  userId?: number,
+  userId: number,
 ) {
   const events = await prisma.event.findMany({
     where: {
-      ...(userId === undefined ? {} : { userId }),
+      userId,
       ...(filters.category ? { category: filters.category } : {}),
     },
     orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
@@ -112,15 +118,15 @@ export async function getEventsService(
         occurrenceDate <= (filters.to ?? '9999-12-31'),
     );
 }
-export const getEventService = (id: number, userId?: number) =>
-  prisma.event.findFirst({ where: { id, ...(userId === undefined ? {} : { userId }) } });
-export async function createEventService(input: EventInput, userId?: number) {
+export const getEventService = (id: number, userId: number) =>
+  prisma.event.findFirst({ where: { id, userId } });
+export async function createEventService(input: EventInput, userId: number) {
   validateEventInput(input);
   const data = toData(input) as Prisma.EventCreateInput;
-  if (userId !== undefined) data.user = { connect: { id: userId } };
+  data.user = { connect: { id: userId } };
   return prisma.event.create({ data });
 }
-export async function updateEventService(id: number, input: EventInput, userId?: number) {
+export async function updateEventService(id: number, input: EventInput, userId: number) {
   const current = await getEventService(id, userId);
   if (!current) return null;
   const existing: EventInput = {
@@ -138,7 +144,7 @@ export async function updateEventService(id: number, input: EventInput, userId?:
   validateEventInput({ ...existing, ...input });
   return prisma.event.update({ where: { id }, data: toData(input) as Prisma.EventUpdateInput });
 }
-export async function deleteEventService(id: number, userId?: number) {
+export async function deleteEventService(id: number, userId: number) {
   const current = await getEventService(id, userId);
   if (!current) return null;
   await prisma.event.delete({ where: { id } });

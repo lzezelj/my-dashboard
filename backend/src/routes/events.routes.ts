@@ -6,7 +6,9 @@ import {
   getEvents,
   updateEvent,
 } from '../controllers/events.controller.js';
+import { authMiddleware } from '../middleware/authenticationMiddleware.js';
 const router = Router();
+router.use(authMiddleware);
 router.get('/', getEvents);
 router.get('/:id', getEvent);
 router.post('/', createEvent);

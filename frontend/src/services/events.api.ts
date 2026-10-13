@@ -1,8 +1,11 @@
 import type { DashboardEvent, EventCategory, EventInput } from '../types/events';
 const baseUrl = 'http://localhost:3000/api/events';
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
+  const response = await fetch(url, { ...init, credentials: 'include' });
   if (!response.ok) {
+    if (response.status === 401 && window.location.pathname !== '/unauthorized') {
+      window.location.assign('/unauthorized');
+    }
     const body = await response.json().catch(() => null);
     throw new Error(body?.message ?? 'Event request failed');
   }
