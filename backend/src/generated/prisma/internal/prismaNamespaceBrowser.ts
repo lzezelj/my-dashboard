@@ -51,13 +51,8 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  Todo: 'Todo',
-  Event: 'Event',
-  Movie: 'Movie',
-  TvShow: 'TvShow',
-  Game: 'Game',
-  Birthday: 'Birthday',
-  Appointment: 'Appointment'
+  User: 'User',
+  Event: 'Event'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -76,75 +71,36 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const TodoScalarFieldEnum = {
+export const UserScalarFieldEnum = {
   id: 'id',
-  title: 'title',
-  completed: 'completed',
-  deadline: 'deadline',
+  googleId: 'googleId',
+  email: 'email',
+  name: 'name',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type TodoScalarFieldEnum = (typeof TodoScalarFieldEnum)[keyof typeof TodoScalarFieldEnum]
+export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
 export const EventScalarFieldEnum = {
   id: 'id',
-  type: 'type',
-  sourceId: 'sourceId',
+  userId: 'userId',
+  category: 'category',
+  title: 'title',
+  date: 'date',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  description: 'description',
+  recurring: 'recurring',
+  numberOfRecurrences: 'numberOfRecurrences',
+  allowCompletion: 'allowCompletion',
+  completed: 'completed',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
-
-
-export const MovieScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  releaseDate: 'releaseDate'
-} as const
-
-export type MovieScalarFieldEnum = (typeof MovieScalarFieldEnum)[keyof typeof MovieScalarFieldEnum]
-
-
-export const TvShowScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  releaseDate: 'releaseDate'
-} as const
-
-export type TvShowScalarFieldEnum = (typeof TvShowScalarFieldEnum)[keyof typeof TvShowScalarFieldEnum]
-
-
-export const GameScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  releaseDate: 'releaseDate'
-} as const
-
-export type GameScalarFieldEnum = (typeof GameScalarFieldEnum)[keyof typeof GameScalarFieldEnum]
-
-
-export const BirthdayScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  date: 'date'
-} as const
-
-export type BirthdayScalarFieldEnum = (typeof BirthdayScalarFieldEnum)[keyof typeof BirthdayScalarFieldEnum]
-
-
-export const AppointmentScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  startTime: 'startTime',
-  endTime: 'endTime',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
 
 
 export const SortOrder = {

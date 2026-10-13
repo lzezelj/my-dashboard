@@ -9,7 +9,7 @@
 * 🟢 You can import this file directly.
 */
 
-export const EventType = {
+export const EventCategory = {
   APPOINTMENT: 'APPOINTMENT',
   MOVIE: 'MOVIE',
   TV_SHOW: 'TV_SHOW',
@@ -19,4 +19,14 @@ export const EventType = {
   TODO: 'TODO'
 } as const
 
-export type EventType = (typeof EventType)[keyof typeof EventType]
+export type EventCategory = (typeof EventCategory)[keyof typeof EventCategory]
+
+
+export const Recurrence = {
+  DAILY: 'DAILY',
+  WEEKLY: 'WEEKLY',
+  MONTHLY: 'MONTHLY',
+  YEARLY: 'YEARLY'
+} as const
+
+export type Recurrence = (typeof Recurrence)[keyof typeof Recurrence]

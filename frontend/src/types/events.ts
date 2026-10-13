@@ -1,19 +1,33 @@
-import type { Movies } from "./movies";
-import type { TvShows } from "./tv_shows";
-import type { Games } from "./games";
-import type { Birthdays } from "./birthdays";
-import type { Appointment } from "./appointments";
-import type { Todo } from "./todos";
-export type SourceEvents =
-    | (Movies & { calendarEventId: number; calendarDate: string; eventType: "MOVIE" })
-    | (TvShows & { calendarEventId: number; calendarDate: string; eventType: "TV_SHOW" })
-    | (Games & { calendarEventId: number; calendarDate: string; eventType: "GAME" })
-    | (Birthdays & { calendarEventId: number; calendarDate: string; eventType: "BIRTHDAY" })
-    | (Appointment & { calendarEventId: number; calendarDate: string; eventType: "APPOINTMENT" })
-    | (Todo & { calendarEventId: number; calendarDate: string; eventType: "TODO" })
-export interface CalendarEvent{
-    id: number;
-    title: string;
-    date:string;
-    sourceId:number;
+export const eventCategories = [
+  'APPOINTMENT',
+  'BIRTHDAY',
+  'MOVIE',
+  'TV_SHOW',
+  'GAME',
+  'TODO',
+  'OTHER',
+] as const;
+export const recurrences = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'] as const;
+export type EventCategory = (typeof eventCategories)[number];
+export type Recurrence = (typeof recurrences)[number];
+export interface DashboardEvent {
+  id: number;
+  userId: number | null;
+  category: EventCategory;
+  title: string;
+  date: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  description: string | null;
+  recurring: Recurrence | null;
+  numberOfRecurrences: number | null;
+  allowCompletion: boolean;
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
+  occurrenceDate?: string;
 }
+export type EventInput = Omit<
+  DashboardEvent,
+  'id' | 'userId' | 'createdAt' | 'updatedAt' | 'occurrenceDate'
+>;

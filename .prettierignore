@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.agents/
+.claude/
+.windsurf/
+backend/.agents/
+backend/.claude/
+backend/.windsurf/
+backend/src/generated/
+backend/generated/
+package-lock.json
+backend/package-lock.json
+frontend/package-lock.json

@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-enum EventType {
+enum EventCategory {
   APPOINTMENT
   MOVIE
   TV_SHOW
@@ -10,6 +6,13 @@ enum EventType {
   BIRTHDAY
   OTHER
   TODO
+}
+
+enum Recurrence {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
 }
 generator client {
   provider = "prisma-client"
@@ -19,48 +22,36 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-model Todo{
-  id Int @id @default(autoincrement())
-  title String
-  completed Boolean @default(false)
-  deadline DateTime?
+model User {
+  id        Int     @id @default(autoincrement())
+  googleId  String? @unique
+  email     String? @unique
+  name      String?
+  events    Event[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-model Event{
-  id Int @id @default(autoincrement())
-  type EventType
-  sourceId Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  @@unique([type, sourceId])
-}
-model Movie{
-  id Int @id @default(autoincrement())
-  title String
-  releaseDate DateTime
-}
-model TvShow{
-  id Int @id @default(autoincrement())
-  title String
-  releaseDate DateTime
-}
-model Game{
-  id Int @id @default(autoincrement())
-  title String
-  releaseDate DateTime
-}
-model Birthday{
-  id Int @id @default(autoincrement())
-  name String
-  date DateTime
-}
-model Appointment{
-  id Int @id @default(autoincrement())
-  title String
-  startTime DateTime
-  endTime DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Event {
+  id                  Int           @id @default(autoincrement())
+  // Nullable only during the authentication migration. It becomes required after legacy ownership is backfilled.
+  userId              Int?
+  user                User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  category            EventCategory
+  title               String
+  // PostgreSQL DATE preserves a calendar date; it is not an instant in time.
+  date                DateTime?     @db.Date
+  startTime           DateTime?
+  endTime             DateTime?
+  description         String?
+  recurring           Recurrence?
+  numberOfRecurrences Int?
+  allowCompletion     Boolean       @default(false)
+  completed           Boolean       @default(false)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([userId, category])
+  @@index([date])
+  @@index([startTime])
 }

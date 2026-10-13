@@ -8,11 +8,6 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/Todo.js'
+export type * from './models/User.js'
 export type * from './models/Event.js'
-export type * from './models/Movie.js'
-export type * from './models/TvShow.js'
-export type * from './models/Game.js'
-export type * from './models/Birthday.js'
-export type * from './models/Appointment.js'
 export type * from './commonInputTypes.js'

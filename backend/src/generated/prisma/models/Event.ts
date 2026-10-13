@@ -28,34 +28,63 @@ export type AggregateEvent = {
 
 export type EventAvgAggregateOutputType = {
   id: number | null
-  sourceId: number | null
+  userId: number | null
+  numberOfRecurrences: number | null
 }
 
 export type EventSumAggregateOutputType = {
   id: number | null
-  sourceId: number | null
+  userId: number | null
+  numberOfRecurrences: number | null
 }
 
 export type EventMinAggregateOutputType = {
   id: number | null
-  type: $Enums.EventType | null
-  sourceId: number | null
+  userId: number | null
+  category: $Enums.EventCategory | null
+  title: string | null
+  date: Date | null
+  startTime: Date | null
+  endTime: Date | null
+  description: string | null
+  recurring: $Enums.Recurrence | null
+  numberOfRecurrences: number | null
+  allowCompletion: boolean | null
+  completed: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type EventMaxAggregateOutputType = {
   id: number | null
-  type: $Enums.EventType | null
-  sourceId: number | null
+  userId: number | null
+  category: $Enums.EventCategory | null
+  title: string | null
+  date: Date | null
+  startTime: Date | null
+  endTime: Date | null
+  description: string | null
+  recurring: $Enums.Recurrence | null
+  numberOfRecurrences: number | null
+  allowCompletion: boolean | null
+  completed: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type EventCountAggregateOutputType = {
   id: number
-  type: number
-  sourceId: number
+  userId: number
+  category: number
+  title: number
+  date: number
+  startTime: number
+  endTime: number
+  description: number
+  recurring: number
+  numberOfRecurrences: number
+  allowCompletion: number
+  completed: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -64,34 +93,63 @@ export type EventCountAggregateOutputType = {
 
 export type EventAvgAggregateInputType = {
   id?: true
-  sourceId?: true
+  userId?: true
+  numberOfRecurrences?: true
 }
 
 export type EventSumAggregateInputType = {
   id?: true
-  sourceId?: true
+  userId?: true
+  numberOfRecurrences?: true
 }
 
 export type EventMinAggregateInputType = {
   id?: true
-  type?: true
-  sourceId?: true
+  userId?: true
+  category?: true
+  title?: true
+  date?: true
+  startTime?: true
+  endTime?: true
+  description?: true
+  recurring?: true
+  numberOfRecurrences?: true
+  allowCompletion?: true
+  completed?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type EventMaxAggregateInputType = {
   id?: true
-  type?: true
-  sourceId?: true
+  userId?: true
+  category?: true
+  title?: true
+  date?: true
+  startTime?: true
+  endTime?: true
+  description?: true
+  recurring?: true
+  numberOfRecurrences?: true
+  allowCompletion?: true
+  completed?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type EventCountAggregateInputType = {
   id?: true
-  type?: true
-  sourceId?: true
+  userId?: true
+  category?: true
+  title?: true
+  date?: true
+  startTime?: true
+  endTime?: true
+  description?: true
+  recurring?: true
+  numberOfRecurrences?: true
+  allowCompletion?: true
+  completed?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -185,8 +243,17 @@ export type EventGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 
 export type EventGroupByOutputType = {
   id: number
-  type: $Enums.EventType
-  sourceId: number
+  userId: number | null
+  category: $Enums.EventCategory
+  title: string
+  date: Date | null
+  startTime: Date | null
+  endTime: Date | null
+  description: string | null
+  recurring: $Enums.Recurrence | null
+  numberOfRecurrences: number | null
+  allowCompletion: boolean
+  completed: boolean
   createdAt: Date
   updatedAt: Date
   _count: EventCountAggregateOutputType | null
@@ -216,36 +283,74 @@ export type EventWhereInput = {
   OR?: Prisma.EventWhereInput[]
   NOT?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
   id?: Prisma.IntFilter<"Event"> | number
-  type?: Prisma.EnumEventTypeFilter<"Event"> | $Enums.EventType
-  sourceId?: Prisma.IntFilter<"Event"> | number
+  userId?: Prisma.IntNullableFilter<"Event"> | number | null
+  category?: Prisma.EnumEventCategoryFilter<"Event"> | $Enums.EventCategory
+  title?: Prisma.StringFilter<"Event"> | string
+  date?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  startTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  endTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  description?: Prisma.StringNullableFilter<"Event"> | string | null
+  recurring?: Prisma.EnumRecurrenceNullableFilter<"Event"> | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.IntNullableFilter<"Event"> | number | null
+  allowCompletion?: Prisma.BoolFilter<"Event"> | boolean
+  completed?: Prisma.BoolFilter<"Event"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type EventOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  type?: Prisma.SortOrder
-  sourceId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  category?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  date?: Prisma.SortOrderInput | Prisma.SortOrder
+  startTime?: Prisma.SortOrderInput | Prisma.SortOrder
+  endTime?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
+  recurring?: Prisma.SortOrderInput | Prisma.SortOrder
+  numberOfRecurrences?: Prisma.SortOrderInput | Prisma.SortOrder
+  allowCompletion?: Prisma.SortOrder
+  completed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type EventWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  type_sourceId?: Prisma.EventTypeSourceIdCompoundUniqueInput
   AND?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
   OR?: Prisma.EventWhereInput[]
   NOT?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
-  type?: Prisma.EnumEventTypeFilter<"Event"> | $Enums.EventType
-  sourceId?: Prisma.IntFilter<"Event"> | number
+  userId?: Prisma.IntNullableFilter<"Event"> | number | null
+  category?: Prisma.EnumEventCategoryFilter<"Event"> | $Enums.EventCategory
+  title?: Prisma.StringFilter<"Event"> | string
+  date?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  startTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  endTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  description?: Prisma.StringNullableFilter<"Event"> | string | null
+  recurring?: Prisma.EnumRecurrenceNullableFilter<"Event"> | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.IntNullableFilter<"Event"> | number | null
+  allowCompletion?: Prisma.BoolFilter<"Event"> | boolean
+  completed?: Prisma.BoolFilter<"Event"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
-}, "id" | "type_sourceId">
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+}, "id">
 
 export type EventOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  type?: Prisma.SortOrder
-  sourceId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  category?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  date?: Prisma.SortOrderInput | Prisma.SortOrder
+  startTime?: Prisma.SortOrderInput | Prisma.SortOrder
+  endTime?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
+  recurring?: Prisma.SortOrderInput | Prisma.SortOrder
+  numberOfRecurrences?: Prisma.SortOrderInput | Prisma.SortOrder
+  allowCompletion?: Prisma.SortOrder
+  completed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.EventCountOrderByAggregateInput
@@ -260,151 +365,521 @@ export type EventScalarWhereWithAggregatesInput = {
   OR?: Prisma.EventScalarWhereWithAggregatesInput[]
   NOT?: Prisma.EventScalarWhereWithAggregatesInput | Prisma.EventScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Event"> | number
-  type?: Prisma.EnumEventTypeWithAggregatesFilter<"Event"> | $Enums.EventType
-  sourceId?: Prisma.IntWithAggregatesFilter<"Event"> | number
+  userId?: Prisma.IntNullableWithAggregatesFilter<"Event"> | number | null
+  category?: Prisma.EnumEventCategoryWithAggregatesFilter<"Event"> | $Enums.EventCategory
+  title?: Prisma.StringWithAggregatesFilter<"Event"> | string
+  date?: Prisma.DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
+  startTime?: Prisma.DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
+  endTime?: Prisma.DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
+  description?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  recurring?: Prisma.EnumRecurrenceNullableWithAggregatesFilter<"Event"> | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.IntNullableWithAggregatesFilter<"Event"> | number | null
+  allowCompletion?: Prisma.BoolWithAggregatesFilter<"Event"> | boolean
+  completed?: Prisma.BoolWithAggregatesFilter<"Event"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
 }
 
 export type EventCreateInput = {
-  type: $Enums.EventType
-  sourceId: number
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  allowCompletion?: boolean
+  completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  user?: Prisma.UserCreateNestedOneWithoutEventsInput
 }
 
 export type EventUncheckedCreateInput = {
   id?: number
-  type: $Enums.EventType
-  sourceId: number
+  userId?: number | null
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  allowCompletion?: boolean
+  completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type EventUpdateInput = {
-  type?: Prisma.EnumEventTypeFieldUpdateOperationsInput | $Enums.EventType
-  sourceId?: Prisma.IntFieldUpdateOperationsInput | number
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneWithoutEventsNestedInput
 }
 
 export type EventUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  type?: Prisma.EnumEventTypeFieldUpdateOperationsInput | $Enums.EventType
-  sourceId?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type EventCreateManyInput = {
   id?: number
-  type: $Enums.EventType
-  sourceId: number
+  userId?: number | null
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  allowCompletion?: boolean
+  completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type EventUpdateManyMutationInput = {
-  type?: Prisma.EnumEventTypeFieldUpdateOperationsInput | $Enums.EventType
-  sourceId?: Prisma.IntFieldUpdateOperationsInput | number
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type EventUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  type?: Prisma.EnumEventTypeFieldUpdateOperationsInput | $Enums.EventType
-  sourceId?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type EventTypeSourceIdCompoundUniqueInput = {
-  type: $Enums.EventType
-  sourceId: number
+export type EventListRelationFilter = {
+  every?: Prisma.EventWhereInput
+  some?: Prisma.EventWhereInput
+  none?: Prisma.EventWhereInput
+}
+
+export type EventOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type EventCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  type?: Prisma.SortOrder
-  sourceId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  date?: Prisma.SortOrder
+  startTime?: Prisma.SortOrder
+  endTime?: Prisma.SortOrder
+  description?: Prisma.SortOrder
+  recurring?: Prisma.SortOrder
+  numberOfRecurrences?: Prisma.SortOrder
+  allowCompletion?: Prisma.SortOrder
+  completed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type EventAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  sourceId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  numberOfRecurrences?: Prisma.SortOrder
 }
 
 export type EventMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  type?: Prisma.SortOrder
-  sourceId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  date?: Prisma.SortOrder
+  startTime?: Prisma.SortOrder
+  endTime?: Prisma.SortOrder
+  description?: Prisma.SortOrder
+  recurring?: Prisma.SortOrder
+  numberOfRecurrences?: Prisma.SortOrder
+  allowCompletion?: Prisma.SortOrder
+  completed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type EventMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  type?: Prisma.SortOrder
-  sourceId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  date?: Prisma.SortOrder
+  startTime?: Prisma.SortOrder
+  endTime?: Prisma.SortOrder
+  description?: Prisma.SortOrder
+  recurring?: Prisma.SortOrder
+  numberOfRecurrences?: Prisma.SortOrder
+  allowCompletion?: Prisma.SortOrder
+  completed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type EventSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  sourceId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  numberOfRecurrences?: Prisma.SortOrder
 }
 
-export type EnumEventTypeFieldUpdateOperationsInput = {
-  set?: $Enums.EventType
+export type EventCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutUserInput, Prisma.EventUncheckedCreateWithoutUserInput> | Prisma.EventCreateWithoutUserInput[] | Prisma.EventUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutUserInput | Prisma.EventCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.EventCreateManyUserInputEnvelope
+  connect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+}
+
+export type EventUncheckedCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutUserInput, Prisma.EventUncheckedCreateWithoutUserInput> | Prisma.EventCreateWithoutUserInput[] | Prisma.EventUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutUserInput | Prisma.EventCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.EventCreateManyUserInputEnvelope
+  connect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+}
+
+export type EventUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutUserInput, Prisma.EventUncheckedCreateWithoutUserInput> | Prisma.EventCreateWithoutUserInput[] | Prisma.EventUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutUserInput | Prisma.EventCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.EventUpsertWithWhereUniqueWithoutUserInput | Prisma.EventUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.EventCreateManyUserInputEnvelope
+  set?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  disconnect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  delete?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  connect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  update?: Prisma.EventUpdateWithWhereUniqueWithoutUserInput | Prisma.EventUpdateWithWhereUniqueWithoutUserInput[]
+  updateMany?: Prisma.EventUpdateManyWithWhereWithoutUserInput | Prisma.EventUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
+}
+
+export type EventUncheckedUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutUserInput, Prisma.EventUncheckedCreateWithoutUserInput> | Prisma.EventCreateWithoutUserInput[] | Prisma.EventUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutUserInput | Prisma.EventCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.EventUpsertWithWhereUniqueWithoutUserInput | Prisma.EventUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.EventCreateManyUserInputEnvelope
+  set?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  disconnect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  delete?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  connect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  update?: Prisma.EventUpdateWithWhereUniqueWithoutUserInput | Prisma.EventUpdateWithWhereUniqueWithoutUserInput[]
+  updateMany?: Prisma.EventUpdateManyWithWhereWithoutUserInput | Prisma.EventUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
+}
+
+export type EnumEventCategoryFieldUpdateOperationsInput = {
+  set?: $Enums.EventCategory
+}
+
+export type StringFieldUpdateOperationsInput = {
+  set?: string
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
+export type NullableEnumRecurrenceFieldUpdateOperationsInput = {
+  set?: $Enums.Recurrence | null
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type EventCreateWithoutUserInput = {
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  allowCompletion?: boolean
+  completed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type EventUncheckedCreateWithoutUserInput = {
+  id?: number
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  allowCompletion?: boolean
+  completed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type EventCreateOrConnectWithoutUserInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutUserInput, Prisma.EventUncheckedCreateWithoutUserInput>
+}
+
+export type EventCreateManyUserInputEnvelope = {
+  data: Prisma.EventCreateManyUserInput | Prisma.EventCreateManyUserInput[]
+  skipDuplicates?: boolean
+}
+
+export type EventUpsertWithWhereUniqueWithoutUserInput = {
+  where: Prisma.EventWhereUniqueInput
+  update: Prisma.XOR<Prisma.EventUpdateWithoutUserInput, Prisma.EventUncheckedUpdateWithoutUserInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutUserInput, Prisma.EventUncheckedCreateWithoutUserInput>
+}
+
+export type EventUpdateWithWhereUniqueWithoutUserInput = {
+  where: Prisma.EventWhereUniqueInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutUserInput, Prisma.EventUncheckedUpdateWithoutUserInput>
+}
+
+export type EventUpdateManyWithWhereWithoutUserInput = {
+  where: Prisma.EventScalarWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateManyMutationInput, Prisma.EventUncheckedUpdateManyWithoutUserInput>
+}
+
+export type EventScalarWhereInput = {
+  AND?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
+  OR?: Prisma.EventScalarWhereInput[]
+  NOT?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
+  id?: Prisma.IntFilter<"Event"> | number
+  userId?: Prisma.IntNullableFilter<"Event"> | number | null
+  category?: Prisma.EnumEventCategoryFilter<"Event"> | $Enums.EventCategory
+  title?: Prisma.StringFilter<"Event"> | string
+  date?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  startTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  endTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  description?: Prisma.StringNullableFilter<"Event"> | string | null
+  recurring?: Prisma.EnumRecurrenceNullableFilter<"Event"> | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.IntNullableFilter<"Event"> | number | null
+  allowCompletion?: Prisma.BoolFilter<"Event"> | boolean
+  completed?: Prisma.BoolFilter<"Event"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
+}
+
+export type EventCreateManyUserInput = {
+  id?: number
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  allowCompletion?: boolean
+  completed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type EventUpdateWithoutUserInput = {
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type EventUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type EventUncheckedUpdateManyWithoutUserInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
 
 export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  type?: boolean
-  sourceId?: boolean
+  userId?: boolean
+  category?: boolean
+  title?: boolean
+  date?: boolean
+  startTime?: boolean
+  endTime?: boolean
+  description?: boolean
+  recurring?: boolean
+  numberOfRecurrences?: boolean
+  allowCompletion?: boolean
+  completed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  user?: boolean | Prisma.Event$userArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  type?: boolean
-  sourceId?: boolean
+  userId?: boolean
+  category?: boolean
+  title?: boolean
+  date?: boolean
+  startTime?: boolean
+  endTime?: boolean
+  description?: boolean
+  recurring?: boolean
+  numberOfRecurrences?: boolean
+  allowCompletion?: boolean
+  completed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  user?: boolean | Prisma.Event$userArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  type?: boolean
-  sourceId?: boolean
+  userId?: boolean
+  category?: boolean
+  title?: boolean
+  date?: boolean
+  startTime?: boolean
+  endTime?: boolean
+  description?: boolean
+  recurring?: boolean
+  numberOfRecurrences?: boolean
+  allowCompletion?: boolean
+  completed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  user?: boolean | Prisma.Event$userArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectScalar = {
   id?: boolean
-  type?: boolean
-  sourceId?: boolean
+  userId?: boolean
+  category?: boolean
+  title?: boolean
+  date?: boolean
+  startTime?: boolean
+  endTime?: boolean
+  description?: boolean
+  recurring?: boolean
+  numberOfRecurrences?: boolean
+  allowCompletion?: boolean
+  completed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "sourceId" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
+export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "category" | "title" | "date" | "startTime" | "endTime" | "description" | "recurring" | "numberOfRecurrences" | "allowCompletion" | "completed" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
+export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.Event$userArgs<ExtArgs>
+}
+export type EventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.Event$userArgs<ExtArgs>
+}
+export type EventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.Event$userArgs<ExtArgs>
+}
 
 export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Event"
-  objects: {}
+  objects: {
+    user: Prisma.$UserPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    type: $Enums.EventType
-    sourceId: number
+    userId: number | null
+    category: $Enums.EventCategory
+    title: string
+    date: Date | null
+    startTime: Date | null
+    endTime: Date | null
+    description: string | null
+    recurring: $Enums.Recurrence | null
+    numberOfRecurrences: number | null
+    allowCompletion: boolean
+    completed: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["event"]>
@@ -801,6 +1276,7 @@ readonly fields: EventFieldRefs;
  */
 export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  user<T extends Prisma.Event$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -831,8 +1307,17 @@ export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Ty
  */
 export interface EventFieldRefs {
   readonly id: Prisma.FieldRef<"Event", 'Int'>
-  readonly type: Prisma.FieldRef<"Event", 'EventType'>
-  readonly sourceId: Prisma.FieldRef<"Event", 'Int'>
+  readonly userId: Prisma.FieldRef<"Event", 'Int'>
+  readonly category: Prisma.FieldRef<"Event", 'EventCategory'>
+  readonly title: Prisma.FieldRef<"Event", 'String'>
+  readonly date: Prisma.FieldRef<"Event", 'DateTime'>
+  readonly startTime: Prisma.FieldRef<"Event", 'DateTime'>
+  readonly endTime: Prisma.FieldRef<"Event", 'DateTime'>
+  readonly description: Prisma.FieldRef<"Event", 'String'>
+  readonly recurring: Prisma.FieldRef<"Event", 'Recurrence'>
+  readonly numberOfRecurrences: Prisma.FieldRef<"Event", 'Int'>
+  readonly allowCompletion: Prisma.FieldRef<"Event", 'Boolean'>
+  readonly completed: Prisma.FieldRef<"Event", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Event", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Event", 'DateTime'>
 }
@@ -852,6 +1337,10 @@ export type EventFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   omit?: Prisma.EventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventInclude<ExtArgs> | null
+  /**
    * Filter, which Event to fetch.
    */
   where: Prisma.EventWhereUniqueInput
@@ -870,6 +1359,10 @@ export type EventFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.EventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventInclude<ExtArgs> | null
+  /**
    * Filter, which Event to fetch.
    */
   where: Prisma.EventWhereUniqueInput
@@ -887,6 +1380,10 @@ export type EventFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the Event
    */
   omit?: Prisma.EventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventInclude<ExtArgs> | null
   /**
    * Filter, which Event to fetch.
    */
@@ -936,6 +1433,10 @@ export type EventFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.EventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventInclude<ExtArgs> | null
+  /**
    * Filter, which Event to fetch.
    */
   where?: Prisma.EventWhereInput
@@ -983,6 +1484,10 @@ export type EventFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Omit specific fields from the Event
    */
   omit?: Prisma.EventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventInclude<ExtArgs> | null
   /**
    * Filter, which Events to fetch.
    */
@@ -1032,6 +1537,10 @@ export type EventCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   omit?: Prisma.EventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventInclude<ExtArgs> | null
+  /**
    * The data needed to create a Event.
    */
   data: Prisma.XOR<Prisma.EventCreateInput, Prisma.EventUncheckedCreateInput>
@@ -1065,6 +1574,10 @@ export type EventCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    */
   data: Prisma.EventCreateManyInput | Prisma.EventCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1079,6 +1592,10 @@ export type EventUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the Event
    */
   omit?: Prisma.EventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventInclude<ExtArgs> | null
   /**
    * The data needed to update a Event.
    */
@@ -1131,6 +1648,10 @@ export type EventUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many Events to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1145,6 +1666,10 @@ export type EventUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the Event
    */
   omit?: Prisma.EventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventInclude<ExtArgs> | null
   /**
    * The filter to search for the Event to update in case it exists.
    */
@@ -1172,6 +1697,10 @@ export type EventDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   omit?: Prisma.EventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventInclude<ExtArgs> | null
+  /**
    * Filter which Event to delete.
    */
   where: Prisma.EventWhereUniqueInput
@@ -1192,6 +1721,25 @@ export type EventDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
+ * Event.user
+ */
+export type Event$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
  * Event without action
  */
 export type EventDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1203,4 +1751,8 @@ export type EventDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    * Omit specific fields from the Event
    */
   omit?: Prisma.EventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventInclude<ExtArgs> | null
 }
