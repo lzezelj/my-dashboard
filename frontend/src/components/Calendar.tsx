@@ -136,10 +136,47 @@ export default function Calendar() {
   }, [events]);
   const days = new Date(Number(month.slice(0, 4)), Number(month.slice(5)), 0).getDate();
   const selectedDayEvents = byDate.get(selected) ?? [];
+  const changeMonth = (offset: number) => {
+    const currentMonth = new Date(Number(month.slice(0, 4)), Number(month.slice(5)) - 1, 1);
+    currentMonth.setMonth(currentMonth.getMonth() + offset);
+    setMonth(
+      `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`,
+    );
+  };
   return (
     <>
       <div className="calendar">
-        <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
+        <div className="calendar-month-controls">
+          <button
+            type="button"
+            className="calendar-month-button"
+            aria-label="Previous month"
+            onClick={() => changeMonth(-1)}
+          >
+            <span className="calendar-month-chevron calendar-month-chevron--previous" aria-hidden="true" />
+          </button>
+          <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
+          <button
+            type="button"
+            className="calendar-month-button"
+            aria-label="Next month"
+            onClick={() => changeMonth(1)}
+          >
+            <span className="calendar-month-chevron calendar-month-chevron--next" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className="calendar-current-month-button"
+            onClick={() => {
+              setMonth(today.slice(0, 7));
+              setSelected(today);
+              setSelectedDayEvent(null);
+              setShowCreateForm(false);
+            }}
+          >
+            Current Month
+          </button>
+        </div>
         <div className="calendar-grid">
           {Array.from({ length: days }, (_, index) => {
             const date = `${month}-${String(index + 1).padStart(2, '0')}`,

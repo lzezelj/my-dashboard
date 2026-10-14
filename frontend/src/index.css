@@ -314,6 +314,61 @@ code {
   gap: 8px;
 }
 
+.account-menu {
+  position: relative;
+}
+
+.account-menu__trigger {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-h);
+  background: var(--social-bg);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.account-menu__trigger:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.account-menu__items {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  min-width: 150px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.account-menu__items a,
+.account-menu__items button {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-h);
+  background: transparent;
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.account-menu__items a:hover,
+.account-menu__items button:hover {
+  background: var(--accent-bg);
+}
+
 .navbar a,
 .navbar button {
   padding: 8px 14px;
@@ -335,6 +390,22 @@ code {
   border-color: var(--accent-border);
   background: var(--accent-bg);
   transform: translateY(-1px);
+}
+
+.navbar .navbar__delete-account {
+  border-color: rgba(190, 50, 70, 0.45);
+  color: #b4233c;
+}
+
+.account-export-button {
+  margin-top: 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--accent-border);
+  border-radius: 7px;
+  color: var(--text-h);
+  background: var(--accent-bg);
+  font: inherit;
+  cursor: pointer;
 }
 
 .calendar-grid {
@@ -700,10 +771,19 @@ code {
 }
 
 /* Native month selector */
+.calendar-month-controls {
+  display: flex;
+  width: 100%;
+  max-width: 520px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .calendar input[type='month'] {
   width: 100%;
   max-width: 260px;
-  margin-bottom: 20px;
+  margin: 0;
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -712,6 +792,69 @@ code {
   font: inherit;
   box-sizing: border-box;
   cursor: pointer;
+}
+
+.calendar-month-button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  color: var(--text-h);
+  background: var(--accent-bg);
+  font: inherit;
+  cursor: pointer;
+}
+
+.calendar-month-chevron {
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+}
+
+.calendar-month-chevron--previous {
+  transform: translateX(2px) rotate(-135deg);
+}
+
+.calendar-month-chevron--next {
+  transform: translateX(-2px) rotate(45deg);
+}
+
+.calendar-month-button:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-bg) 70%, var(--bg));
+}
+
+.calendar-month-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.calendar-current-month-button {
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  color: var(--text-h);
+  background: var(--accent-bg);
+  font: inherit;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.calendar-current-month-button:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-bg) 70%, var(--bg));
+}
+
+.calendar-current-month-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .calendar input[type='month']:hover {
@@ -1669,6 +1812,18 @@ code {
 @media (max-width: 640px) {
   .calendar {
     padding: 16px;
+  }
+
+  .calendar-month-controls {
+    flex-wrap: wrap;
+  }
+
+  .calendar input[type='month'] {
+    flex: 1 1 calc(100% - 104px);
+  }
+
+  .calendar-current-month-button {
+    width: 100%;
   }
 
   .calendar-grid {

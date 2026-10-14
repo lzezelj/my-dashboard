@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Edit from './pages/Edit.tsx';
 import Home from './pages/Home.tsx';
 import EventManager from './components/EventManager.tsx';
-import { getCurrentUser, logout, type AuthUser } from './services/authentication.api';
+import { deleteAccount, getCurrentUser, logout, type AuthUser } from './services/authentication.api';
 import Unauthorized from './pages/Unauthorized.tsx';
 import Import from './pages/Import.tsx';
 
 function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [statusNotice, setStatusNotice] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     getCurrentUser().then(setUser).catch(console.error);
@@ -20,8 +22,22 @@ function App() {
     try {
       await logout();
       setUser(null);
+      setStatusNotice('You have been logged out successfully.');
+      navigate('/home', { replace: true });
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await deleteAccount();
+      setUser(null);
+      setStatusNotice('Your account was deleted successfully.');
+      navigate('/home', { replace: true });
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   };
 
@@ -29,9 +45,26 @@ function App() {
 
   return (
     <>
-      {showNavbar && <Navbar user={user} onLogin={setUser} onLogout={handleLogout} />}
+      {showNavbar && (
+        <Navbar
+          user={user}
+          onLogin={setUser}
+          onLogout={handleLogout}
+          onDeleteAccount={handleDeleteAccount}
+        />
+      )}
       <Routes>
-        <Route path="/home" element={<Home user={user} onLogin={setUser} />} />
+        <Route
+          path="/home"
+          element={
+            <Home
+              user={user}
+              onLogin={setUser}
+              deletionNotice={statusNotice}
+              onDismissDeletionNotice={() => setStatusNotice(null)}
+            />
+          }
+        />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/edit" element={<Edit />}>
           <Route index element={<EventManager />} />

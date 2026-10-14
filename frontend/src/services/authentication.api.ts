@@ -31,3 +31,14 @@ export async function logout(): Promise<void> {
     throw new Error('Could not log out');
   }
 }
+
+export async function deleteAccount(): Promise<void> {
+  const response = await fetch(`${authUrl}/account`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('Could not delete account');
+  }
+}

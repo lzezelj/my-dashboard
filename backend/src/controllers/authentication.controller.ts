@@ -98,3 +98,28 @@ export const logout = (_req: Request, res: Response) => {
   });
   return res.status(200).json({ message: 'Logged out successfully' });
 };
+
+export const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
+  if (req.userId === undefined) return res.status(401).json({ message: 'Authentication required' });
+  const userId = req.userId;
+
+  try {
+    // Delete owned events first so their occurrence overrides are removed by the
+    // database cascade. Keeping this in one transaction prevents partial deletion.
+    await prisma.$transaction(async (transaction) => {
+      await transaction.event.deleteMany({ where: { userId } });
+      await transaction.user.delete({ where: { id: userId } });
+    });
+
+    res.clearCookie('auth_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+    return res.status(204).send();
+  } catch (error) {
+    console.error('Could not delete account:', error);
+    return res.status(500).json({ message: 'Could not delete account' });
+  }
+};

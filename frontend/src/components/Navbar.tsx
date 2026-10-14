@@ -1,20 +1,70 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import GoogleLoginButton from './GoogleLoginButton';
 import type { AuthUser } from '../services/authentication.api';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Modal from './Modal';
+import { exportEvents } from '../services/events.api';
 
 type NavbarProps = {
   user: AuthUser | null;
   onLogin: (user: AuthUser) => void;
   onLogout: () => Promise<void>;
+  onDeleteAccount: () => Promise<void>;
 };
 
-export default function Navbar({ user, onLogin, onLogout }: NavbarProps) {
-  const location = useLocation();
+export default function Navbar({ user, onLogin, onLogout, onDeleteAccount }: NavbarProps) {
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
+  const [showDeleteAccountConfirmation, setShowDeleteAccountConfirmation] = useState(false);
+  const [accountError, setAccountError] = useState<string | null>(null);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
 
-  const isEditPage = location.pathname.startsWith('/edit');
+  useEffect(() => {
+    const closeWhenOutside = (event: MouseEvent) => {
+      if (!accountMenuRef.current?.contains(event.target as Node)) {
+        setIsAccountMenuOpen(false);
+      }
+    };
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsAccountMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', closeWhenOutside);
+    document.addEventListener('keydown', closeWithEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeWhenOutside);
+      document.removeEventListener('keydown', closeWithEscape);
+    };
+  }, []);
+
+  const downloadCalendar = async () => {
+    try {
+      const calendar = await exportEvents();
+      const blob = new Blob([JSON.stringify(calendar, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'personal-dashboard-calendar.json';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setAccountError('Your calendar could not be downloaded. Please try again before deleting your account.');
+    }
+  };
+
+  const confirmAccountDeletion = async () => {
+    setAccountError(null);
+    setIsDeletingAccount(true);
+    try {
+      await onDeleteAccount();
+      setShowDeleteAccountConfirmation(false);
+    } catch {
+      setAccountError('Your account could not be deleted. Please try again.');
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
 
   return (
     <nav className="navbar">
@@ -30,15 +80,67 @@ export default function Navbar({ user, onLogin, onLogout }: NavbarProps) {
       >
         <p>You will need to sign in with Google again to access your events.</p>
       </Modal>
+      <Modal
+        isOpen={showDeleteAccountConfirmation}
+        title="Delete your account?"
+        confirmLabel={isDeletingAccount ? 'Deleting…' : 'Delete account'}
+        onCancel={() => {
+          if (!isDeletingAccount) {
+            setShowDeleteAccountConfirmation(false);
+            setAccountError(null);
+          }
+        }}
+        onConfirm={() => void confirmAccountDeletion()}
+        destructive
+      >
+        <p>This permanently deletes your account and all calendar events. This cannot be undone.</p>
+        <button type="button" className="account-export-button" onClick={() => void downloadCalendar()}>
+          Download calendar JSON first
+        </button>
+        {accountError && <p className="form-error">{accountError}</p>}
+      </Modal>
       <div className="navbar__links">
         <Link to="/home">Home</Link>
-        {!isEditPage && <Link to="/edit">Edit</Link>}
       </div>
       <div className="navbar__auth">
         {user ? (
-          <button type="button" onClick={() => setShowLogoutConfirmation(true)}>
-            Log out{user.name ? ` (${user.name})` : ''}
-          </button>
+          <div className="account-menu" ref={accountMenuRef}>
+            <button
+              type="button"
+              className="account-menu__trigger"
+              aria-expanded={isAccountMenuOpen}
+              aria-haspopup="menu"
+              onClick={() => setIsAccountMenuOpen((isOpen) => !isOpen)}
+            >
+              My Account
+            </button>
+            {isAccountMenuOpen && (
+              <div className="account-menu__items" role="menu">
+                <Link to="/edit" role="menuitem" onClick={() => setIsAccountMenuOpen(false)}>
+                  Edit
+                </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAccountMenuOpen(false);
+                  setShowLogoutConfirmation(true);
+                }}
+              >
+                Log out
+              </button>
+              <button
+                type="button"
+                className="navbar__delete-account"
+                onClick={() => {
+                  setIsAccountMenuOpen(false);
+                  setShowDeleteAccountConfirmation(true);
+                }}
+              >
+                Delete account
+              </button>
+              </div>
+            )}
+          </div>
         ) : (
           <GoogleLoginButton onLogin={onLogin} />
         )}
