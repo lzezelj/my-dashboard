@@ -20,8 +20,21 @@ const knownFields = new Set([
   'startTime',
   'endTime',
   'description',
+  'details',
+  'externalUid',
+  'timeZone',
+  'allDay',
+  'location',
+  'url',
+  'recurrenceRule',
+  'status',
+  'sequence',
+  'originalIcs',
+  'recurrenceDates',
+  'exclusionDates',
   'recurring',
   'numberOfRecurrences',
+  'recurrenceEndDate',
   'allowCompletion',
   'completed',
   'occurrenceOverrides',
@@ -33,8 +46,21 @@ const repairableFields = [
   ['startTime', 'Start time'],
   ['endTime', 'End time'],
   ['description', 'Description'],
+  ['details', 'Category details'],
+  ['externalUid', 'External calendar UID'],
+  ['timeZone', 'Time zone'],
+  ['allDay', 'All-day status'],
+  ['location', 'Location'],
+  ['url', 'URL'],
+  ['recurrenceRule', 'Recurrence rule'],
+  ['status', 'Status'],
+  ['sequence', 'Sequence'],
+  ['originalIcs', 'Original ICS'],
+  ['recurrenceDates', 'Additional recurrence dates'],
+  ['exclusionDates', 'Excluded recurrence dates'],
   ['recurring', 'Recurrence'],
   ['numberOfRecurrences', 'Number of recurrences'],
+  ['recurrenceEndDate', 'Recurrence end date'],
   ['allowCompletion', 'Allow completion'],
   ['completed', 'Completed'],
   ['occurrenceOverrides', 'Occurrence overrides'],
@@ -116,8 +142,8 @@ export default function ImportPreview() {
       )
         throw new Error('The file must contain an events array.');
       const source = parsed as { version?: unknown; events: unknown[] };
-      if (source.version !== 1)
-        throw new Error('This import format is unsupported. Expected version 1.');
+      if (source.version !== 2)
+        throw new Error('This import format is unsupported. Expected version 2.');
       setCandidates(
         source.events.map((item, index) => {
           const data = item && typeof item === 'object' ? { ...(item as ImportedEvent) } : {};

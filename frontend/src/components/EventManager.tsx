@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { DashboardEvent, EventCategory } from '../types/events';
-import { eventCategories, eventCategoryLabels } from '../types/events';
+import { eventCategories, eventCategoryLabels, eventDetailLabels } from '../types/events';
 import {
   deleteEvent,
+  deleteAllEvents,
+  deleteEvents,
   exportEvents,
+  exportIcs,
   getEventOccurrences,
   getEvents,
   updateEvent,
@@ -29,6 +32,8 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
   const [occurrenceDescription, setOccurrenceDescription] = useState('');
   const [occurrenceDate, setOccurrenceDate] = useState('');
   const [showOccurrenceSaveConfirmation, setShowOccurrenceSaveConfirmation] = useState(false);
+  const [selectedEventIds, setSelectedEventIds] = useState<Set<number>>(new Set());
+  const [bulkDeleteMode, setBulkDeleteMode] = useState<'selected' | 'all' | null>(null);
   const navigate = useNavigate();
   const load = useCallback(async () => {
     try {
@@ -92,8 +97,52 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
       setError(err instanceof Error ? err.message : 'Could not export events.');
     }
   };
+  const downloadIcsExport = async () => {
+    try {
+      const ics = await exportIcs();
+      const file = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(file);
+      link.download = `dashboard-events-${new Date().toISOString().slice(0, 10)}.ics`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not export ICS calendar.');
+    }
+  };
+  const confirmBulkDelete = async () => {
+    try {
+      if (bulkDeleteMode === 'all') await deleteAllEvents();
+      else if (bulkDeleteMode === 'selected') await deleteEvents([...selectedEventIds]);
+      setSelectedEventIds(new Set());
+      setBulkDeleteMode(null);
+      closeForm();
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not delete events.');
+      setBulkDeleteMode(null);
+    }
+  };
   return (
     <div className="event-manager">
+      <Modal
+        isOpen={bulkDeleteMode !== null}
+        title={bulkDeleteMode === 'all' ? 'Delete all events?' : 'Delete selected events?'}
+        confirmLabel={
+          bulkDeleteMode === 'all'
+            ? 'Delete all events'
+            : `Delete ${selectedEventIds.size} selected`
+        }
+        destructive
+        onCancel={() => setBulkDeleteMode(null)}
+        onConfirm={() => void confirmBulkDelete()}
+      >
+        <p>
+          {bulkDeleteMode === 'all'
+            ? 'This permanently deletes every event in your account, across all categories.'
+            : `This permanently deletes ${selectedEventIds.size} selected event${selectedEventIds.size === 1 ? '' : 's'}.`}
+        </p>
+      </Modal>
       <Modal
         isOpen={showOccurrenceSaveConfirmation}
         title="Save occurrence changes?"
@@ -112,7 +161,14 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
         onConfirm={() => {
           if (!eventToDelete) return;
           void deleteEvent(eventToDelete.id)
-            .then(load)
+            .then(() => {
+              setSelectedEventIds((current) => {
+                const next = new Set(current);
+                next.delete(eventToDelete.id);
+                return next;
+              });
+              return load();
+            })
             .finally(() => setEventToDelete(null));
         }}
       >
@@ -154,8 +210,26 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
           <button type="button" onClick={() => void downloadExport()}>
             Export JSON
           </button>
+          <button type="button" onClick={() => void downloadIcsExport()}>
+            Export ICS
+          </button>
           <button type="button" onClick={() => navigate('/edit/import')}>
-            Import JSON
+            Import calendar
+          </button>
+          <button
+            type="button"
+            className="danger-button"
+            disabled={selectedEventIds.size === 0}
+            onClick={() => setBulkDeleteMode('selected')}
+          >
+            Delete selected ({selectedEventIds.size})
+          </button>
+          <button
+            type="button"
+            className="danger-button"
+            onClick={() => setBulkDeleteMode('all')}
+          >
+            Delete all events
           </button>
         </div>
       </header>
@@ -179,12 +253,38 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
           events.map((event) => (
             <div className="event-manager__entry" key={event.id}>
               <article className="event-manager__card">
+                <label className="event-manager__select">
+                  <input
+                    type="checkbox"
+                    checked={selectedEventIds.has(event.id)}
+                    onChange={(changeEvent) =>
+                      setSelectedEventIds((current) => {
+                        const next = new Set(current);
+                        if (changeEvent.target.checked) next.add(event.id);
+                        else next.delete(event.id);
+                        return next;
+                      })
+                    }
+                  />
+                  Select event
+                </label>
                 <h3>{event.title}</h3>
                 <p>
                   {eventCategoryLabels[event.category]} ·{' '}
                   {dateOnlyToDisplay(event.date ?? event.startTime?.slice(0, 10) ?? '')}
                 </p>
                 {event.description && <p>{event.description}</p>}
+                {event.location && <p>Location: {event.location}</p>}
+                {event.url && (
+                  <p>
+                    Link: <a href={event.url}>{event.url}</a>
+                  </p>
+                )}
+                {Object.entries(event.details ?? {}).map(([key, value]) => (
+                  <p key={key}>
+                    {eventDetailLabels[key] ?? key}: {value}
+                  </p>
+                ))}
                 {event.allowCompletion && (
                   <button
                     type="button"

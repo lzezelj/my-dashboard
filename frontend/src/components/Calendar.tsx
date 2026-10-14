@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DashboardEvent, EventCategory } from '../types/events';
-import { eventCategories, eventCategoryLabels } from '../types/events';
+import { eventCategories, eventCategoryLabels, eventDetailLabels } from '../types/events';
 import { getEvents, updateEvent, updateOccurrence } from '../services/events.api';
 import { dateOnlyToDisplay, localDateInputValue } from '../utils/dateUtils';
 import EventForm from './EventForm';
@@ -50,6 +50,17 @@ function EventDetails({
         <p>This changes only this occurrence, not the full recurring event.</p>
       </Modal>
       <p>{event.description?.trim() || 'No description has been added for this event.'}</p>
+      {event.location && <p>Location: {event.location}</p>}
+      {event.url && (
+        <p>
+          Link: <a href={event.url}>{event.url}</a>
+        </p>
+      )}
+      {Object.entries(event.details ?? {}).map(([key, value]) => (
+        <p key={key}>
+          {eventDetailLabels[key] ?? key}: {value}
+        </p>
+      ))}
       {event.recurring && (
         <>
           <button
@@ -135,6 +146,14 @@ export default function Calendar() {
     return items;
   }, [events]);
   const days = new Date(Number(month.slice(0, 4)), Number(month.slice(5)), 0).getDate();
+  const firstDayOffset =
+    (new Date(Number(month.slice(0, 4)), Number(month.slice(5)) - 1, 1).getDay() + 6) % 7;
+  const previousMonthLastDate = new Date(
+    Number(month.slice(0, 4)),
+    Number(month.slice(5)) - 1,
+    0,
+  );
+  const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const selectedDayEvents = byDate.get(selected) ?? [];
   const changeMonth = (offset: number) => {
     const currentMonth = new Date(Number(month.slice(0, 4)), Number(month.slice(5)) - 1, 1);
@@ -178,6 +197,34 @@ export default function Calendar() {
           </button>
         </div>
         <div className="calendar-grid">
+          {weekDays.map((day) => (
+            <span className="calendar-weekday" key={day}>
+              <span className="calendar-weekday__full">{day}</span>
+              <span className="calendar-weekday__short" aria-hidden="true">
+                {day.slice(0, 2)}
+              </span>
+            </span>
+          ))}
+          {Array.from({ length: firstDayOffset }, (_, index) => {
+            const day = previousMonthLastDate.getDate() - firstDayOffset + index + 1;
+            const date = `${previousMonthLastDate.getFullYear()}-${String(previousMonthLastDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            return (
+              <button
+                type="button"
+                className="calendar-day calendar-day--outside"
+                aria-label={`Open ${dateOnlyToDisplay(date)}`}
+                key={date}
+                onClick={() => {
+                  setMonth(date.slice(0, 7));
+                  setSelected(date);
+                  setSelectedDayEvent(null);
+                  setShowCreateForm(false);
+                }}
+              >
+                <span>{day}</span>
+              </button>
+            );
+          })}
           {Array.from({ length: days }, (_, index) => {
             const date = `${month}-${String(index + 1).padStart(2, '0')}`,
               items = byDate.get(date) ?? [];

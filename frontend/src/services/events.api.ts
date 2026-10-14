@@ -53,7 +53,7 @@ export const updateOccurrence = (
 export const getEventOccurrences = (id: number) =>
   request<DashboardEvent[]>(`${baseUrl}/${id}/occurrences`);
 export type EventExport = {
-  version: 1;
+  version: 2;
   exportedAt: string;
   events: Array<
     Omit<EventInput, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'occurrenceDate'> & {
@@ -66,6 +66,28 @@ export type EventExport = {
   >;
 };
 export const exportEvents = () => request<EventExport>(`${baseUrl}/export`);
+export async function exportIcs(): Promise<string> {
+  const response = await fetch(`${baseUrl}/export/ics`, { credentials: 'include' });
+  if (!response.ok) throw new Error('Could not export ICS calendar');
+  return response.text();
+}
+export type IcsPreviewEvent = Partial<EventInput> & {
+  sourceIndex: number;
+  title: string;
+  warnings: string[];
+};
+export const previewIcsImport = (ics: string) =>
+  request<{ events: IcsPreviewEvent[] }>(`${baseUrl}/import/ics/preview`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ics }),
+  });
+export const importIcs = (ics: string, selectedIndexes: number[]) =>
+  request<ImportEventsResult>(`${baseUrl}/import/ics`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ics, selectedIndexes }),
+  });
 export const checkImportDuplicates = (events: Array<Partial<EventInput>>) =>
   request<{ duplicates: number[] }>(`${baseUrl}/import/duplicates`, {
     method: 'POST',
@@ -89,3 +111,11 @@ export const importEvents = (
     body: JSON.stringify({ events }),
   });
 export const deleteEvent = (id: number) => request<void>(`${baseUrl}/${id}`, { method: 'DELETE' });
+export const deleteEvents = (ids: number[]) =>
+  request<{ count: number }>(`${baseUrl}/bulk`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids }),
+  });
+export const deleteAllEvents = () =>
+  request<{ count: number }>(`${baseUrl}/all`, { method: 'DELETE' });

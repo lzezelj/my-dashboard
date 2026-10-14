@@ -29,12 +29,14 @@ export type AggregateEvent = {
 export type EventAvgAggregateOutputType = {
   id: number | null
   userId: number | null
+  sequence: number | null
   numberOfRecurrences: number | null
 }
 
 export type EventSumAggregateOutputType = {
   id: number | null
   userId: number | null
+  sequence: number | null
   numberOfRecurrences: number | null
 }
 
@@ -47,8 +49,18 @@ export type EventMinAggregateOutputType = {
   startTime: Date | null
   endTime: Date | null
   description: string | null
+  externalUid: string | null
+  timeZone: string | null
+  allDay: boolean | null
+  location: string | null
+  url: string | null
+  recurrenceRule: string | null
+  status: string | null
+  sequence: number | null
+  originalIcs: string | null
   recurring: $Enums.Recurrence | null
   numberOfRecurrences: number | null
+  recurrenceEndDate: Date | null
   allowCompletion: boolean | null
   completed: boolean | null
   createdAt: Date | null
@@ -64,8 +76,18 @@ export type EventMaxAggregateOutputType = {
   startTime: Date | null
   endTime: Date | null
   description: string | null
+  externalUid: string | null
+  timeZone: string | null
+  allDay: boolean | null
+  location: string | null
+  url: string | null
+  recurrenceRule: string | null
+  status: string | null
+  sequence: number | null
+  originalIcs: string | null
   recurring: $Enums.Recurrence | null
   numberOfRecurrences: number | null
+  recurrenceEndDate: Date | null
   allowCompletion: boolean | null
   completed: boolean | null
   createdAt: Date | null
@@ -81,8 +103,19 @@ export type EventCountAggregateOutputType = {
   startTime: number
   endTime: number
   description: number
+  details: number
+  externalUid: number
+  timeZone: number
+  allDay: number
+  location: number
+  url: number
+  recurrenceRule: number
+  status: number
+  sequence: number
+  originalIcs: number
   recurring: number
   numberOfRecurrences: number
+  recurrenceEndDate: number
   allowCompletion: number
   completed: number
   createdAt: number
@@ -94,12 +127,14 @@ export type EventCountAggregateOutputType = {
 export type EventAvgAggregateInputType = {
   id?: true
   userId?: true
+  sequence?: true
   numberOfRecurrences?: true
 }
 
 export type EventSumAggregateInputType = {
   id?: true
   userId?: true
+  sequence?: true
   numberOfRecurrences?: true
 }
 
@@ -112,8 +147,18 @@ export type EventMinAggregateInputType = {
   startTime?: true
   endTime?: true
   description?: true
+  externalUid?: true
+  timeZone?: true
+  allDay?: true
+  location?: true
+  url?: true
+  recurrenceRule?: true
+  status?: true
+  sequence?: true
+  originalIcs?: true
   recurring?: true
   numberOfRecurrences?: true
+  recurrenceEndDate?: true
   allowCompletion?: true
   completed?: true
   createdAt?: true
@@ -129,8 +174,18 @@ export type EventMaxAggregateInputType = {
   startTime?: true
   endTime?: true
   description?: true
+  externalUid?: true
+  timeZone?: true
+  allDay?: true
+  location?: true
+  url?: true
+  recurrenceRule?: true
+  status?: true
+  sequence?: true
+  originalIcs?: true
   recurring?: true
   numberOfRecurrences?: true
+  recurrenceEndDate?: true
   allowCompletion?: true
   completed?: true
   createdAt?: true
@@ -146,8 +201,19 @@ export type EventCountAggregateInputType = {
   startTime?: true
   endTime?: true
   description?: true
+  details?: true
+  externalUid?: true
+  timeZone?: true
+  allDay?: true
+  location?: true
+  url?: true
+  recurrenceRule?: true
+  status?: true
+  sequence?: true
+  originalIcs?: true
   recurring?: true
   numberOfRecurrences?: true
+  recurrenceEndDate?: true
   allowCompletion?: true
   completed?: true
   createdAt?: true
@@ -250,8 +316,19 @@ export type EventGroupByOutputType = {
   startTime: Date | null
   endTime: Date | null
   description: string | null
+  details: runtime.JsonValue | null
+  externalUid: string | null
+  timeZone: string | null
+  allDay: boolean
+  location: string | null
+  url: string | null
+  recurrenceRule: string | null
+  status: string | null
+  sequence: number | null
+  originalIcs: string | null
   recurring: $Enums.Recurrence | null
   numberOfRecurrences: number | null
+  recurrenceEndDate: Date | null
   allowCompletion: boolean
   completed: boolean
   createdAt: Date
@@ -290,14 +367,27 @@ export type EventWhereInput = {
   startTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   endTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   description?: Prisma.StringNullableFilter<"Event"> | string | null
+  details?: Prisma.JsonNullableFilter<"Event">
+  externalUid?: Prisma.StringNullableFilter<"Event"> | string | null
+  timeZone?: Prisma.StringNullableFilter<"Event"> | string | null
+  allDay?: Prisma.BoolFilter<"Event"> | boolean
+  location?: Prisma.StringNullableFilter<"Event"> | string | null
+  url?: Prisma.StringNullableFilter<"Event"> | string | null
+  recurrenceRule?: Prisma.StringNullableFilter<"Event"> | string | null
+  status?: Prisma.StringNullableFilter<"Event"> | string | null
+  sequence?: Prisma.IntNullableFilter<"Event"> | number | null
+  originalIcs?: Prisma.StringNullableFilter<"Event"> | string | null
   recurring?: Prisma.EnumRecurrenceNullableFilter<"Event"> | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.IntNullableFilter<"Event"> | number | null
+  recurrenceEndDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   allowCompletion?: Prisma.BoolFilter<"Event"> | boolean
   completed?: Prisma.BoolFilter<"Event"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   occurrenceOverrides?: Prisma.EventOccurrenceOverrideListRelationFilter
+  recurrenceDates?: Prisma.EventRecurrenceDateListRelationFilter
+  exclusionDates?: Prisma.EventExclusionDateListRelationFilter
 }
 
 export type EventOrderByWithRelationInput = {
@@ -309,14 +399,27 @@ export type EventOrderByWithRelationInput = {
   startTime?: Prisma.SortOrderInput | Prisma.SortOrder
   endTime?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  details?: Prisma.SortOrderInput | Prisma.SortOrder
+  externalUid?: Prisma.SortOrderInput | Prisma.SortOrder
+  timeZone?: Prisma.SortOrderInput | Prisma.SortOrder
+  allDay?: Prisma.SortOrder
+  location?: Prisma.SortOrderInput | Prisma.SortOrder
+  url?: Prisma.SortOrderInput | Prisma.SortOrder
+  recurrenceRule?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrderInput | Prisma.SortOrder
+  sequence?: Prisma.SortOrderInput | Prisma.SortOrder
+  originalIcs?: Prisma.SortOrderInput | Prisma.SortOrder
   recurring?: Prisma.SortOrderInput | Prisma.SortOrder
   numberOfRecurrences?: Prisma.SortOrderInput | Prisma.SortOrder
+  recurrenceEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   allowCompletion?: Prisma.SortOrder
   completed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   occurrenceOverrides?: Prisma.EventOccurrenceOverrideOrderByRelationAggregateInput
+  recurrenceDates?: Prisma.EventRecurrenceDateOrderByRelationAggregateInput
+  exclusionDates?: Prisma.EventExclusionDateOrderByRelationAggregateInput
 }
 
 export type EventWhereUniqueInput = Prisma.AtLeast<{
@@ -331,14 +434,27 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   startTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   endTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   description?: Prisma.StringNullableFilter<"Event"> | string | null
+  details?: Prisma.JsonNullableFilter<"Event">
+  externalUid?: Prisma.StringNullableFilter<"Event"> | string | null
+  timeZone?: Prisma.StringNullableFilter<"Event"> | string | null
+  allDay?: Prisma.BoolFilter<"Event"> | boolean
+  location?: Prisma.StringNullableFilter<"Event"> | string | null
+  url?: Prisma.StringNullableFilter<"Event"> | string | null
+  recurrenceRule?: Prisma.StringNullableFilter<"Event"> | string | null
+  status?: Prisma.StringNullableFilter<"Event"> | string | null
+  sequence?: Prisma.IntNullableFilter<"Event"> | number | null
+  originalIcs?: Prisma.StringNullableFilter<"Event"> | string | null
   recurring?: Prisma.EnumRecurrenceNullableFilter<"Event"> | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.IntNullableFilter<"Event"> | number | null
+  recurrenceEndDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   allowCompletion?: Prisma.BoolFilter<"Event"> | boolean
   completed?: Prisma.BoolFilter<"Event"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   occurrenceOverrides?: Prisma.EventOccurrenceOverrideListRelationFilter
+  recurrenceDates?: Prisma.EventRecurrenceDateListRelationFilter
+  exclusionDates?: Prisma.EventExclusionDateListRelationFilter
 }, "id">
 
 export type EventOrderByWithAggregationInput = {
@@ -350,8 +466,19 @@ export type EventOrderByWithAggregationInput = {
   startTime?: Prisma.SortOrderInput | Prisma.SortOrder
   endTime?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  details?: Prisma.SortOrderInput | Prisma.SortOrder
+  externalUid?: Prisma.SortOrderInput | Prisma.SortOrder
+  timeZone?: Prisma.SortOrderInput | Prisma.SortOrder
+  allDay?: Prisma.SortOrder
+  location?: Prisma.SortOrderInput | Prisma.SortOrder
+  url?: Prisma.SortOrderInput | Prisma.SortOrder
+  recurrenceRule?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrderInput | Prisma.SortOrder
+  sequence?: Prisma.SortOrderInput | Prisma.SortOrder
+  originalIcs?: Prisma.SortOrderInput | Prisma.SortOrder
   recurring?: Prisma.SortOrderInput | Prisma.SortOrder
   numberOfRecurrences?: Prisma.SortOrderInput | Prisma.SortOrder
+  recurrenceEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   allowCompletion?: Prisma.SortOrder
   completed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -375,8 +502,19 @@ export type EventScalarWhereWithAggregatesInput = {
   startTime?: Prisma.DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
   endTime?: Prisma.DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  details?: Prisma.JsonNullableWithAggregatesFilter<"Event">
+  externalUid?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  timeZone?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  allDay?: Prisma.BoolWithAggregatesFilter<"Event"> | boolean
+  location?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  url?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  recurrenceRule?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  status?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  sequence?: Prisma.IntNullableWithAggregatesFilter<"Event"> | number | null
+  originalIcs?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
   recurring?: Prisma.EnumRecurrenceNullableWithAggregatesFilter<"Event"> | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.IntNullableWithAggregatesFilter<"Event"> | number | null
+  recurrenceEndDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
   allowCompletion?: Prisma.BoolWithAggregatesFilter<"Event"> | boolean
   completed?: Prisma.BoolWithAggregatesFilter<"Event"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
@@ -390,14 +528,27 @@ export type EventCreateInput = {
   startTime?: Date | string | null
   endTime?: Date | string | null
   description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
   recurring?: $Enums.Recurrence | null
   numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutEventsInput
   occurrenceOverrides?: Prisma.EventOccurrenceOverrideCreateNestedManyWithoutEventInput
+  recurrenceDates?: Prisma.EventRecurrenceDateCreateNestedManyWithoutEventInput
+  exclusionDates?: Prisma.EventExclusionDateCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateInput = {
@@ -409,13 +560,26 @@ export type EventUncheckedCreateInput = {
   startTime?: Date | string | null
   endTime?: Date | string | null
   description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
   recurring?: $Enums.Recurrence | null
   numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedCreateNestedManyWithoutEventInput
+  recurrenceDates?: Prisma.EventRecurrenceDateUncheckedCreateNestedManyWithoutEventInput
+  exclusionDates?: Prisma.EventExclusionDateUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventUpdateInput = {
@@ -425,14 +589,27 @@ export type EventUpdateInput = {
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutEventsNestedInput
   occurrenceOverrides?: Prisma.EventOccurrenceOverrideUpdateManyWithoutEventNestedInput
+  recurrenceDates?: Prisma.EventRecurrenceDateUpdateManyWithoutEventNestedInput
+  exclusionDates?: Prisma.EventExclusionDateUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateInput = {
@@ -444,13 +621,26 @@ export type EventUncheckedUpdateInput = {
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedUpdateManyWithoutEventNestedInput
+  recurrenceDates?: Prisma.EventRecurrenceDateUncheckedUpdateManyWithoutEventNestedInput
+  exclusionDates?: Prisma.EventExclusionDateUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateManyInput = {
@@ -462,8 +652,19 @@ export type EventCreateManyInput = {
   startTime?: Date | string | null
   endTime?: Date | string | null
   description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
   recurring?: $Enums.Recurrence | null
   numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: Date | string
@@ -477,8 +678,19 @@ export type EventUpdateManyMutationInput = {
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -494,8 +706,19 @@ export type EventUncheckedUpdateManyInput = {
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -521,8 +744,19 @@ export type EventCountOrderByAggregateInput = {
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  details?: Prisma.SortOrder
+  externalUid?: Prisma.SortOrder
+  timeZone?: Prisma.SortOrder
+  allDay?: Prisma.SortOrder
+  location?: Prisma.SortOrder
+  url?: Prisma.SortOrder
+  recurrenceRule?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
+  originalIcs?: Prisma.SortOrder
   recurring?: Prisma.SortOrder
   numberOfRecurrences?: Prisma.SortOrder
+  recurrenceEndDate?: Prisma.SortOrder
   allowCompletion?: Prisma.SortOrder
   completed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -532,6 +766,7 @@ export type EventCountOrderByAggregateInput = {
 export type EventAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
   numberOfRecurrences?: Prisma.SortOrder
 }
 
@@ -544,8 +779,18 @@ export type EventMaxOrderByAggregateInput = {
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  externalUid?: Prisma.SortOrder
+  timeZone?: Prisma.SortOrder
+  allDay?: Prisma.SortOrder
+  location?: Prisma.SortOrder
+  url?: Prisma.SortOrder
+  recurrenceRule?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
+  originalIcs?: Prisma.SortOrder
   recurring?: Prisma.SortOrder
   numberOfRecurrences?: Prisma.SortOrder
+  recurrenceEndDate?: Prisma.SortOrder
   allowCompletion?: Prisma.SortOrder
   completed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -561,8 +806,18 @@ export type EventMinOrderByAggregateInput = {
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  externalUid?: Prisma.SortOrder
+  timeZone?: Prisma.SortOrder
+  allDay?: Prisma.SortOrder
+  location?: Prisma.SortOrder
+  url?: Prisma.SortOrder
+  recurrenceRule?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
+  originalIcs?: Prisma.SortOrder
   recurring?: Prisma.SortOrder
   numberOfRecurrences?: Prisma.SortOrder
+  recurrenceEndDate?: Prisma.SortOrder
   allowCompletion?: Prisma.SortOrder
   completed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -572,6 +827,7 @@ export type EventMinOrderByAggregateInput = {
 export type EventSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
   numberOfRecurrences?: Prisma.SortOrder
 }
 
@@ -634,8 +890,8 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
 }
 
-export type NullableEnumRecurrenceFieldUpdateOperationsInput = {
-  set?: $Enums.Recurrence | null
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type NullableIntFieldUpdateOperationsInput = {
@@ -646,8 +902,36 @@ export type NullableIntFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
+export type NullableEnumRecurrenceFieldUpdateOperationsInput = {
+  set?: $Enums.Recurrence | null
+}
+
+export type EventCreateNestedOneWithoutRecurrenceDatesInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutRecurrenceDatesInput, Prisma.EventUncheckedCreateWithoutRecurrenceDatesInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutRecurrenceDatesInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneRequiredWithoutRecurrenceDatesNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutRecurrenceDatesInput, Prisma.EventUncheckedCreateWithoutRecurrenceDatesInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutRecurrenceDatesInput
+  upsert?: Prisma.EventUpsertWithoutRecurrenceDatesInput
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutRecurrenceDatesInput, Prisma.EventUpdateWithoutRecurrenceDatesInput>, Prisma.EventUncheckedUpdateWithoutRecurrenceDatesInput>
+}
+
+export type EventCreateNestedOneWithoutExclusionDatesInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutExclusionDatesInput, Prisma.EventUncheckedCreateWithoutExclusionDatesInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutExclusionDatesInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneRequiredWithoutExclusionDatesNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutExclusionDatesInput, Prisma.EventUncheckedCreateWithoutExclusionDatesInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutExclusionDatesInput
+  upsert?: Prisma.EventUpsertWithoutExclusionDatesInput
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutExclusionDatesInput, Prisma.EventUpdateWithoutExclusionDatesInput>, Prisma.EventUncheckedUpdateWithoutExclusionDatesInput>
 }
 
 export type EventCreateNestedOneWithoutOccurrenceOverridesInput = {
@@ -671,13 +955,26 @@ export type EventCreateWithoutUserInput = {
   startTime?: Date | string | null
   endTime?: Date | string | null
   description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
   recurring?: $Enums.Recurrence | null
   numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   occurrenceOverrides?: Prisma.EventOccurrenceOverrideCreateNestedManyWithoutEventInput
+  recurrenceDates?: Prisma.EventRecurrenceDateCreateNestedManyWithoutEventInput
+  exclusionDates?: Prisma.EventExclusionDateCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutUserInput = {
@@ -688,13 +985,26 @@ export type EventUncheckedCreateWithoutUserInput = {
   startTime?: Date | string | null
   endTime?: Date | string | null
   description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
   recurring?: $Enums.Recurrence | null
   numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedCreateNestedManyWithoutEventInput
+  recurrenceDates?: Prisma.EventRecurrenceDateUncheckedCreateNestedManyWithoutEventInput
+  exclusionDates?: Prisma.EventExclusionDateUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutUserInput = {
@@ -735,12 +1045,291 @@ export type EventScalarWhereInput = {
   startTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   endTime?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   description?: Prisma.StringNullableFilter<"Event"> | string | null
+  details?: Prisma.JsonNullableFilter<"Event">
+  externalUid?: Prisma.StringNullableFilter<"Event"> | string | null
+  timeZone?: Prisma.StringNullableFilter<"Event"> | string | null
+  allDay?: Prisma.BoolFilter<"Event"> | boolean
+  location?: Prisma.StringNullableFilter<"Event"> | string | null
+  url?: Prisma.StringNullableFilter<"Event"> | string | null
+  recurrenceRule?: Prisma.StringNullableFilter<"Event"> | string | null
+  status?: Prisma.StringNullableFilter<"Event"> | string | null
+  sequence?: Prisma.IntNullableFilter<"Event"> | number | null
+  originalIcs?: Prisma.StringNullableFilter<"Event"> | string | null
   recurring?: Prisma.EnumRecurrenceNullableFilter<"Event"> | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.IntNullableFilter<"Event"> | number | null
+  recurrenceEndDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   allowCompletion?: Prisma.BoolFilter<"Event"> | boolean
   completed?: Prisma.BoolFilter<"Event"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
+}
+
+export type EventCreateWithoutRecurrenceDatesInput = {
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
+  allowCompletion?: boolean
+  completed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user?: Prisma.UserCreateNestedOneWithoutEventsInput
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideCreateNestedManyWithoutEventInput
+  exclusionDates?: Prisma.EventExclusionDateCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutRecurrenceDatesInput = {
+  id?: number
+  userId?: number | null
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
+  allowCompletion?: boolean
+  completed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedCreateNestedManyWithoutEventInput
+  exclusionDates?: Prisma.EventExclusionDateUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutRecurrenceDatesInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutRecurrenceDatesInput, Prisma.EventUncheckedCreateWithoutRecurrenceDatesInput>
+}
+
+export type EventUpsertWithoutRecurrenceDatesInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutRecurrenceDatesInput, Prisma.EventUncheckedUpdateWithoutRecurrenceDatesInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutRecurrenceDatesInput, Prisma.EventUncheckedCreateWithoutRecurrenceDatesInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutRecurrenceDatesInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutRecurrenceDatesInput, Prisma.EventUncheckedUpdateWithoutRecurrenceDatesInput>
+}
+
+export type EventUpdateWithoutRecurrenceDatesInput = {
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneWithoutEventsNestedInput
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUpdateManyWithoutEventNestedInput
+  exclusionDates?: Prisma.EventExclusionDateUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutRecurrenceDatesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedUpdateManyWithoutEventNestedInput
+  exclusionDates?: Prisma.EventExclusionDateUncheckedUpdateManyWithoutEventNestedInput
+}
+
+export type EventCreateWithoutExclusionDatesInput = {
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
+  allowCompletion?: boolean
+  completed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user?: Prisma.UserCreateNestedOneWithoutEventsInput
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideCreateNestedManyWithoutEventInput
+  recurrenceDates?: Prisma.EventRecurrenceDateCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutExclusionDatesInput = {
+  id?: number
+  userId?: number | null
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
+  allowCompletion?: boolean
+  completed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedCreateNestedManyWithoutEventInput
+  recurrenceDates?: Prisma.EventRecurrenceDateUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutExclusionDatesInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutExclusionDatesInput, Prisma.EventUncheckedCreateWithoutExclusionDatesInput>
+}
+
+export type EventUpsertWithoutExclusionDatesInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutExclusionDatesInput, Prisma.EventUncheckedUpdateWithoutExclusionDatesInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutExclusionDatesInput, Prisma.EventUncheckedCreateWithoutExclusionDatesInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutExclusionDatesInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutExclusionDatesInput, Prisma.EventUncheckedUpdateWithoutExclusionDatesInput>
+}
+
+export type EventUpdateWithoutExclusionDatesInput = {
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneWithoutEventsNestedInput
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUpdateManyWithoutEventNestedInput
+  recurrenceDates?: Prisma.EventRecurrenceDateUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutExclusionDatesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedUpdateManyWithoutEventNestedInput
+  recurrenceDates?: Prisma.EventRecurrenceDateUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateWithoutOccurrenceOverridesInput = {
@@ -750,13 +1339,26 @@ export type EventCreateWithoutOccurrenceOverridesInput = {
   startTime?: Date | string | null
   endTime?: Date | string | null
   description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
   recurring?: $Enums.Recurrence | null
   numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutEventsInput
+  recurrenceDates?: Prisma.EventRecurrenceDateCreateNestedManyWithoutEventInput
+  exclusionDates?: Prisma.EventExclusionDateCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutOccurrenceOverridesInput = {
@@ -768,12 +1370,25 @@ export type EventUncheckedCreateWithoutOccurrenceOverridesInput = {
   startTime?: Date | string | null
   endTime?: Date | string | null
   description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
   recurring?: $Enums.Recurrence | null
   numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  recurrenceDates?: Prisma.EventRecurrenceDateUncheckedCreateNestedManyWithoutEventInput
+  exclusionDates?: Prisma.EventExclusionDateUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutOccurrenceOverridesInput = {
@@ -799,13 +1414,26 @@ export type EventUpdateWithoutOccurrenceOverridesInput = {
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutEventsNestedInput
+  recurrenceDates?: Prisma.EventRecurrenceDateUpdateManyWithoutEventNestedInput
+  exclusionDates?: Prisma.EventExclusionDateUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutOccurrenceOverridesInput = {
@@ -817,12 +1445,25 @@ export type EventUncheckedUpdateWithoutOccurrenceOverridesInput = {
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recurrenceDates?: Prisma.EventRecurrenceDateUncheckedUpdateManyWithoutEventNestedInput
+  exclusionDates?: Prisma.EventExclusionDateUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateManyUserInput = {
@@ -833,8 +1474,19 @@ export type EventCreateManyUserInput = {
   startTime?: Date | string | null
   endTime?: Date | string | null
   description?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: string | null
+  timeZone?: string | null
+  allDay?: boolean
+  location?: string | null
+  url?: string | null
+  recurrenceRule?: string | null
+  status?: string | null
+  sequence?: number | null
+  originalIcs?: string | null
   recurring?: $Enums.Recurrence | null
   numberOfRecurrences?: number | null
+  recurrenceEndDate?: Date | string | null
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: Date | string
@@ -848,13 +1500,26 @@ export type EventUpdateWithoutUserInput = {
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   occurrenceOverrides?: Prisma.EventOccurrenceOverrideUpdateManyWithoutEventNestedInput
+  recurrenceDates?: Prisma.EventRecurrenceDateUpdateManyWithoutEventNestedInput
+  exclusionDates?: Prisma.EventExclusionDateUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutUserInput = {
@@ -865,13 +1530,26 @@ export type EventUncheckedUpdateWithoutUserInput = {
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedUpdateManyWithoutEventNestedInput
+  recurrenceDates?: Prisma.EventRecurrenceDateUncheckedUpdateManyWithoutEventNestedInput
+  exclusionDates?: Prisma.EventExclusionDateUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateManyWithoutUserInput = {
@@ -882,8 +1560,19 @@ export type EventUncheckedUpdateManyWithoutUserInput = {
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  externalUid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeZone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurrenceRule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originalIcs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
   numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recurrenceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -897,10 +1586,14 @@ export type EventUncheckedUpdateManyWithoutUserInput = {
 
 export type EventCountOutputType = {
   occurrenceOverrides: number
+  recurrenceDates: number
+  exclusionDates: number
 }
 
 export type EventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   occurrenceOverrides?: boolean | EventCountOutputTypeCountOccurrenceOverridesArgs
+  recurrenceDates?: boolean | EventCountOutputTypeCountRecurrenceDatesArgs
+  exclusionDates?: boolean | EventCountOutputTypeCountExclusionDatesArgs
 }
 
 /**
@@ -920,6 +1613,20 @@ export type EventCountOutputTypeCountOccurrenceOverridesArgs<ExtArgs extends run
   where?: Prisma.EventOccurrenceOverrideWhereInput
 }
 
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountRecurrenceDatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EventRecurrenceDateWhereInput
+}
+
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountExclusionDatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EventExclusionDateWhereInput
+}
+
 
 export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -930,14 +1637,27 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   startTime?: boolean
   endTime?: boolean
   description?: boolean
+  details?: boolean
+  externalUid?: boolean
+  timeZone?: boolean
+  allDay?: boolean
+  location?: boolean
+  url?: boolean
+  recurrenceRule?: boolean
+  status?: boolean
+  sequence?: boolean
+  originalIcs?: boolean
   recurring?: boolean
   numberOfRecurrences?: boolean
+  recurrenceEndDate?: boolean
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.Event$userArgs<ExtArgs>
   occurrenceOverrides?: boolean | Prisma.Event$occurrenceOverridesArgs<ExtArgs>
+  recurrenceDates?: boolean | Prisma.Event$recurrenceDatesArgs<ExtArgs>
+  exclusionDates?: boolean | Prisma.Event$exclusionDatesArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
@@ -950,8 +1670,19 @@ export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   startTime?: boolean
   endTime?: boolean
   description?: boolean
+  details?: boolean
+  externalUid?: boolean
+  timeZone?: boolean
+  allDay?: boolean
+  location?: boolean
+  url?: boolean
+  recurrenceRule?: boolean
+  status?: boolean
+  sequence?: boolean
+  originalIcs?: boolean
   recurring?: boolean
   numberOfRecurrences?: boolean
+  recurrenceEndDate?: boolean
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: boolean
@@ -968,8 +1699,19 @@ export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   startTime?: boolean
   endTime?: boolean
   description?: boolean
+  details?: boolean
+  externalUid?: boolean
+  timeZone?: boolean
+  allDay?: boolean
+  location?: boolean
+  url?: boolean
+  recurrenceRule?: boolean
+  status?: boolean
+  sequence?: boolean
+  originalIcs?: boolean
   recurring?: boolean
   numberOfRecurrences?: boolean
+  recurrenceEndDate?: boolean
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: boolean
@@ -986,18 +1728,31 @@ export type EventSelectScalar = {
   startTime?: boolean
   endTime?: boolean
   description?: boolean
+  details?: boolean
+  externalUid?: boolean
+  timeZone?: boolean
+  allDay?: boolean
+  location?: boolean
+  url?: boolean
+  recurrenceRule?: boolean
+  status?: boolean
+  sequence?: boolean
+  originalIcs?: boolean
   recurring?: boolean
   numberOfRecurrences?: boolean
+  recurrenceEndDate?: boolean
   allowCompletion?: boolean
   completed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "category" | "title" | "date" | "startTime" | "endTime" | "description" | "recurring" | "numberOfRecurrences" | "allowCompletion" | "completed" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
+export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "category" | "title" | "date" | "startTime" | "endTime" | "description" | "details" | "externalUid" | "timeZone" | "allDay" | "location" | "url" | "recurrenceRule" | "status" | "sequence" | "originalIcs" | "recurring" | "numberOfRecurrences" | "recurrenceEndDate" | "allowCompletion" | "completed" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
 export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.Event$userArgs<ExtArgs>
   occurrenceOverrides?: boolean | Prisma.Event$occurrenceOverridesArgs<ExtArgs>
+  recurrenceDates?: boolean | Prisma.Event$recurrenceDatesArgs<ExtArgs>
+  exclusionDates?: boolean | Prisma.Event$exclusionDatesArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1012,6 +1767,8 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   objects: {
     user: Prisma.$UserPayload<ExtArgs> | null
     occurrenceOverrides: Prisma.$EventOccurrenceOverridePayload<ExtArgs>[]
+    recurrenceDates: Prisma.$EventRecurrenceDatePayload<ExtArgs>[]
+    exclusionDates: Prisma.$EventExclusionDatePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1022,8 +1779,19 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     startTime: Date | null
     endTime: Date | null
     description: string | null
+    details: runtime.JsonValue | null
+    externalUid: string | null
+    timeZone: string | null
+    allDay: boolean
+    location: string | null
+    url: string | null
+    recurrenceRule: string | null
+    status: string | null
+    sequence: number | null
+    originalIcs: string | null
     recurring: $Enums.Recurrence | null
     numberOfRecurrences: number | null
+    recurrenceEndDate: Date | null
     allowCompletion: boolean
     completed: boolean
     createdAt: Date
@@ -1424,6 +2192,8 @@ export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Ty
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.Event$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   occurrenceOverrides<T extends Prisma.Event$occurrenceOverridesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$occurrenceOverridesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventOccurrenceOverridePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  recurrenceDates<T extends Prisma.Event$recurrenceDatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$recurrenceDatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventRecurrenceDatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  exclusionDates<T extends Prisma.Event$exclusionDatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$exclusionDatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventExclusionDatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1461,8 +2231,19 @@ export interface EventFieldRefs {
   readonly startTime: Prisma.FieldRef<"Event", 'DateTime'>
   readonly endTime: Prisma.FieldRef<"Event", 'DateTime'>
   readonly description: Prisma.FieldRef<"Event", 'String'>
+  readonly details: Prisma.FieldRef<"Event", 'Json'>
+  readonly externalUid: Prisma.FieldRef<"Event", 'String'>
+  readonly timeZone: Prisma.FieldRef<"Event", 'String'>
+  readonly allDay: Prisma.FieldRef<"Event", 'Boolean'>
+  readonly location: Prisma.FieldRef<"Event", 'String'>
+  readonly url: Prisma.FieldRef<"Event", 'String'>
+  readonly recurrenceRule: Prisma.FieldRef<"Event", 'String'>
+  readonly status: Prisma.FieldRef<"Event", 'String'>
+  readonly sequence: Prisma.FieldRef<"Event", 'Int'>
+  readonly originalIcs: Prisma.FieldRef<"Event", 'String'>
   readonly recurring: Prisma.FieldRef<"Event", 'Recurrence'>
   readonly numberOfRecurrences: Prisma.FieldRef<"Event", 'Int'>
+  readonly recurrenceEndDate: Prisma.FieldRef<"Event", 'DateTime'>
   readonly allowCompletion: Prisma.FieldRef<"Event", 'Boolean'>
   readonly completed: Prisma.FieldRef<"Event", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Event", 'DateTime'>
@@ -1908,6 +2689,54 @@ export type Event$occurrenceOverridesArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.EventOccurrenceOverrideScalarFieldEnum | Prisma.EventOccurrenceOverrideScalarFieldEnum[]
+}
+
+/**
+ * Event.recurrenceDates
+ */
+export type Event$recurrenceDatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EventRecurrenceDate
+   */
+  select?: Prisma.EventRecurrenceDateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EventRecurrenceDate
+   */
+  omit?: Prisma.EventRecurrenceDateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventRecurrenceDateInclude<ExtArgs> | null
+  where?: Prisma.EventRecurrenceDateWhereInput
+  orderBy?: Prisma.EventRecurrenceDateOrderByWithRelationInput | Prisma.EventRecurrenceDateOrderByWithRelationInput[]
+  cursor?: Prisma.EventRecurrenceDateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EventRecurrenceDateScalarFieldEnum | Prisma.EventRecurrenceDateScalarFieldEnum[]
+}
+
+/**
+ * Event.exclusionDates
+ */
+export type Event$exclusionDatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EventExclusionDate
+   */
+  select?: Prisma.EventExclusionDateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EventExclusionDate
+   */
+  omit?: Prisma.EventExclusionDateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventExclusionDateInclude<ExtArgs> | null
+  where?: Prisma.EventExclusionDateWhereInput
+  orderBy?: Prisma.EventExclusionDateOrderByWithRelationInput | Prisma.EventExclusionDateOrderByWithRelationInput[]
+  cursor?: Prisma.EventExclusionDateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EventExclusionDateScalarFieldEnum | Prisma.EventExclusionDateScalarFieldEnum[]
 }
 
 /**

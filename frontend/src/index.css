@@ -424,6 +424,10 @@ code {
   align-items: center;
 }
 
+.calendar-weekday__short {
+  display: none;
+}
+
 .calendar-day {
   position: relative;
   border: 1px solid #ccc;
@@ -921,6 +925,17 @@ code {
   background: var(--accent-bg);
 }
 
+.calendar-day--outside {
+  color: color-mix(in srgb, var(--text) 58%, transparent);
+  background: color-mix(in srgb, var(--code-bg) 65%, var(--bg));
+  opacity: 0.72;
+}
+
+.calendar-day--outside:hover {
+  color: var(--text);
+  opacity: 1;
+}
+
 /* Edit pages */
 .edit-page {
   padding: 4px 24px 32px;
@@ -1370,9 +1385,33 @@ code {
   padding-left: 20px;
 }
 
+.ics-import-warnings {
+  margin: 0;
+  padding: 0 16px 12px 44px;
+  color: #b36b00;
+  font-size: 0.85rem;
+}
+
 .event-manager__card h3 {
   margin: 0 0 4px;
   color: var(--text-h);
+}
+
+.event-manager__select {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.event-manager__select input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
 }
 
 .event-manager__card p + p {
@@ -1687,6 +1726,18 @@ code {
 }
 .event-details p {
   color: var(--text);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.event-card p,
+.event-manager__card p,
+.all-event-entry p,
+.occurrences-window__item p {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .event-details__edit {
@@ -1833,6 +1884,14 @@ code {
   .calendar-grid > span {
     padding: 5px 1px;
     font-size: 0.7rem;
+  }
+
+  .calendar-weekday__full {
+    display: none;
+  }
+
+  .calendar-weekday__short {
+    display: inline;
   }
 
   .calendar-day {

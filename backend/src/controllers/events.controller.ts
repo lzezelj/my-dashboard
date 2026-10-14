@@ -4,6 +4,8 @@ import type { AuthenticatedRequest } from '../middleware/authenticationMiddlewar
 import {
   createEventService,
   deleteEventService,
+  deleteAllEventsService,
+  deleteEventsService,
   exportEventsService,
   findImportDuplicatesService,
   getEventService,
@@ -13,6 +15,11 @@ import {
   updateEventService,
   updateOccurrenceService,
 } from '../services/events.service.js';
+import {
+  exportIcsService,
+  importIcsService,
+  parseIcsService,
+} from '../services/icalendar.service.js';
 const eventId = (value: string) => {
   const id = Number(value);
   return Number.isInteger(id) && id > 0 ? id : null;
@@ -57,6 +64,38 @@ export async function exportEvents(req: AuthenticatedRequest, res: Response) {
   try {
     res.setHeader('Content-Disposition', 'attachment; filename="dashboard-events.json"');
     return res.json(await exportEventsService(userId));
+  } catch (error) {
+    return fail(res, error);
+  }
+}
+export async function exportIcs(req: AuthenticatedRequest, res: Response) {
+  const userId = getUserId(req, res);
+  if (userId === null) return;
+  try {
+    res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="dashboard-events.ics"');
+    return res.send(await exportIcsService(userId));
+  } catch (error) {
+    return fail(res, error);
+  }
+}
+export async function previewIcsImport(req: AuthenticatedRequest, res: Response) {
+  if (getUserId(req, res) === null) return;
+  try {
+    return res.json({ events: parseIcsService(req.body?.ics) });
+  } catch (error) {
+    return fail(res, error);
+  }
+}
+export async function importIcs(req: AuthenticatedRequest, res: Response) {
+  const userId = getUserId(req, res);
+  if (userId === null) return;
+  if (!Array.isArray(req.body?.selectedIndexes))
+    return res.status(400).json({ message: 'selectedIndexes must be an array.' });
+  try {
+    return res
+      .status(201)
+      .json(await importIcsService(req.body.ics, req.body.selectedIndexes, userId));
   } catch (error) {
     return fail(res, error);
   }
@@ -158,6 +197,25 @@ export async function deleteEvent(req: AuthenticatedRequest, res: Response) {
     return (await deleteEventService(id, userId))
       ? res.status(204).send()
       : res.status(404).json({ message: 'Event not found.' });
+  } catch (error) {
+    return fail(res, error);
+  }
+}
+export async function deleteEvents(req: AuthenticatedRequest, res: Response) {
+  const userId = getUserId(req, res);
+  if (userId === null) return;
+  try {
+    return res.json(await deleteEventsService(req.body?.ids, userId));
+  } catch (error) {
+    return fail(res, error);
+  }
+}
+
+export async function deleteAllEvents(req: AuthenticatedRequest, res: Response) {
+  const userId = getUserId(req, res);
+  if (userId === null) return;
+  try {
+    return res.json(await deleteAllEventsService(userId));
   } catch (error) {
     return fail(res, error);
   }

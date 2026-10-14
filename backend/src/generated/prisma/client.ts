@@ -52,6 +52,16 @@ export type User = Prisma.UserModel
  */
 export type Event = Prisma.EventModel
 /**
+ * Model EventRecurrenceDate
+ * 
+ */
+export type EventRecurrenceDate = Prisma.EventRecurrenceDateModel
+/**
+ * Model EventExclusionDate
+ * 
+ */
+export type EventExclusionDate = Prisma.EventExclusionDateModel
+/**
  * Model EventOccurrenceOverride
  * 
  */

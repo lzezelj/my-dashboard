@@ -14,8 +14,21 @@ export type EventInput = {
   startTime?: string | null;
   endTime?: string | null;
   description?: string | null;
+  details?: Record<string, string> | null;
+  externalUid?: string | null;
+  timeZone?: string | null;
+  allDay?: boolean;
+  location?: string | null;
+  url?: string | null;
+  recurrenceRule?: string | null;
+  status?: string | null;
+  sequence?: number | null;
+  originalIcs?: string | null;
+  recurrenceDates?: string[];
+  exclusionDates?: string[];
   recurring?: Recurrence | null;
   numberOfRecurrences?: number | null;
+  recurrenceEndDate?: string | null;
   allowCompletion?: boolean;
   completed?: boolean;
 };
@@ -74,12 +87,63 @@ export function validateEventInput(input: EventInput, partial = false): EventInp
   if (input.recurring) {
     if (
       !Object.values(Recurrence).includes(input.recurring) ||
-      !Number.isInteger(input.numberOfRecurrences) ||
-      input.numberOfRecurrences! < 1
+      (input.numberOfRecurrences !== undefined &&
+        input.numberOfRecurrences !== null &&
+        (!Number.isInteger(input.numberOfRecurrences) || input.numberOfRecurrences < 1))
     )
-      invalid('Recurrence requires a positive numberOfRecurrences.');
-  } else if (input.numberOfRecurrences !== undefined && input.numberOfRecurrences !== null)
-    invalid('numberOfRecurrences must be null without recurrence.');
+      invalid('numberOfRecurrences must be a positive integer when provided.');
+    if (input.recurrenceEndDate) parseDate(input.recurrenceEndDate);
+    const recurrenceStart = input.date ?? input.startTime?.slice(0, 10);
+    if (input.recurrenceEndDate && recurrenceStart && input.recurrenceEndDate < recurrenceStart)
+      invalid('recurrenceEndDate cannot be before the event starts.');
+    if (input.numberOfRecurrences && input.recurrenceEndDate)
+      invalid('Recurrence can end by count or date, but not both.');
+  } else if (
+    (input.numberOfRecurrences !== undefined && input.numberOfRecurrences !== null) ||
+    (input.recurrenceEndDate !== undefined && input.recurrenceEndDate !== null)
+  )
+    invalid('Recurrence limits must be null without recurrence.');
+  for (const [field, value] of [
+    ['externalUid', input.externalUid],
+    ['timeZone', input.timeZone],
+    ['location', input.location],
+    ['url', input.url],
+    ['recurrenceRule', input.recurrenceRule],
+    ['status', input.status],
+    ['originalIcs', input.originalIcs],
+  ] as const)
+    if (value !== undefined && value !== null && typeof value !== 'string')
+      invalid(`${field} must be a string.`);
+  if (input.url) {
+    try {
+      const url = new URL(input.url);
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') invalid('url must use HTTP or HTTPS.');
+    } catch {
+      invalid('url must be a valid HTTP or HTTPS URL.');
+    }
+  }
+  if (input.allDay !== undefined && typeof input.allDay !== 'boolean')
+    invalid('allDay must be a boolean.');
+  if (
+    input.sequence !== undefined &&
+    input.sequence !== null &&
+    (!Number.isInteger(input.sequence) || input.sequence < 0)
+  )
+    invalid('sequence must be a non-negative integer.');
+  for (const [field, value] of [
+    ['recurrenceDates', input.recurrenceDates],
+    ['exclusionDates', input.exclusionDates],
+  ] as const)
+    if (value !== undefined && (!Array.isArray(value) || value.some((item) => typeof item !== 'string')))
+      invalid(`${field} must be an array of strings.`);
+  if (
+    input.details !== undefined &&
+    input.details !== null &&
+    (typeof input.details !== 'object' ||
+      Array.isArray(input.details) ||
+      Object.values(input.details).some((value) => typeof value !== 'string'))
+  )
+    invalid('details must be an object containing string values.');
   return { ...input, title: input.title?.trim() };
 }
 const toData = (input: EventInput) => ({
@@ -99,8 +163,29 @@ const toData = (input: EventInput) => ({
         ? null
         : parseTimestamp(input.endTime, 'endTime'),
   description: input.description,
+  details:
+    input.details === undefined
+      ? undefined
+      : input.details === null
+        ? Prisma.JsonNull
+        : input.details,
+  externalUid: input.externalUid,
+  timeZone: input.timeZone,
+  allDay: input.allDay ?? (input.date ? true : undefined),
+  location: input.location,
+  url: input.url,
+  recurrenceRule: input.recurrenceRule,
+  status: input.status,
+  sequence: input.sequence,
+  originalIcs: input.originalIcs,
   recurring: input.recurring,
   numberOfRecurrences: input.numberOfRecurrences,
+  recurrenceEndDate:
+    input.recurrenceEndDate === undefined
+      ? undefined
+      : input.recurrenceEndDate === null
+        ? null
+        : parseDate(input.recurrenceEndDate),
   allowCompletion: input.allowCompletion,
   completed: input.completed,
 });
@@ -120,7 +205,7 @@ export async function getEventsService(
   if (!filters.from && !filters.to)
     return events.map(({ occurrenceOverrides: _occurrenceOverrides, ...event }) => event);
   return events
-    .flatMap(expandEvent)
+    .flatMap((event) => expandEvent(event, filters))
     .filter(
       ({ occurrenceDate }) =>
         occurrenceDate >= (filters.from ?? '0001-01-01') &&
@@ -130,11 +215,11 @@ export async function getEventsService(
 export async function exportEventsService(userId: number) {
   const events = await prisma.event.findMany({
     where: { userId },
-    include: { occurrenceOverrides: true },
+    include: { occurrenceOverrides: true, recurrenceDates: true, exclusionDates: true },
     orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
   });
   return {
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     events: events.map((event) => ({
       category: event.category,
@@ -143,8 +228,21 @@ export async function exportEventsService(userId: number) {
       startTime: event.startTime?.toISOString() ?? null,
       endTime: event.endTime?.toISOString() ?? null,
       description: event.description,
+      details: event.details,
+      externalUid: event.externalUid,
+      timeZone: event.timeZone,
+      allDay: event.allDay,
+      location: event.location,
+      url: event.url,
+      recurrenceRule: event.recurrenceRule,
+      status: event.status,
+      sequence: event.sequence,
+      originalIcs: event.originalIcs,
+      recurrenceDates: event.recurrenceDates.map(({ value }) => value),
+      exclusionDates: event.exclusionDates.map(({ value }) => value),
       recurring: event.recurring,
       numberOfRecurrences: event.numberOfRecurrences,
+      recurrenceEndDate: event.recurrenceEndDate?.toISOString().slice(0, 10) ?? null,
       allowCompletion: event.allowCompletion,
       completed: event.completed,
       occurrenceOverrides: event.occurrenceOverrides.map((override) => ({
@@ -215,18 +313,22 @@ function parseImportOverrides(
       : null;
   if (!original) invalid('An event requires either date or startTime.');
   const recurrenceStart = original as Date;
-  const validDates = new Set(
-    Array.from({ length: event.numberOfRecurrences ?? 0 }, (_unused, index) =>
-      occurrenceDate(recurrenceStart, event.recurring!, index).toISOString().slice(0, 10),
-    ),
-  );
   const seen = new Set<string>();
 
   return rawOverrides.map((item, index) => {
     if (!item || typeof item !== 'object')
       invalid(`Occurrence override ${index + 1} must be an object.`);
     const override = item as Record<string, unknown>;
-    if (typeof override.occurrenceDate !== 'string' || !validDates.has(override.occurrenceDate))
+    if (
+      typeof override.occurrenceDate !== 'string' ||
+      !isOccurrenceDate(
+        recurrenceStart,
+        event.recurring!,
+        override.occurrenceDate,
+        event.numberOfRecurrences,
+        event.recurrenceEndDate,
+      )
+    )
       invalid(`Occurrence override ${index + 1} has an invalid occurrenceDate.`);
     const sourceDate = override.occurrenceDate as string;
     if (seen.has(sourceDate))
@@ -271,8 +373,21 @@ export async function importEventsService(items: unknown[], userId: number) {
         startTime: (rawEvent.startTime ?? null) as string | null,
         endTime: (rawEvent.endTime ?? null) as string | null,
         description: (rawEvent.description ?? null) as string | null,
+        details: (rawEvent.details ?? null) as Record<string, string> | null,
+        externalUid: (rawEvent.externalUid ?? null) as string | null,
+        timeZone: (rawEvent.timeZone ?? null) as string | null,
+        allDay: (rawEvent.allDay ?? Boolean(rawEvent.date)) as boolean,
+        location: (rawEvent.location ?? null) as string | null,
+        url: (rawEvent.url ?? null) as string | null,
+        recurrenceRule: (rawEvent.recurrenceRule ?? null) as string | null,
+        status: (rawEvent.status ?? null) as string | null,
+        sequence: (rawEvent.sequence ?? null) as number | null,
+        originalIcs: (rawEvent.originalIcs ?? null) as string | null,
+        recurrenceDates: (rawEvent.recurrenceDates ?? []) as string[],
+        exclusionDates: (rawEvent.exclusionDates ?? []) as string[],
         recurring: (rawEvent.recurring ?? null) as Recurrence | null,
         numberOfRecurrences: (rawEvent.numberOfRecurrences ?? null) as number | null,
+        recurrenceEndDate: (rawEvent.recurrenceEndDate ?? null) as string | null,
         allowCompletion: (rawEvent.allowCompletion ?? false) as boolean,
         completed: (rawEvent.completed ?? false) as boolean,
       };
@@ -302,6 +417,12 @@ export async function importEventsService(items: unknown[], userId: number) {
             date: override.date ? parseDate(override.date) : null,
             description: override.description,
           })),
+        };
+        data.recurrenceDates = {
+          create: (event.recurrenceDates ?? []).map((value) => ({ value })),
+        };
+        data.exclusionDates = {
+          create: (event.exclusionDates ?? []).map((value) => ({ value })),
         };
         await transaction.event.create({ data });
       });
@@ -344,8 +465,22 @@ export async function updateEventService(id: number, input: EventInput, userId: 
     startTime: current.startTime?.toISOString() ?? null,
     endTime: current.endTime?.toISOString() ?? null,
     description: current.description,
+    details:
+      current.details && typeof current.details === 'object' && !Array.isArray(current.details)
+        ? (current.details as Record<string, string>)
+        : null,
+    externalUid: current.externalUid,
+    timeZone: current.timeZone,
+    allDay: current.allDay,
+    location: current.location,
+    url: current.url,
+    recurrenceRule: current.recurrenceRule,
+    status: current.status,
+    sequence: current.sequence,
+    originalIcs: current.originalIcs,
     recurring: current.recurring,
     numberOfRecurrences: current.numberOfRecurrences,
+    recurrenceEndDate: current.recurrenceEndDate?.toISOString().slice(0, 10) ?? null,
     allowCompletion: current.allowCompletion,
     completed: current.completed,
   };
@@ -358,6 +493,20 @@ export async function deleteEventService(id: number, userId: number) {
   await prisma.event.delete({ where: { id } });
   return current;
 }
+export async function deleteEventsService(ids: unknown, userId: number) {
+  if (!Array.isArray(ids) || ids.length === 0) invalid('ids must be a non-empty array.');
+  const eventIds = ids as unknown[];
+  if (
+    eventIds.length > 10_000 ||
+    eventIds.some((id) => !Number.isSafeInteger(id) || Number(id) <= 0)
+  )
+    invalid('ids must contain valid event ids.');
+  const uniqueIds = [...new Set(eventIds as number[])];
+  return prisma.event.deleteMany({ where: { userId, id: { in: uniqueIds } } });
+}
+
+export const deleteAllEventsService = (userId: number) =>
+  prisma.event.deleteMany({ where: { userId } });
 export async function updateOccurrenceService(
   id: number,
   occurrence: string,
@@ -388,9 +537,18 @@ export async function updateOccurrenceService(
   const event = await getEventService(id, userId);
   if (!event) return null;
   if (!event.recurring) invalid('Only recurring events can have occurrence descriptions.');
+  const recurrence = event.recurring as Recurrence;
   const occurrenceDateValue = parseDate(occurrence);
-  const validOccurrence = expandEvent({ ...event, occurrenceOverrides: [] }).some(
-    (item) => item.occurrenceDate === occurrence,
+  const original = event.date ?? event.startTime;
+  const validOccurrence = Boolean(
+    original &&
+      isOccurrenceDate(
+        original,
+        recurrence,
+        occurrence,
+        event.numberOfRecurrences,
+        event.recurrenceEndDate?.toISOString().slice(0, 10),
+      ),
   );
   if (!validOccurrence) invalid('The occurrence does not belong to this event.');
   await prisma.eventOccurrenceOverride.upsert({
@@ -447,22 +605,53 @@ function occurrenceDate(original: Date, recurrence: Recurrence, index: number) {
     ),
   );
 }
-export function expandEvent(event: EventWithOverrides): EventOccurrence[] {
+function isOccurrenceDate(
+  original: Date,
+  recurrence: Recurrence,
+  target: string,
+  count?: number | null,
+  endDate?: string | null,
+) {
+  const maximum = count ?? 100_000;
+  for (let index = 0; index < maximum; index += 1) {
+    const candidate = occurrenceDate(original, recurrence, index).toISOString().slice(0, 10);
+    if (endDate && candidate > endDate) return false;
+    if (candidate === target) return true;
+    if (candidate > target) return false;
+  }
+  return false;
+}
+
+export function expandEvent(
+  event: EventWithOverrides,
+  filters: { from?: string; to?: string } = {},
+): EventOccurrence[] {
   const original = event.date ?? event.startTime;
   if (!original) return [];
-  const count = event.recurring ? (event.numberOfRecurrences ?? 0) : 1;
-  return Array.from({ length: count }, (_unused, index) => {
+  const maximum = event.recurring ? (event.numberOfRecurrences ?? 100_000) : 1;
+  const occurrences: EventOccurrence[] = [];
+  for (let index = 0; index < maximum; index += 1) {
     const date = event.recurring ? occurrenceDate(original, event.recurring, index) : original;
     const sourceOccurrenceDate = date.toISOString().slice(0, 10);
+    const recurrenceEndDate = event.recurrenceEndDate?.toISOString().slice(0, 10);
+    if (recurrenceEndDate && sourceOccurrenceDate > recurrenceEndDate) break;
+    if (filters.to && sourceOccurrenceDate > filters.to) break;
     const override = event.occurrenceOverrides.find(
       (item) => item.occurrenceDate.toISOString().slice(0, 10) === sourceOccurrenceDate,
     );
     const { occurrenceOverrides, ...baseEvent } = event;
-    return {
+    const occurrence = {
       ...baseEvent,
       description: override?.description ?? event.description,
       occurrenceDate: override?.date?.toISOString().slice(0, 10) ?? sourceOccurrenceDate,
       sourceOccurrenceDate,
     };
-  });
+    if (
+      occurrence.occurrenceDate >= (filters.from ?? '0001-01-01') &&
+      occurrence.occurrenceDate <= (filters.to ?? '9999-12-31')
+    )
+      occurrences.push(occurrence);
+    if (!filters.to && occurrences.length >= 100) break;
+  }
+  return occurrences;
 }

@@ -12,8 +12,12 @@ const blankEvent = (category: EventCategory, date?: string): EventInput => ({
   startTime: null,
   endTime: null,
   description: null,
+  details: null,
+  location: null,
+  url: null,
   recurring: null,
   numberOfRecurrences: null,
+  recurrenceEndDate: null,
   allowCompletion: category === 'TODO',
   completed: false,
 });
@@ -24,6 +28,60 @@ type EventFormProps = {
   onSaved: () => void | Promise<void>;
   onCancel: () => void;
 };
+
+type DetailField = {
+  key: string;
+  label: string;
+  type?: 'text' | 'number' | 'url' | 'select';
+  options?: string[];
+  placeholder?: string;
+};
+
+const categoryDetailFields: Record<EventCategory, DetailField[]> = {
+  APPOINTMENT: [
+    { key: 'contactName', label: 'Contact person' },
+    { key: 'contactPhone', label: 'Phone number', placeholder: '+49 ...' },
+  ],
+  BIRTHDAY: [
+    { key: 'relationship', label: 'Relationship' },
+    { key: 'birthYear', label: 'Birth year', type: 'number' },
+    { key: 'giftIdeas', label: 'Gift ideas' },
+  ],
+  MOVIE: [
+    { key: 'director', label: 'Director' },
+    { key: 'releaseYear', label: 'Release year', type: 'number' },
+    { key: 'genre', label: 'Genre' },
+    { key: 'watchOn', label: 'Cinema or streaming service' },
+  ],
+  TV_SHOW: [
+    { key: 'streamingService', label: 'Streaming service' },
+    { key: 'genre', label: 'Genre' },
+  ],
+  GAME: [
+    { key: 'platform', label: 'Platform' },
+    { key: 'developer', label: 'Developer' },
+    { key: 'genre', label: 'Genre' },
+    {
+      key: 'progress',
+      label: 'Progress',
+      type: 'select',
+      options: ['Not started', 'Playing', 'Completed', 'Paused'],
+    },
+  ],
+  TODO: [
+    {
+      key: 'priority',
+      label: 'Priority',
+      type: 'select',
+      options: ['Low', 'Medium', 'High'],
+    },
+    { key: 'project', label: 'Project or list' },
+    { key: 'estimatedMinutes', label: 'Estimated minutes', type: 'number' },
+  ],
+  OTHER: [],
+};
+
+const categoriesWithPlace = new Set<EventCategory>(['APPOINTMENT', 'MOVIE', 'OTHER']);
 
 export default function EventForm({
   category,
@@ -39,20 +97,43 @@ export default function EventForm({
   );
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [recurrenceEnd, setRecurrenceEnd] = useState<'never' | 'date' | 'count'>(() =>
+    event?.numberOfRecurrences ? 'count' : event?.recurrenceEndDate ? 'date' : 'never',
+  );
   const set = <K extends keyof EventInput>(key: K, value: EventInput[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
+  const setDetail = (key: string, value: string) =>
+    setForm((current) => {
+      const details = { ...(current.details ?? {}) };
+      if (value) details[key] = value;
+      else delete details[key];
+      return { ...current, details: Object.keys(details).length ? details : null };
+    });
   const submit = async (submitEvent: React.FormEvent) => {
     submitEvent.preventDefault();
     setError(null);
     const payload: EventInput = {
       ...form,
       description: form.description?.trim() || null,
+      details: form.details
+        ? Object.fromEntries(
+            Object.entries(form.details)
+              .map(([key, value]) => [key, value.trim()])
+              .filter(([, value]) => value),
+          )
+        : null,
+      location: form.location?.trim() || null,
+      url: form.url?.trim() || null,
       date: form.startTime ? null : form.date,
       endTime: form.startTime ? form.endTime : null,
       allowCompletion: form.category === 'TODO' ? form.allowCompletion : false,
       completed: form.category === 'TODO' && form.allowCompletion ? form.completed : false,
       recurring: form.recurring || null,
-      numberOfRecurrences: form.recurring ? form.numberOfRecurrences : null,
+      numberOfRecurrences:
+        form.recurring && recurrenceEnd === 'count' ? form.numberOfRecurrences : null,
+      recurrenceEndDate:
+        form.recurring && recurrenceEnd === 'date' ? form.recurrenceEndDate : null,
+      recurrenceRule: form.recurring ? null : form.recurrenceRule,
     };
     try {
       if (event) await updateEvent(event.id, payload);
@@ -63,6 +144,7 @@ export default function EventForm({
     }
   };
   const isEditing = Boolean(event);
+  const categoryLabel = eventCategoryLabels[form.category];
   const finishSaving = async () => {
     setShowSuccess(false);
     await onSaved();
@@ -85,7 +167,7 @@ export default function EventForm({
       </Modal>
       <header className="event-form__header">
         <div>
-          <h2>{isEditing ? 'Edit event' : 'Create event'}</h2>
+          <h2>{isEditing ? `Edit ${categoryLabel}` : `Create ${categoryLabel}`}</h2>
           <p>{isEditing ? 'Update the details below.' : 'Add an event to your dashboard.'}</p>
         </div>
         <button type="button" className="event-form__close" onClick={onCancel}>
@@ -104,7 +186,15 @@ export default function EventForm({
             Category
             <select
               value={form.category}
-              onChange={(e) => set('category', e.target.value as EventCategory)}
+              onChange={(e) =>
+                setForm((current) => ({
+                  ...current,
+                  category: e.target.value as EventCategory,
+                  details: null,
+                  location: null,
+                  url: null,
+                }))
+              }
             >
               {eventCategories.map((item) => (
                 <option key={item} value={item}>
@@ -123,6 +213,53 @@ export default function EventForm({
             onChange={(e) => set('title', e.target.value)}
           />
         </label>
+        {categoriesWithPlace.has(form.category) && (
+          <label className="form-field">
+            Location
+            <input
+              value={form.location ?? ''}
+              placeholder={form.category === 'MOVIE' ? 'Cinema or venue' : undefined}
+              onChange={(e) => set('location', e.target.value || null)}
+            />
+          </label>
+        )}
+        {categoriesWithPlace.has(form.category) && (
+          <label className="form-field">
+            Related link
+            <input
+              type="url"
+              value={form.url ?? ''}
+              placeholder="https://..."
+              onChange={(e) => set('url', e.target.value || null)}
+            />
+          </label>
+        )}
+        {categoryDetailFields[form.category].map((field) => (
+          <label className="form-field" key={field.key}>
+            {field.label}
+            {field.type === 'select' ? (
+              <select
+                value={form.details?.[field.key] ?? ''}
+                onChange={(e) => setDetail(field.key, e.target.value)}
+              >
+                <option value="">Not specified</option>
+                {field.options?.map((option) => (
+                  <option value={option} key={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type={field.type ?? 'text'}
+                min={field.type === 'number' ? '0' : undefined}
+                value={form.details?.[field.key] ?? ''}
+                placeholder={field.placeholder}
+                onChange={(e) => setDetail(field.key, e.target.value)}
+              />
+            )}
+          </label>
+        ))}
         <label className="form-field">
           Description
           <textarea
@@ -207,21 +344,50 @@ export default function EventForm({
           </select>
         </label>
         {form.recurring && (
-          <label className="form-field">
-            Occurrences
-            <input
-              required
-              min="1"
-              type="number"
-              value={form.numberOfRecurrences ?? 1}
-              onChange={(e) => set('numberOfRecurrences', Number(e.target.value))}
-            />
-          </label>
+          <>
+            <label className="form-field">
+              Ends
+              <select
+                value={recurrenceEnd}
+                onChange={(e) =>
+                  setRecurrenceEnd(e.target.value as 'never' | 'date' | 'count')
+                }
+              >
+                <option value="never">Never</option>
+                <option value="date">On a date</option>
+                <option value="count">After a number of occurrences</option>
+              </select>
+            </label>
+            {recurrenceEnd === 'count' && (
+              <label className="form-field">
+                Occurrences
+                <input
+                  required
+                  min="1"
+                  type="number"
+                  value={form.numberOfRecurrences ?? 1}
+                  onChange={(e) => set('numberOfRecurrences', Number(e.target.value))}
+                />
+              </label>
+            )}
+            {recurrenceEnd === 'date' && (
+              <label className="form-field">
+                End date
+                <input
+                  required
+                  type="date"
+                  min={form.date ?? form.startTime?.slice(0, 10) ?? undefined}
+                  value={form.recurrenceEndDate ?? ''}
+                  onChange={(e) => set('recurrenceEndDate', e.target.value || null)}
+                />
+              </label>
+            )}
+          </>
         )}
       </div>
       <div className="event-form__actions">
         <button className="primary-button" type="submit">
-          {isEditing ? 'Update event' : 'Create event'}
+          {isEditing ? `Update ${categoryLabel}` : `Create ${categoryLabel}`}
         </button>
         <button type="button" onClick={onCancel}>
           Cancel

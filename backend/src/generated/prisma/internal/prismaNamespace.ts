@@ -399,6 +399,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   Event: 'Event',
+  EventRecurrenceDate: 'EventRecurrenceDate',
+  EventExclusionDate: 'EventExclusionDate',
   EventOccurrenceOverride: 'EventOccurrenceOverride'
 } as const
 
@@ -415,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "event" | "eventOccurrenceOverride"
+    modelProps: "user" | "event" | "eventRecurrenceDate" | "eventExclusionDate" | "eventOccurrenceOverride"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -567,6 +569,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EventRecurrenceDate: {
+      payload: Prisma.$EventRecurrenceDatePayload<ExtArgs>
+      fields: Prisma.EventRecurrenceDateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EventRecurrenceDateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventRecurrenceDatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EventRecurrenceDateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventRecurrenceDatePayload>
+        }
+        findFirst: {
+          args: Prisma.EventRecurrenceDateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventRecurrenceDatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EventRecurrenceDateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventRecurrenceDatePayload>
+        }
+        findMany: {
+          args: Prisma.EventRecurrenceDateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventRecurrenceDatePayload>[]
+        }
+        create: {
+          args: Prisma.EventRecurrenceDateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventRecurrenceDatePayload>
+        }
+        createMany: {
+          args: Prisma.EventRecurrenceDateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EventRecurrenceDateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventRecurrenceDatePayload>[]
+        }
+        delete: {
+          args: Prisma.EventRecurrenceDateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventRecurrenceDatePayload>
+        }
+        update: {
+          args: Prisma.EventRecurrenceDateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventRecurrenceDatePayload>
+        }
+        deleteMany: {
+          args: Prisma.EventRecurrenceDateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EventRecurrenceDateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EventRecurrenceDateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventRecurrenceDatePayload>[]
+        }
+        upsert: {
+          args: Prisma.EventRecurrenceDateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventRecurrenceDatePayload>
+        }
+        aggregate: {
+          args: Prisma.EventRecurrenceDateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEventRecurrenceDate>
+        }
+        groupBy: {
+          args: Prisma.EventRecurrenceDateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventRecurrenceDateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EventRecurrenceDateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventRecurrenceDateCountAggregateOutputType> | number
+        }
+      }
+    }
+    EventExclusionDate: {
+      payload: Prisma.$EventExclusionDatePayload<ExtArgs>
+      fields: Prisma.EventExclusionDateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EventExclusionDateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventExclusionDatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EventExclusionDateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventExclusionDatePayload>
+        }
+        findFirst: {
+          args: Prisma.EventExclusionDateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventExclusionDatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EventExclusionDateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventExclusionDatePayload>
+        }
+        findMany: {
+          args: Prisma.EventExclusionDateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventExclusionDatePayload>[]
+        }
+        create: {
+          args: Prisma.EventExclusionDateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventExclusionDatePayload>
+        }
+        createMany: {
+          args: Prisma.EventExclusionDateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EventExclusionDateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventExclusionDatePayload>[]
+        }
+        delete: {
+          args: Prisma.EventExclusionDateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventExclusionDatePayload>
+        }
+        update: {
+          args: Prisma.EventExclusionDateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventExclusionDatePayload>
+        }
+        deleteMany: {
+          args: Prisma.EventExclusionDateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EventExclusionDateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EventExclusionDateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventExclusionDatePayload>[]
+        }
+        upsert: {
+          args: Prisma.EventExclusionDateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventExclusionDatePayload>
+        }
+        aggregate: {
+          args: Prisma.EventExclusionDateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEventExclusionDate>
+        }
+        groupBy: {
+          args: Prisma.EventExclusionDateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventExclusionDateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EventExclusionDateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventExclusionDateCountAggregateOutputType> | number
+        }
+      }
+    }
     EventOccurrenceOverride: {
       payload: Prisma.$EventOccurrenceOverridePayload<ExtArgs>
       fields: Prisma.EventOccurrenceOverrideFieldRefs
@@ -701,8 +851,19 @@ export const EventScalarFieldEnum = {
   startTime: 'startTime',
   endTime: 'endTime',
   description: 'description',
+  details: 'details',
+  externalUid: 'externalUid',
+  timeZone: 'timeZone',
+  allDay: 'allDay',
+  location: 'location',
+  url: 'url',
+  recurrenceRule: 'recurrenceRule',
+  status: 'status',
+  sequence: 'sequence',
+  originalIcs: 'originalIcs',
   recurring: 'recurring',
   numberOfRecurrences: 'numberOfRecurrences',
+  recurrenceEndDate: 'recurrenceEndDate',
   allowCompletion: 'allowCompletion',
   completed: 'completed',
   createdAt: 'createdAt',
@@ -710,6 +871,24 @@ export const EventScalarFieldEnum = {
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const EventRecurrenceDateScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  value: 'value'
+} as const
+
+export type EventRecurrenceDateScalarFieldEnum = (typeof EventRecurrenceDateScalarFieldEnum)[keyof typeof EventRecurrenceDateScalarFieldEnum]
+
+
+export const EventExclusionDateScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  value: 'value'
+} as const
+
+export type EventExclusionDateScalarFieldEnum = (typeof EventExclusionDateScalarFieldEnum)[keyof typeof EventExclusionDateScalarFieldEnum]
 
 
 export const EventOccurrenceOverrideScalarFieldEnum = {
@@ -731,6 +910,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -745,6 +932,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -810,6 +1006,27 @@ export type ListEnumEventCategoryFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'Recurrence'
  */
 export type EnumRecurrenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Recurrence'>
@@ -820,13 +1037,6 @@ export type EnumRecurrenceFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'Recurrence[]'
  */
 export type ListEnumRecurrenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Recurrence[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -996,6 +1206,8 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   event?: Prisma.EventOmit
+  eventRecurrenceDate?: Prisma.EventRecurrenceDateOmit
+  eventExclusionDate?: Prisma.EventExclusionDateOmit
   eventOccurrenceOverride?: Prisma.EventOccurrenceOverrideOmit
 }
 

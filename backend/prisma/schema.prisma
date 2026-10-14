@@ -44,17 +44,52 @@ model Event {
   startTime           DateTime?
   endTime             DateTime?
   description         String?
+  details             Json?
+  // Interoperability metadata used by iCalendar imports and exports.
+  externalUid         String?
+  timeZone            String?
+  allDay              Boolean       @default(false)
+  location            String?
+  url                 String?
+  recurrenceRule      String?
+  status              String?
+  sequence            Int?
+  originalIcs         String?
   recurring           Recurrence?
   numberOfRecurrences Int?
+  recurrenceEndDate   DateTime?                 @db.Date
   allowCompletion     Boolean       @default(false)
   completed           Boolean       @default(false)
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
   occurrenceOverrides EventOccurrenceOverride[]
+  recurrenceDates     EventRecurrenceDate[]
+  exclusionDates      EventExclusionDate[]
 
   @@index([userId, category])
+  @@index([userId, externalUid])
   @@index([date])
   @@index([startTime])
+}
+
+model EventRecurrenceDate {
+  id      Int    @id @default(autoincrement())
+  eventId Int
+  // Preserves the original RFC 5545 value until recurrence expansion supports it.
+  value   String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, value])
+}
+
+model EventExclusionDate {
+  id      Int    @id @default(autoincrement())
+  eventId Int
+  // Preserves the original RFC 5545 value, including date-only and UTC forms.
+  value   String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, value])
 }
 
 model EventOccurrenceOverride {

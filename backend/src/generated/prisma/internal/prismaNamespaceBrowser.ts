@@ -53,6 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Event: 'Event',
+  EventRecurrenceDate: 'EventRecurrenceDate',
+  EventExclusionDate: 'EventExclusionDate',
   EventOccurrenceOverride: 'EventOccurrenceOverride'
 } as const
 
@@ -93,8 +95,19 @@ export const EventScalarFieldEnum = {
   startTime: 'startTime',
   endTime: 'endTime',
   description: 'description',
+  details: 'details',
+  externalUid: 'externalUid',
+  timeZone: 'timeZone',
+  allDay: 'allDay',
+  location: 'location',
+  url: 'url',
+  recurrenceRule: 'recurrenceRule',
+  status: 'status',
+  sequence: 'sequence',
+  originalIcs: 'originalIcs',
   recurring: 'recurring',
   numberOfRecurrences: 'numberOfRecurrences',
+  recurrenceEndDate: 'recurrenceEndDate',
   allowCompletion: 'allowCompletion',
   completed: 'completed',
   createdAt: 'createdAt',
@@ -102,6 +115,24 @@ export const EventScalarFieldEnum = {
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const EventRecurrenceDateScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  value: 'value'
+} as const
+
+export type EventRecurrenceDateScalarFieldEnum = (typeof EventRecurrenceDateScalarFieldEnum)[keyof typeof EventRecurrenceDateScalarFieldEnum]
+
+
+export const EventExclusionDateScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  value: 'value'
+} as const
+
+export type EventExclusionDateScalarFieldEnum = (typeof EventExclusionDateScalarFieldEnum)[keyof typeof EventExclusionDateScalarFieldEnum]
 
 
 export const EventOccurrenceOverrideScalarFieldEnum = {
@@ -123,6 +154,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -137,4 +176,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
