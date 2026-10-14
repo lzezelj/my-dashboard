@@ -127,6 +127,196 @@ export async function getEventsService(
         occurrenceDate <= (filters.to ?? '9999-12-31'),
     );
 }
+export async function exportEventsService(userId: number) {
+  const events = await prisma.event.findMany({
+    where: { userId },
+    include: { occurrenceOverrides: true },
+    orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+  });
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    events: events.map((event) => ({
+      category: event.category,
+      title: event.title,
+      date: event.date?.toISOString().slice(0, 10) ?? null,
+      startTime: event.startTime?.toISOString() ?? null,
+      endTime: event.endTime?.toISOString() ?? null,
+      description: event.description,
+      recurring: event.recurring,
+      numberOfRecurrences: event.numberOfRecurrences,
+      allowCompletion: event.allowCompletion,
+      completed: event.completed,
+      occurrenceOverrides: event.occurrenceOverrides.map((override) => ({
+        occurrenceDate: override.occurrenceDate.toISOString().slice(0, 10),
+        date: override.date?.toISOString().slice(0, 10) ?? null,
+        description: override.description,
+      })),
+    })),
+  };
+}
+export async function findImportDuplicatesService(
+  importedEvents: Array<{ title?: unknown; date?: unknown; startTime?: unknown }>,
+  userId: number,
+) {
+  const existing = await prisma.event.findMany({
+    where: { userId },
+    select: { title: true, date: true, startTime: true },
+  });
+  const key = (title: string, date: string) => `${title.trim().toLocaleLowerCase()}\u0000${date}`;
+  const existingKeys = new Set(
+    existing.flatMap((event) => {
+      const date =
+        event.date?.toISOString().slice(0, 10) ?? event.startTime?.toISOString().slice(0, 10);
+      return date ? [key(event.title, date)] : [];
+    }),
+  );
+  return importedEvents.flatMap((event, index) => {
+    const date =
+      typeof event.date === 'string'
+        ? event.date
+        : typeof event.startTime === 'string'
+          ? event.startTime.slice(0, 10)
+          : null;
+    return typeof event.title === 'string' && date && existingKeys.has(key(event.title, date))
+      ? [index]
+      : [];
+  });
+}
+
+type ImportOccurrenceOverride = {
+  occurrenceDate: string;
+  date: string | null;
+  description: string | null;
+};
+
+type ImportItem = {
+  sourceIndex?: unknown;
+  event?: unknown;
+  preserveOverrides?: unknown;
+};
+
+function parseImportOverrides(
+  value: unknown,
+  event: EventInput,
+  preserveOverrides: boolean,
+): ImportOccurrenceOverride[] {
+  if (!preserveOverrides) return [];
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) invalid('occurrenceOverrides must be an array.');
+  const rawOverrides = value as unknown[];
+  if (rawOverrides.length === 0) return [];
+  if (!event.recurring) invalid('Only recurring events can contain occurrence overrides.');
+
+  const original = event.date
+    ? parseDate(event.date)
+    : event.startTime
+      ? parseTimestamp(event.startTime, 'startTime')
+      : null;
+  if (!original) invalid('An event requires either date or startTime.');
+  const recurrenceStart = original as Date;
+  const validDates = new Set(
+    Array.from({ length: event.numberOfRecurrences ?? 0 }, (_unused, index) =>
+      occurrenceDate(recurrenceStart, event.recurring!, index).toISOString().slice(0, 10),
+    ),
+  );
+  const seen = new Set<string>();
+
+  return rawOverrides.map((item, index) => {
+    if (!item || typeof item !== 'object')
+      invalid(`Occurrence override ${index + 1} must be an object.`);
+    const override = item as Record<string, unknown>;
+    if (typeof override.occurrenceDate !== 'string' || !validDates.has(override.occurrenceDate))
+      invalid(`Occurrence override ${index + 1} has an invalid occurrenceDate.`);
+    const sourceDate = override.occurrenceDate as string;
+    if (seen.has(sourceDate))
+      invalid(`Occurrence override ${index + 1} duplicates an occurrence date.`);
+    seen.add(sourceDate);
+    if (override.date !== undefined && override.date !== null && typeof override.date !== 'string')
+      invalid(`Occurrence override ${index + 1} has an invalid date.`);
+    if (
+      override.description !== undefined &&
+      override.description !== null &&
+      typeof override.description !== 'string'
+    )
+      invalid(`Occurrence override ${index + 1} has an invalid description.`);
+    if (typeof override.date === 'string') parseDate(override.date);
+    return {
+      occurrenceDate: sourceDate,
+      date: typeof override.date === 'string' ? override.date : null,
+      description:
+        typeof override.description === 'string' ? override.description.trim() || null : null,
+    };
+  });
+}
+
+export async function importEventsService(items: unknown[], userId: number) {
+  const skipped: Array<{ index: number; message: string }> = [];
+  let imported = 0;
+
+  for (const [position, rawItem] of items.entries()) {
+    const fallbackIndex = position + 1;
+    let sourceIndex = fallbackIndex;
+    try {
+      if (!rawItem || typeof rawItem !== 'object') invalid('Import entry must be an object.');
+      const item = rawItem as ImportItem;
+      if (Number.isInteger(item.sourceIndex) && Number(item.sourceIndex) > 0)
+        sourceIndex = Number(item.sourceIndex);
+      if (!item.event || typeof item.event !== 'object') invalid('Event data is missing.');
+      const rawEvent = item.event as Record<string, unknown>;
+      const event: EventInput = {
+        category: rawEvent.category as EventCategory,
+        title: rawEvent.title as string,
+        date: (rawEvent.date ?? null) as string | null,
+        startTime: (rawEvent.startTime ?? null) as string | null,
+        endTime: (rawEvent.endTime ?? null) as string | null,
+        description: (rawEvent.description ?? null) as string | null,
+        recurring: (rawEvent.recurring ?? null) as Recurrence | null,
+        numberOfRecurrences: (rawEvent.numberOfRecurrences ?? null) as number | null,
+        allowCompletion: (rawEvent.allowCompletion ?? false) as boolean,
+        completed: (rawEvent.completed ?? false) as boolean,
+      };
+      validateEventInput(event);
+      if (
+        event.description !== undefined &&
+        event.description !== null &&
+        typeof event.description !== 'string'
+      )
+        invalid('description must be a string.');
+      if (event.allowCompletion !== undefined && typeof event.allowCompletion !== 'boolean')
+        invalid('allowCompletion must be a boolean.');
+      if (event.completed !== undefined && typeof event.completed !== 'boolean')
+        invalid('completed must be a boolean.');
+      const overrides = parseImportOverrides(
+        rawEvent.occurrenceOverrides,
+        event,
+        item.preserveOverrides === true,
+      );
+
+      await prisma.$transaction(async (transaction) => {
+        const data = toData(event) as Prisma.EventCreateInput;
+        data.user = { connect: { id: userId } };
+        data.occurrenceOverrides = {
+          create: overrides.map((override) => ({
+            occurrenceDate: parseDate(override.occurrenceDate),
+            date: override.date ? parseDate(override.date) : null,
+            description: override.description,
+          })),
+        };
+        await transaction.event.create({ data });
+      });
+      imported += 1;
+    } catch (error) {
+      skipped.push({
+        index: sourceIndex,
+        message: error instanceof Error ? error.message : 'Invalid event.',
+      });
+    }
+  }
+
+  return { imported, skipped };
+}
+
 export const getEventService = (id: number, userId: number) =>
   prisma.event.findFirst({ where: { id, userId } });
 export async function getEventOccurrencesService(id: number, userId: number) {

@@ -6,6 +6,7 @@ import Home from './pages/Home.tsx';
 import EventManager from './components/EventManager.tsx';
 import { getCurrentUser, logout, type AuthUser } from './services/authentication.api';
 import Unauthorized from './pages/Unauthorized.tsx';
+import Import from './pages/Import.tsx';
 
 function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -34,6 +35,7 @@ function App() {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/edit" element={<Edit />}>
           <Route index element={<EventManager />} />
+          <Route path="import" element={<Import />} />
           <Route path="movies" element={<EventManager key="movie" initialCategory="MOVIE" />} />
           <Route
             path="tv-shows"

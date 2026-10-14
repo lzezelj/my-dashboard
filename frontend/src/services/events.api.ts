@@ -52,4 +52,40 @@ export const updateOccurrence = (
   });
 export const getEventOccurrences = (id: number) =>
   request<DashboardEvent[]>(`${baseUrl}/${id}/occurrences`);
+export type EventExport = {
+  version: 1;
+  exportedAt: string;
+  events: Array<
+    Omit<EventInput, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'occurrenceDate'> & {
+      occurrenceOverrides: Array<{
+        occurrenceDate: string;
+        date: string | null;
+        description: string | null;
+      }>;
+    }
+  >;
+};
+export const exportEvents = () => request<EventExport>(`${baseUrl}/export`);
+export const checkImportDuplicates = (events: Array<Partial<EventInput>>) =>
+  request<{ duplicates: number[] }>(`${baseUrl}/import/duplicates`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ events }),
+  });
+export type ImportEventsResult = {
+  imported: number;
+  skipped: Array<{ index: number; message: string }>;
+};
+export const importEvents = (
+  events: Array<{
+    sourceIndex: number;
+    event: Partial<EventInput> & { occurrenceOverrides?: unknown[] };
+    preserveOverrides: boolean;
+  }>,
+) =>
+  request<ImportEventsResult>(`${baseUrl}/import`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ events }),
+  });
 export const deleteEvent = (id: number) => request<void>(`${baseUrl}/${id}`, { method: 'DELETE' });

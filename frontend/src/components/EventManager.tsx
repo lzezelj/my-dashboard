@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { DashboardEvent, EventCategory } from '../types/events';
 import { eventCategories, eventCategoryLabels } from '../types/events';
 import {
   deleteEvent,
+  exportEvents,
   getEventOccurrences,
   getEvents,
   updateEvent,
@@ -27,6 +29,7 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
   const [occurrenceDescription, setOccurrenceDescription] = useState('');
   const [occurrenceDate, setOccurrenceDate] = useState('');
   const [showOccurrenceSaveConfirmation, setShowOccurrenceSaveConfirmation] = useState(false);
+  const navigate = useNavigate();
   const load = useCallback(async () => {
     try {
       setError(null);
@@ -74,6 +77,19 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
       setShowOccurrenceSaveConfirmation(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save occurrence changes.');
+    }
+  };
+  const downloadExport = async () => {
+    try {
+      const eventExport = await exportEvents();
+      const file = new Blob([JSON.stringify(eventExport, null, 2)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(file);
+      link.download = `dashboard-events-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not export events.');
     }
   };
   return (
@@ -134,6 +150,12 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
             }}
           >
             {showCreate ? 'Close form' : 'Add event'}
+          </button>
+          <button type="button" onClick={() => void downloadExport()}>
+            Export JSON
+          </button>
+          <button type="button" onClick={() => navigate('/edit/import')}>
+            Import JSON
           </button>
         </div>
       </header>

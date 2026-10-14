@@ -4,9 +4,12 @@ import type { AuthenticatedRequest } from '../middleware/authenticationMiddlewar
 import {
   createEventService,
   deleteEventService,
+  exportEventsService,
+  findImportDuplicatesService,
   getEventService,
   getEventOccurrencesService,
   getEventsService,
+  importEventsService,
   updateEventService,
   updateOccurrenceService,
 } from '../services/events.service.js';
@@ -48,6 +51,40 @@ export async function getEvents(req: AuthenticatedRequest, res: Response) {
     return fail(res, error);
   }
 }
+export async function exportEvents(req: AuthenticatedRequest, res: Response) {
+  const userId = getUserId(req, res);
+  if (userId === null) return;
+  try {
+    res.setHeader('Content-Disposition', 'attachment; filename="dashboard-events.json"');
+    return res.json(await exportEventsService(userId));
+  } catch (error) {
+    return fail(res, error);
+  }
+}
+export async function checkImportDuplicates(req: AuthenticatedRequest, res: Response) {
+  const userId = getUserId(req, res);
+  if (userId === null) return;
+  if (!Array.isArray(req.body.events))
+    return res.status(400).json({ message: 'events must be an array.' });
+  try {
+    return res.json({ duplicates: await findImportDuplicatesService(req.body.events, userId) });
+  } catch (error) {
+    return fail(res, error);
+  }
+}
+
+export async function importEvents(req: AuthenticatedRequest, res: Response) {
+  const userId = getUserId(req, res);
+  if (userId === null) return;
+  if (!Array.isArray(req.body.events))
+    return res.status(400).json({ message: 'events must be an array.' });
+  try {
+    return res.status(201).json(await importEventsService(req.body.events, userId));
+  } catch (error) {
+    return fail(res, error);
+  }
+}
+
 export async function getEvent(req: AuthenticatedRequest, res: Response) {
   const userId = getUserId(req, res);
   if (userId === null) return;
