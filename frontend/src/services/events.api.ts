@@ -30,4 +30,26 @@ export const updateEvent = (id: number, event: Partial<EventInput>) =>
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(event),
   });
+export const updateOccurrenceDescription = (
+  id: number,
+  occurrenceDate: string,
+  description: string,
+) =>
+  request<DashboardEvent>(`${baseUrl}/${id}/occurrences/${occurrenceDate}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ description }),
+  });
+export const updateOccurrence = (
+  id: number,
+  occurrenceDate: string,
+  update: { description?: string; date?: string },
+) =>
+  request<DashboardEvent>(`${baseUrl}/${id}/occurrences/${occurrenceDate}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(update),
+  });
+export const getEventOccurrences = (id: number) =>
+  request<DashboardEvent[]>(`${baseUrl}/${id}/occurrences`);
 export const deleteEvent = (id: number) => request<void>(`${baseUrl}/${id}`, { method: 'DELETE' });

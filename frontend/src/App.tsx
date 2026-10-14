@@ -33,16 +33,22 @@ function App() {
         <Route path="/home" element={<Home user={user} onLogin={setUser} />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/edit" element={<Edit />}>
-          <Route index element={<h1></h1>} />
-          <Route path="movies" element={<EventManager key="movie" category="MOVIE" />} />
-          <Route path="tv-shows" element={<EventManager key="tv-show" category="TV_SHOW" />} />
-          <Route path="games" element={<EventManager key="game" category="GAME" />} />
-          <Route path="birthdays" element={<EventManager key="birthday" category="BIRTHDAY" />} />
+          <Route index element={<EventManager />} />
+          <Route path="movies" element={<EventManager key="movie" initialCategory="MOVIE" />} />
+          <Route
+            path="tv-shows"
+            element={<EventManager key="tv-show" initialCategory="TV_SHOW" />}
+          />
+          <Route path="games" element={<EventManager key="game" initialCategory="GAME" />} />
+          <Route
+            path="birthdays"
+            element={<EventManager key="birthday" initialCategory="BIRTHDAY" />}
+          />
           <Route
             path="appointments"
-            element={<EventManager key="appointment" category="APPOINTMENT" />}
+            element={<EventManager key="appointment" initialCategory="APPOINTMENT" />}
           />
-          <Route path="todos" element={<EventManager key="todo" category="TODO" />} />
+          <Route path="todos" element={<EventManager key="todo" initialCategory="TODO" />} />
           <Route path="events" element={<EventManager key="all-events" />} />
         </Route>
       </Routes>

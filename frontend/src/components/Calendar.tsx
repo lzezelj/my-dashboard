@@ -1,26 +1,90 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DashboardEvent, EventCategory } from '../types/events';
-import { eventCategories } from '../types/events';
-import { getEvents, updateEvent } from '../services/events.api';
+import { eventCategories, eventCategoryLabels } from '../types/events';
+import { getEvents, updateEvent, updateOccurrence } from '../services/events.api';
 import { dateOnlyToDisplay, localDateInputValue } from '../utils/dateUtils';
+import EventForm from './EventForm';
+import Modal from './Modal';
 
-const categoryLabels: Record<EventCategory, string> = {
-  APPOINTMENT: 'Appointment',
-  BIRTHDAY: 'Birthday',
-  MOVIE: 'Movie',
-  TV_SHOW: 'TV show',
-  GAME: 'Game',
-  TODO: 'Todo',
-  OTHER: 'Other',
-};
 const eventDate = (event: DashboardEvent) =>
   event.occurrenceDate ?? event.date?.slice(0, 10) ?? event.startTime?.slice(0, 10) ?? '';
 const isSameEvent = (first: DashboardEvent | null, second: DashboardEvent) =>
   first?.id === second.id && eventDate(first) === eventDate(second);
-function EventDetails({ event }: { event: DashboardEvent }) {
+function EventDetails({
+  event,
+  onSaved,
+}: {
+  event: DashboardEvent;
+  onSaved: () => void | Promise<void>;
+}) {
+  const [editingDescription, setEditingDescription] = useState(false);
+  const [description, setDescription] = useState(event.description ?? '');
+  const [occurrenceDate, setOccurrenceDate] = useState(eventDate(event));
+  const [error, setError] = useState<string | null>(null);
+  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
+  const saveOccurrence = async () => {
+    try {
+      setError(null);
+      await updateOccurrence(event.id, event.sourceOccurrenceDate ?? eventDate(event), {
+        description,
+        date: occurrenceDate,
+      });
+      setEditingDescription(false);
+      setShowSaveConfirmation(false);
+      await onSaved();
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error ? saveError.message : 'Could not save occurrence changes.',
+      );
+    }
+  };
   return (
     <aside className="event-details" aria-live="polite">
+      <Modal
+        isOpen={showSaveConfirmation}
+        title="Save occurrence changes?"
+        confirmLabel="Save changes"
+        onCancel={() => setShowSaveConfirmation(false)}
+        onConfirm={() => void saveOccurrence()}
+      >
+        <p>This changes only this occurrence, not the full recurring event.</p>
+      </Modal>
       <p>{event.description?.trim() || 'No description has been added for this event.'}</p>
+      {event.recurring && (
+        <>
+          <button
+            type="button"
+            className="event-details__edit"
+            onClick={() => setEditingDescription((open) => !open)}
+          >
+            {editingDescription ? 'Cancel' : 'Edit this occurrence'}
+          </button>
+          {editingDescription && (
+            <div className="event-details__editor">
+              <label className="form-field event-details__date">
+                Date
+                <input
+                  type="date"
+                  value={occurrenceDate}
+                  onChange={(e) => setOccurrenceDate(e.target.value)}
+                />
+              </label>
+              <label className="form-field event-details__description">
+                Description
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+              </label>
+              {error && <p className="form-error">{error}</p>}
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => setShowSaveConfirmation(true)}
+              >
+                Save occurrence
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </aside>
   );
 }
@@ -34,22 +98,34 @@ export default function Calendar() {
   const [upcomingCategory, setUpcomingCategory] = useState<EventCategory | 'ALL'>('ALL');
   const [selectedDayEvent, setSelectedDayEvent] = useState<DashboardEvent | null>(null);
   const [selectedUpcomingEvent, setSelectedUpcomingEvent] = useState<DashboardEvent | null>(null);
-  useEffect(() => {
-    const start = `${month}-01`,
-      end = localDateInputValue(new Date(Number(month.slice(0, 4)), Number(month.slice(5)), 0));
-    getEvents({ from: start, to: end }).then(setEvents).catch(console.error);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const loadMonth = useCallback(async () => {
+    const start = `${month}-01`;
+    const end = localDateInputValue(new Date(Number(month.slice(0, 4)), Number(month.slice(5)), 0));
+    try {
+      setEvents(await getEvents({ from: start, to: end }));
+    } catch (error) {
+      console.error(error);
+    }
   }, [month]);
-  useEffect(() => {
+  const loadUpcoming = useCallback(async () => {
     const filters =
       upcomingCategory === 'ALL' ? { from: today } : { from: today, category: upcomingCategory };
-    getEvents(filters)
-      .then((items) =>
-        setUpcomingEvents(
-          items.sort((a, b) => eventDate(a).localeCompare(eventDate(b))).slice(0, 5),
-        ),
-      )
-      .catch(console.error);
+    try {
+      const items = await getEvents(filters);
+      setUpcomingEvents(items.sort((a, b) => eventDate(a).localeCompare(eventDate(b))).slice(0, 5));
+    } catch (error) {
+      console.error(error);
+    }
   }, [today, upcomingCategory]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadMonth(), 0);
+    return () => window.clearTimeout(timer);
+  }, [loadMonth]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadUpcoming(), 0);
+    return () => window.clearTimeout(timer);
+  }, [loadUpcoming]);
   const byDate = useMemo(() => {
     const items = new Map<string, DashboardEvent[]>();
     events.forEach((event) => {
@@ -75,6 +151,7 @@ export default function Calendar() {
                 onClick={() => {
                   setSelected(date);
                   setSelectedDayEvent(null);
+                  setShowCreateForm(false);
                 }}
               >
                 <span>{index + 1}</span>
@@ -105,7 +182,7 @@ export default function Calendar() {
                 >
                   <strong>{event.title}</strong>
                   <span>
-                    {categoryLabels[event.category]}
+                    {eventCategoryLabels[event.category]}
                     {event.startTime && (
                       <>
                         {' '}
@@ -118,7 +195,9 @@ export default function Calendar() {
                     )}
                   </span>
                 </button>
-                {isSameEvent(selectedDayEvent, event) && <EventDetails event={event} />}
+                {isSameEvent(selectedDayEvent, event) && (
+                  <EventDetails event={event} onSaved={loadMonth} />
+                )}
               </div>
             ))
           )}
@@ -141,6 +220,24 @@ export default function Calendar() {
                 {event.title}: {event.completed ? 'Completed' : 'Complete'}
               </button>
             ))}
+          <button
+            className="selected-day-action primary-button"
+            type="button"
+            onClick={() => setShowCreateForm((open) => !open)}
+          >
+            {showCreateForm ? 'Close form' : 'Add event'}
+          </button>
+          {showCreateForm && (
+            <EventForm
+              key={`calendar-create-${selected}`}
+              initialDate={selected}
+              onCancel={() => setShowCreateForm(false)}
+              onSaved={async () => {
+                setShowCreateForm(false);
+                await Promise.all([loadMonth(), loadUpcoming()]);
+              }}
+            />
+          )}
         </section>
       </div>
       <section className="upcoming-events-window" aria-labelledby="upcoming-events-title">
@@ -158,7 +255,7 @@ export default function Calendar() {
               <option value="ALL">All categories</option>
               {eventCategories.map((category) => (
                 <option key={category} value={category}>
-                  {categoryLabels[category]}
+                  {eventCategoryLabels[category]}
                 </option>
               ))}
             </select>
@@ -185,10 +282,17 @@ export default function Calendar() {
                   <strong>{event.title}</strong>
                   <span>
                     {dateOnlyToDisplay(eventDate(event))} {'\u2014'}{' '}
-                    {categoryLabels[event.category]}
+                    {eventCategoryLabels[event.category]}
                   </span>
                 </button>
-                {isSameEvent(selectedUpcomingEvent, event) && <EventDetails event={event} />}
+                {isSameEvent(selectedUpcomingEvent, event) && (
+                  <EventDetails
+                    event={event}
+                    onSaved={async () => {
+                      await Promise.all([loadMonth(), loadUpcoming()]);
+                    }}
+                  />
+                )}
               </div>
             ))
           )}

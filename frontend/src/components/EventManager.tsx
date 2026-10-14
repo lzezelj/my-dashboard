@@ -1,271 +1,272 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { DashboardEvent, EventCategory, EventInput, Recurrence } from '../types/events';
-import { eventCategories, recurrences } from '../types/events';
-import { createEvent, deleteEvent, getEvents, updateEvent } from '../services/events.api';
-import { dateOnlyToDisplay, localDateInputValue } from '../utils/dateUtils';
+import type { DashboardEvent, EventCategory } from '../types/events';
+import { eventCategories, eventCategoryLabels } from '../types/events';
+import {
+  deleteEvent,
+  getEventOccurrences,
+  getEvents,
+  updateEvent,
+  updateOccurrence,
+} from '../services/events.api';
+import { dateOnlyToDisplay } from '../utils/dateUtils';
+import EventForm from './EventForm';
+import Modal from './Modal';
 
-const labels: Record<EventCategory, string> = {
-  APPOINTMENT: 'Appointment',
-  BIRTHDAY: 'Birthday',
-  MOVIE: 'Movie',
-  TV_SHOW: 'TV show',
-  GAME: 'Game',
-  TODO: 'Todo',
-  OTHER: 'Other',
-};
-const empty = (category: EventCategory): EventInput => ({
-  category,
-  title: '',
-  date: localDateInputValue(),
-  startTime: null,
-  endTime: null,
-  description: null,
-  recurring: null,
-  numberOfRecurrences: null,
-  allowCompletion: category === 'TODO',
-  completed: false,
-});
-export default function EventManager({ category }: { category?: EventCategory }) {
-  const initialCategory = category ?? 'OTHER';
-  const [events, setEvents] = useState<DashboardEvent[]>([]),
-    [form, setForm] = useState<EventInput>(() => empty(initialCategory)),
-    [error, setError] = useState<string | null>(null),
-    [editing, setEditing] = useState<number | null>(null);
+export default function EventManager({ initialCategory }: { initialCategory?: EventCategory }) {
+  const [filterCategory, setFilterCategory] = useState<EventCategory | 'ALL'>(
+    initialCategory ?? 'ALL',
+  );
+  const [events, setEvents] = useState<DashboardEvent[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<DashboardEvent | null>(null);
+  const [eventToDelete, setEventToDelete] = useState<DashboardEvent | null>(null);
+  const [occurrenceEventId, setOccurrenceEventId] = useState<number | null>(null);
+  const [occurrences, setOccurrences] = useState<DashboardEvent[]>([]);
+  const [editingOccurrence, setEditingOccurrence] = useState<DashboardEvent | null>(null);
+  const [occurrenceDescription, setOccurrenceDescription] = useState('');
+  const [occurrenceDate, setOccurrenceDate] = useState('');
+  const [showOccurrenceSaveConfirmation, setShowOccurrenceSaveConfirmation] = useState(false);
   const load = useCallback(async () => {
     try {
-      setEvents(await getEvents(category ? { category } : {}));
+      setError(null);
+      setEvents(await getEvents(filterCategory === 'ALL' ? {} : { category: filterCategory }));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load events.');
     }
-  }, [category]);
+  }, [filterCategory]);
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void load();
-    }, 0);
+    const timer = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(timer);
   }, [load]);
-  const set = <K extends keyof EventInput>(key: K, value: EventInput[K]) =>
-    setForm((current) => ({ ...current, [key]: value }));
-  const submit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError(null);
+  const closeForm = () => {
+    setShowCreate(false);
+    setEditingEvent(null);
+  };
+  const saved = async () => {
+    closeForm();
+    await load();
+  };
+  const toggleOccurrences = async (event: DashboardEvent) => {
+    if (occurrenceEventId === event.id) {
+      setOccurrenceEventId(null);
+      setEditingOccurrence(null);
+      return;
+    }
     try {
-      const payload = {
-        ...form,
-        description: form.description?.trim() || null,
-        date: form.startTime ? null : form.date,
-        endTime: form.startTime ? form.endTime : null,
-        allowCompletion: form.category === 'TODO' ? form.allowCompletion : false,
-        completed: form.category === 'TODO' && form.allowCompletion ? form.completed : false,
-        recurring: form.recurring || null,
-        numberOfRecurrences: form.recurring ? form.numberOfRecurrences : null,
-      };
-      if (editing) await updateEvent(editing, payload);
-      else await createEvent(payload);
-      setEditing(null);
-      setForm(empty(category ?? form.category));
-      await load();
+      setOccurrences(await getEventOccurrences(event.id));
+      setOccurrenceEventId(event.id);
+      setEditingOccurrence(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save event.');
+      setError(err instanceof Error ? err.message : 'Could not load occurrences.');
     }
   };
-  const edit = (event: DashboardEvent) => {
-    setEditing(event.id);
-    setForm({
-      ...event,
-      date: event.date?.slice(0, 10) ?? null,
-      startTime: event.startTime,
-      endTime: event.endTime,
-    });
+  const saveOccurrence = async () => {
+    if (!editingOccurrence || occurrenceEventId === null) return;
+    try {
+      await updateOccurrence(
+        occurrenceEventId,
+        editingOccurrence.sourceOccurrenceDate ?? editingOccurrence.occurrenceDate ?? '',
+        { description: occurrenceDescription, date: occurrenceDate },
+      );
+      setOccurrences(await getEventOccurrences(occurrenceEventId));
+      setEditingOccurrence(null);
+      setShowOccurrenceSaveConfirmation(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save occurrence changes.');
+    }
   };
   return (
     <div className="event-manager">
+      <Modal
+        isOpen={showOccurrenceSaveConfirmation}
+        title="Save occurrence changes?"
+        confirmLabel="Save changes"
+        onCancel={() => setShowOccurrenceSaveConfirmation(false)}
+        onConfirm={() => void saveOccurrence()}
+      >
+        <p>This updates only the selected occurrence, not the entire recurring event.</p>
+      </Modal>
+      <Modal
+        isOpen={eventToDelete !== null}
+        title="Delete event?"
+        confirmLabel="Delete event"
+        destructive
+        onCancel={() => setEventToDelete(null)}
+        onConfirm={() => {
+          if (!eventToDelete) return;
+          void deleteEvent(eventToDelete.id)
+            .then(load)
+            .finally(() => setEventToDelete(null));
+        }}
+      >
+        <p>Delete “{eventToDelete?.title}”? This cannot be undone.</p>
+      </Modal>
+      <header className="event-manager__header">
+        <div>
+          <h1>Events</h1>
+          <p>Browse, add, and update your events.</p>
+        </div>
+        <div className="event-manager__controls">
+          <label className="category-selector">
+            Category
+            <select
+              value={filterCategory}
+              onChange={(e) => {
+                setFilterCategory(e.target.value as EventCategory | 'ALL');
+                closeForm();
+              }}
+            >
+              <option value="ALL">All categories</option>
+              {eventCategories.map((item) => (
+                <option key={item} value={item}>
+                  {eventCategoryLabels[item]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            className="primary-button"
+            type="button"
+            onClick={() => {
+              setEditingEvent(null);
+              setShowCreate((open) => !open);
+            }}
+          >
+            {showCreate ? 'Close form' : 'Add event'}
+          </button>
+        </div>
+      </header>
       {error && (
         <p className="form-error" role="alert">
           {error}
         </p>
       )}
-      <form className="event-manager__form" onSubmit={submit}>
-        <header className="event-manager__form-header">
-          <div>
-            <h2>{editing ? 'Edit event' : 'Create event'}</h2>
-            <p>{editing ? 'Update the details below.' : 'Add an event to your dashboard.'}</p>
-          </div>
-        </header>
-        <div className="event-form-section event-form-section--details">
-          <h3>Details</h3>
-          {!category && (
-            <label className="form-field">
-              Category
-              <select
-                value={form.category}
-                onChange={(e) => set('category', e.target.value as EventCategory)}
-              >
-                {eventCategories.map((item) => (
-                  <option key={item} value={item}>
-                    {labels[item]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <label className="form-field">
-            {form.category === 'BIRTHDAY' ? 'Name' : 'Title'}
-            <input
-              required
-              name={form.category === 'BIRTHDAY' ? 'name' : 'title'}
-              value={form.title}
-              onChange={(e) => set('title', e.target.value)}
-            />
-          </label>
-          <label className="form-field">
-            Description
-            <textarea
-              value={form.description ?? ''}
-              onChange={(e) => set('description', e.target.value || null)}
-            />
-          </label>
-        </div>
-        <div className="event-form-section event-form-section--schedule">
-          <h3>Schedule</h3>
-          <label className="calendar-checkbox">
-            <input
-              type="checkbox"
-              checked={Boolean(form.startTime)}
-              onChange={(e) =>
-                set(
-                  'startTime',
-                  e.target.checked ? new Date().toISOString().slice(0, 16) + ':00.000Z' : null,
-                )
-              }
-            />{' '}
-            Timed event
-          </label>
-          {form.startTime ? (
-            <>
-              <label className="form-field">
-                Start
-                <input
-                  type="datetime-local"
-                  value={form.startTime.slice(0, 16)}
-                  onChange={(e) => set('startTime', new Date(e.target.value).toISOString())}
-                />
-              </label>
-              <label className="form-field">
-                End
-                <input
-                  type="datetime-local"
-                  value={form.endTime?.slice(0, 16) ?? ''}
-                  onChange={(e) =>
-                    set('endTime', e.target.value ? new Date(e.target.value).toISOString() : null)
-                  }
-                />
-              </label>
-            </>
-          ) : (
-            <label className="form-field">
-              Date
-              <input
-                required
-                type="date"
-                value={form.date ?? ''}
-                onChange={(e) => set('date', e.target.value)}
-              />
-            </label>
-          )}
-        </div>
-        <div className="event-form-section event-form-section--options">
-          <h3>Options</h3>
-          {form.category === 'TODO' && (
-            <label className="calendar-checkbox">
-              <input
-                type="checkbox"
-                checked={form.allowCompletion}
-                onChange={(e) => set('allowCompletion', e.target.checked)}
-              />{' '}
-              Allow completion
-            </label>
-          )}
-          <label className="form-field">
-            Recurrence
-            <select
-              value={form.recurring ?? ''}
-              onChange={(e) => set('recurring', (e.target.value || null) as Recurrence | null)}
-            >
-              <option value="">One-time</option>
-              {recurrences.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
-          {form.recurring && (
-            <label className="form-field">
-              Occurrences
-              <input
-                required
-                min="1"
-                type="number"
-                value={form.numberOfRecurrences ?? 1}
-                onChange={(e) => set('numberOfRecurrences', Number(e.target.value))}
-              />
-            </label>
-          )}
-        </div>
-        <div className="event-manager__form-actions">
-          <button className="primary-button" type="submit">
-            {editing ? 'Update event' : 'Create event'}
-          </button>
-          {editing && (
-            <button
-              type="button"
-              onClick={() => {
-                setEditing(null);
-                setForm(empty(category ?? form.category));
-              }}
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
+      {showCreate && (
+        <EventForm
+          key={`create-${filterCategory}`}
+          category={filterCategory === 'ALL' ? undefined : filterCategory}
+          onSaved={saved}
+          onCancel={closeForm}
+        />
+      )}
       <section className="event-manager__list" aria-label="Saved events">
-        <h1>{category ? `${labels[category]} events` : 'Events'}</h1>
-        {events.map((event) => (
-          <article className="event-manager__card" key={event.id}>
-            <h3>{event.title}</h3>
-            <p>
-              {labels[event.category]} ·{' '}
-              {dateOnlyToDisplay(event.date ?? event.startTime?.slice(0, 10) ?? '')}
-            </p>
-            {event.description && <p>{event.description}</p>}
-            {event.allowCompletion && (
-              <button
-                type="button"
-                onClick={async () => {
-                  await updateEvent(event.id, { completed: !event.completed });
-                  await load();
-                }}
-              >
-                {event.completed ? 'Mark incomplete' : 'Complete'}
-              </button>
-            )}
-            <button type="button" onClick={() => edit(event)}>
-              Edit
-            </button>
-            <button
-              type="button"
-              className="danger-button"
-              onClick={async () => {
-                await deleteEvent(event.id);
-                await load();
-              }}
-            >
-              Delete
-            </button>
-          </article>
-        ))}
+        {events.length === 0 ? (
+          <p className="event-list-empty">No events in this category.</p>
+        ) : (
+          events.map((event) => (
+            <div className="event-manager__entry" key={event.id}>
+              <article className="event-manager__card">
+                <h3>{event.title}</h3>
+                <p>
+                  {eventCategoryLabels[event.category]} ·{' '}
+                  {dateOnlyToDisplay(event.date ?? event.startTime?.slice(0, 10) ?? '')}
+                </p>
+                {event.description && <p>{event.description}</p>}
+                {event.allowCompletion && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await updateEvent(event.id, { completed: !event.completed });
+                      await load();
+                    }}
+                  >
+                    {event.completed ? 'Mark incomplete' : 'Complete'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreate(false);
+                    setEditingEvent((current) => (current?.id === event.id ? null : event));
+                  }}
+                >
+                  Edit
+                </button>
+                {event.recurring && (
+                  <button type="button" onClick={() => void toggleOccurrences(event)}>
+                    {occurrenceEventId === event.id ? 'Close occurrences' : 'Edit occurrences'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="danger-button"
+                  onClick={() => setEventToDelete(event)}
+                >
+                  Delete
+                </button>
+              </article>
+              {editingEvent?.id === event.id && (
+                <EventForm
+                  key={`edit-${event.id}`}
+                  event={event}
+                  category={event.category}
+                  onSaved={saved}
+                  onCancel={closeForm}
+                />
+              )}
+              {occurrenceEventId === event.id && (
+                <section
+                  className="occurrences-window"
+                  aria-label={`Occurrences of ${event.title}`}
+                >
+                  <h4>Occurrences</h4>
+                  {occurrences.map((occurrence) => (
+                    <div className="occurrences-window__item" key={occurrence.occurrenceDate}>
+                      <div>
+                        <strong>{dateOnlyToDisplay(occurrence.occurrenceDate ?? '')}</strong>
+                        <p>
+                          {occurrence.description ||
+                            'No description has been added for this occurrence.'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingOccurrence(occurrence);
+                          setOccurrenceDescription(occurrence.description ?? '');
+                          setOccurrenceDate(occurrence.occurrenceDate ?? '');
+                        }}
+                      >
+                        Edit occurrence
+                      </button>
+                      {editingOccurrence?.occurrenceDate === occurrence.occurrenceDate && (
+                        <div className="occurrences-window__editor">
+                          <label className="form-field">
+                            Date
+                            <input
+                              type="date"
+                              value={occurrenceDate}
+                              onChange={(changeEvent) =>
+                                setOccurrenceDate(changeEvent.target.value)
+                              }
+                            />
+                          </label>
+                          <label className="form-field occurrences-window__description">
+                            Description
+                            <textarea
+                              value={occurrenceDescription}
+                              onChange={(changeEvent) =>
+                                setOccurrenceDescription(changeEvent.target.value)
+                              }
+                            />
+                          </label>
+                          <button
+                            className="primary-button"
+                            type="button"
+                            onClick={() => setShowOccurrenceSaveConfirmation(true)}
+                          >
+                            Save occurrence
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </section>
+              )}
+            </div>
+          ))
+        )}
       </section>
     </div>
   );

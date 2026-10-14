@@ -14,19 +14,17 @@ export default function GoogleLoginButton({ onLogin }: GoogleLoginButtonProps) {
           return;
         }
 
-        console.log('Google login successful, contacting backend...');
-
         try {
-          const response = await fetch('http://localhost:3000/api/auth/google', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              credential: credentialResponse.credential,
-            }),
-          });
+          const authenticate = (endpoint: 'login' | 'register') =>
+            fetch(`http://localhost:3000/api/auth/google/${endpoint}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ credential: credentialResponse.credential }),
+            });
+
+          let response = await authenticate('login');
+          if (response.status === 404) response = await authenticate('register');
 
           const data = (await response.json()) as { message?: string; user?: AuthUser };
 

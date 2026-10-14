@@ -5,6 +5,7 @@ type ModalProps = {
   title: string;
   children: ReactNode;
   confirmLabel: string;
+  cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
   destructive?: boolean;
@@ -15,6 +16,7 @@ export default function Modal({
   title,
   children,
   confirmLabel,
+  cancelLabel = 'Cancel',
   onConfirm,
   onCancel,
   destructive = false,
@@ -36,7 +38,7 @@ export default function Modal({
         <div className="modal-content">{children}</div>
         <div className="modal-actions">
           <button type="button" onClick={onCancel}>
-            Cancel
+            {cancelLabel}
           </button>
           <button
             type="button"

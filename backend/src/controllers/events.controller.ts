@@ -5,8 +5,10 @@ import {
   createEventService,
   deleteEventService,
   getEventService,
+  getEventOccurrencesService,
   getEventsService,
   updateEventService,
+  updateOccurrenceService,
 } from '../services/events.service.js';
 const eventId = (value: string) => {
   const id = Number(value);
@@ -59,6 +61,20 @@ export async function getEvent(req: AuthenticatedRequest, res: Response) {
     return fail(res, error);
   }
 }
+export async function getEventOccurrences(req: AuthenticatedRequest, res: Response) {
+  const userId = getUserId(req, res);
+  if (userId === null) return;
+  const id = eventId(typeof req.params.id === 'string' ? req.params.id : '');
+  if (!id) return res.status(400).json({ message: 'Invalid event id.' });
+  try {
+    const occurrences = await getEventOccurrencesService(id, userId);
+    return occurrences
+      ? res.json(occurrences)
+      : res.status(404).json({ message: 'Event not found.' });
+  } catch (error) {
+    return fail(res, error);
+  }
+}
 export async function createEvent(req: AuthenticatedRequest, res: Response) {
   const userId = getUserId(req, res);
   if (userId === null) return;
@@ -77,6 +93,19 @@ export async function updateEvent(req: AuthenticatedRequest, res: Response) {
   if (!id) return res.status(400).json({ message: 'Invalid event id.' });
   try {
     const event = await updateEventService(id, req.body, userId);
+    return event ? res.json(event) : res.status(404).json({ message: 'Event not found.' });
+  } catch (error) {
+    return fail(res, error);
+  }
+}
+export async function updateOccurrence(req: AuthenticatedRequest, res: Response) {
+  const userId = getUserId(req, res);
+  if (userId === null) return;
+  const id = eventId(typeof req.params.id === 'string' ? req.params.id : '');
+  const occurrence = typeof req.params.occurrenceDate === 'string' ? req.params.occurrenceDate : '';
+  if (!id) return res.status(400).json({ message: 'Invalid event id.' });
+  try {
+    const event = await updateOccurrenceService(id, occurrence, req.body, userId);
     return event ? res.json(event) : res.status(404).json({ message: 'Event not found.' });
   } catch (error) {
     return fail(res, error);

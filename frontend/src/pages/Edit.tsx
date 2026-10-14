@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom';
 import { useRef, useState } from 'react';
-import EditNavbar from '../components/EditNavbar';
 import Toast from '../components/Toast';
 
 export type EditOutletContext = {
@@ -19,7 +18,6 @@ export default function Edit() {
 
   return (
     <main className="edit-page">
-      <EditNavbar />
       <section className="edit-content">
         <Outlet context={{ showToast } satisfies EditOutletContext} />
       </section>

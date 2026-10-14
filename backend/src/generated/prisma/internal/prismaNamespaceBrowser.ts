@@ -52,7 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
-  Event: 'Event'
+  Event: 'Event',
+  EventOccurrenceOverride: 'EventOccurrenceOverride'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -101,6 +102,17 @@ export const EventScalarFieldEnum = {
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const EventOccurrenceOverrideScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  occurrenceDate: 'occurrenceDate',
+  date: 'date',
+  description: 'description'
+} as const
+
+export type EventOccurrenceOverrideScalarFieldEnum = (typeof EventOccurrenceOverrideScalarFieldEnum)[keyof typeof EventOccurrenceOverrideScalarFieldEnum]
 
 
 export const SortOrder = {

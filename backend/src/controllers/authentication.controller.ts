@@ -1,104 +1,100 @@
 import type { Request, Response } from 'express';
+import type { TokenPayload } from 'google-auth-library';
 import type { AuthenticatedRequest } from '../middleware/authenticationMiddleware.js';
-import { verifyGoogleToken, findOrCreateGoogleUser } from '../services/authentication.service.js';
+import {
+  findGoogleUser,
+  registerGoogleUser,
+  verifyGoogleToken,
+} from '../services/authentication.service.js';
 import { generateJwt } from '../services/jwt.service.js';
 import { prisma } from '../lib/prisma.js';
 
-export const googleLogin = async (req: Request, res: Response) => {
+const getGooglePayload = async (req: Request, res: Response): Promise<TokenPayload | null> => {
   const { credential } = req.body ?? {};
-
   if (typeof credential !== 'string' || !credential) {
-    return res.status(400).json({
-      message: 'Google credential is required',
-    });
+    res.status(400).json({ message: 'Google credential is required' });
+    return null;
   }
 
-  let payload;
-
   try {
-    payload = await verifyGoogleToken(credential);
+    const payload = await verifyGoogleToken(credential);
+    if (!payload?.sub || !payload.email || !payload.email_verified) {
+      res.status(401).json({ message: 'Invalid Google account information' });
+      return null;
+    }
+    return payload;
   } catch (error) {
     console.error('Google token verification failed:', error);
-
-    return res.status(401).json({
-      message: 'Invalid Google credential',
-    });
+    res.status(401).json({ message: 'Invalid Google credential' });
+    return null;
   }
+};
 
-  if (!payload?.sub || !payload.email || !payload.email_verified) {
-    return res.status(401).json({
-      message: 'Invalid Google account information',
-    });
-  }
+const createSession = (
+  res: Response,
+  user: { id: number; email: string | null; name: string | null },
+) => {
+  const token = generateJwt(user.id);
+  res.cookie('auth_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000,
+    path: '/',
+  });
+  return res.status(200).json({ message: 'Google authentication successful', user });
+};
+
+export const loginWithGoogle = async (req: Request, res: Response) => {
+  const payload = await getGooglePayload(req, res);
+  if (!payload) return;
 
   try {
-    const user = await findOrCreateGoogleUser(payload);
-    const token = generateJwt(user.id);
-    res.cookie('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000,
-      path: '/',
-    });
-
-    return res.status(200).json({
-      message: 'Google authentication successful',
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      },
-    });
+    const user = await findGoogleUser(payload.sub!);
+    if (!user) return res.status(404).json({ message: 'Google account is not registered' });
+    return createSession(res, user);
   } catch (error) {
-    console.error('Could not create or retrieve user:', error);
+    console.error('Could not log in:', error);
+    return res.status(500).json({ message: 'Could not complete login' });
+  }
+};
 
-    return res.status(500).json({
-      message: 'Could not complete authentication',
-    });
+export const registerWithGoogle = async (req: Request, res: Response) => {
+  const payload = await getGooglePayload(req, res);
+  if (!payload) return;
+
+  try {
+    const existingUser = await findGoogleUser(payload.sub!);
+    if (existingUser)
+      return res.status(409).json({ message: 'Google account is already registered' });
+    return createSession(res, await registerGoogleUser(payload));
+  } catch (error) {
+    console.error('Could not register user:', error);
+    return res.status(500).json({ message: 'Could not complete registration' });
   }
 };
 
 export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
-  if (req.userId === undefined) {
-    return res.status(401).json({
-      message: 'Authentication required',
-    });
-  }
+  if (req.userId === undefined) return res.status(401).json({ message: 'Authentication required' });
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-      },
+      select: { id: true, email: true, name: true },
     });
-
-    if (!user) {
-      return res.status(401).json({
-        message: 'User no longer exists',
-      });
-    }
-
+    if (!user) return res.status(401).json({ message: 'User no longer exists' });
     return res.status(200).json({ user });
   } catch (error) {
     console.error('Failed to retrieve current user:', error);
-
-    return res.status(500).json({
-      message: 'Could not retrieve user',
-    });
+    return res.status(500).json({ message: 'Could not retrieve user' });
   }
 };
-export const logout = (req: Request, res: Response) => {
+
+export const logout = (_req: Request, res: Response) => {
   res.clearCookie('auth_token', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
   });
-
-  return res.status(200).json({
-    message: 'Logged out successfully',
-  });
+  return res.status(200).json({ message: 'Logged out successfully' });
 };

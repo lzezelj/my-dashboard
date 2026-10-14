@@ -398,7 +398,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
-  Event: 'Event'
+  Event: 'Event',
+  EventOccurrenceOverride: 'EventOccurrenceOverride'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -414,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "event"
+    modelProps: "user" | "event" | "eventOccurrenceOverride"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -566,6 +567,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EventOccurrenceOverride: {
+      payload: Prisma.$EventOccurrenceOverridePayload<ExtArgs>
+      fields: Prisma.EventOccurrenceOverrideFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EventOccurrenceOverrideFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventOccurrenceOverridePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EventOccurrenceOverrideFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventOccurrenceOverridePayload>
+        }
+        findFirst: {
+          args: Prisma.EventOccurrenceOverrideFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventOccurrenceOverridePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EventOccurrenceOverrideFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventOccurrenceOverridePayload>
+        }
+        findMany: {
+          args: Prisma.EventOccurrenceOverrideFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventOccurrenceOverridePayload>[]
+        }
+        create: {
+          args: Prisma.EventOccurrenceOverrideCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventOccurrenceOverridePayload>
+        }
+        createMany: {
+          args: Prisma.EventOccurrenceOverrideCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EventOccurrenceOverrideCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventOccurrenceOverridePayload>[]
+        }
+        delete: {
+          args: Prisma.EventOccurrenceOverrideDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventOccurrenceOverridePayload>
+        }
+        update: {
+          args: Prisma.EventOccurrenceOverrideUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventOccurrenceOverridePayload>
+        }
+        deleteMany: {
+          args: Prisma.EventOccurrenceOverrideDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EventOccurrenceOverrideUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EventOccurrenceOverrideUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventOccurrenceOverridePayload>[]
+        }
+        upsert: {
+          args: Prisma.EventOccurrenceOverrideUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventOccurrenceOverridePayload>
+        }
+        aggregate: {
+          args: Prisma.EventOccurrenceOverrideAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEventOccurrenceOverride>
+        }
+        groupBy: {
+          args: Prisma.EventOccurrenceOverrideGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventOccurrenceOverrideGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EventOccurrenceOverrideCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventOccurrenceOverrideCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -635,6 +710,17 @@ export const EventScalarFieldEnum = {
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const EventOccurrenceOverrideScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  occurrenceDate: 'occurrenceDate',
+  date: 'date',
+  description: 'description'
+} as const
+
+export type EventOccurrenceOverrideScalarFieldEnum = (typeof EventOccurrenceOverrideScalarFieldEnum)[keyof typeof EventOccurrenceOverrideScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -910,6 +996,7 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   event?: Prisma.EventOmit
+  eventOccurrenceOverride?: Prisma.EventOccurrenceOverrideOmit
 }
 
 /* Types for Logging */

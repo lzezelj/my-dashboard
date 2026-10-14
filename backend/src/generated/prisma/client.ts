@@ -51,3 +51,8 @@ export type User = Prisma.UserModel
  * 
  */
 export type Event = Prisma.EventModel
+/**
+ * Model EventOccurrenceOverride
+ * 
+ */
+export type EventOccurrenceOverride = Prisma.EventOccurrenceOverrideModel

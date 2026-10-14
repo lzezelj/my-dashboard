@@ -18,24 +18,20 @@ export async function verifyGoogleToken(idToken: string) {
   return ticket.getPayload();
 }
 
-export async function findOrCreateGoogleUser(payload: TokenPayload) {
+export async function findGoogleUser(googleId: string) {
+  return prisma.user.findUnique({ where: { googleId } });
+}
+
+export async function registerGoogleUser(payload: TokenPayload) {
   if (!payload.sub || !payload.email || !payload.email_verified) {
     throw new Error('Invalid Google account information');
   }
 
-  const user = await prisma.user.upsert({
-    where: {
-      googleId: payload.sub,
-    },
-    update: {
-      name: payload.name ?? null,
-    },
-    create: {
+  return prisma.user.create({
+    data: {
       googleId: payload.sub,
       email: payload.email,
       name: payload.name ?? null,
     },
   });
-
-  return user;
 }

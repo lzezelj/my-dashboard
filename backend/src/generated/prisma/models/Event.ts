@@ -297,6 +297,7 @@ export type EventWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideListRelationFilter
 }
 
 export type EventOrderByWithRelationInput = {
@@ -315,6 +316,7 @@ export type EventOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideOrderByRelationAggregateInput
 }
 
 export type EventWhereUniqueInput = Prisma.AtLeast<{
@@ -336,6 +338,7 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideListRelationFilter
 }, "id">
 
 export type EventOrderByWithAggregationInput = {
@@ -394,6 +397,7 @@ export type EventCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutEventsInput
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateInput = {
@@ -411,6 +415,7 @@ export type EventUncheckedCreateInput = {
   completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventUpdateInput = {
@@ -427,6 +432,7 @@ export type EventUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutEventsNestedInput
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateInput = {
@@ -444,6 +450,7 @@ export type EventUncheckedUpdateInput = {
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateManyInput = {
@@ -568,6 +575,11 @@ export type EventSumOrderByAggregateInput = {
   numberOfRecurrences?: Prisma.SortOrder
 }
 
+export type EventScalarRelationFilter = {
+  is?: Prisma.EventWhereInput
+  isNot?: Prisma.EventWhereInput
+}
+
 export type EventCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.EventCreateWithoutUserInput, Prisma.EventUncheckedCreateWithoutUserInput> | Prisma.EventCreateWithoutUserInput[] | Prisma.EventUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.EventCreateOrConnectWithoutUserInput | Prisma.EventCreateOrConnectWithoutUserInput[]
@@ -638,6 +650,20 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
+export type EventCreateNestedOneWithoutOccurrenceOverridesInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutOccurrenceOverridesInput, Prisma.EventUncheckedCreateWithoutOccurrenceOverridesInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutOccurrenceOverridesInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneRequiredWithoutOccurrenceOverridesNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutOccurrenceOverridesInput, Prisma.EventUncheckedCreateWithoutOccurrenceOverridesInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutOccurrenceOverridesInput
+  upsert?: Prisma.EventUpsertWithoutOccurrenceOverridesInput
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutOccurrenceOverridesInput, Prisma.EventUpdateWithoutOccurrenceOverridesInput>, Prisma.EventUncheckedUpdateWithoutOccurrenceOverridesInput>
+}
+
 export type EventCreateWithoutUserInput = {
   category: $Enums.EventCategory
   title: string
@@ -651,6 +677,7 @@ export type EventCreateWithoutUserInput = {
   completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutUserInput = {
@@ -667,6 +694,7 @@ export type EventUncheckedCreateWithoutUserInput = {
   completed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutUserInput = {
@@ -715,6 +743,88 @@ export type EventScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
 }
 
+export type EventCreateWithoutOccurrenceOverridesInput = {
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  allowCompletion?: boolean
+  completed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user?: Prisma.UserCreateNestedOneWithoutEventsInput
+}
+
+export type EventUncheckedCreateWithoutOccurrenceOverridesInput = {
+  id?: number
+  userId?: number | null
+  category: $Enums.EventCategory
+  title: string
+  date?: Date | string | null
+  startTime?: Date | string | null
+  endTime?: Date | string | null
+  description?: string | null
+  recurring?: $Enums.Recurrence | null
+  numberOfRecurrences?: number | null
+  allowCompletion?: boolean
+  completed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type EventCreateOrConnectWithoutOccurrenceOverridesInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutOccurrenceOverridesInput, Prisma.EventUncheckedCreateWithoutOccurrenceOverridesInput>
+}
+
+export type EventUpsertWithoutOccurrenceOverridesInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutOccurrenceOverridesInput, Prisma.EventUncheckedUpdateWithoutOccurrenceOverridesInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutOccurrenceOverridesInput, Prisma.EventUncheckedCreateWithoutOccurrenceOverridesInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutOccurrenceOverridesInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutOccurrenceOverridesInput, Prisma.EventUncheckedUpdateWithoutOccurrenceOverridesInput>
+}
+
+export type EventUpdateWithoutOccurrenceOverridesInput = {
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneWithoutEventsNestedInput
+}
+
+export type EventUncheckedUpdateWithoutOccurrenceOverridesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  category?: Prisma.EnumEventCategoryFieldUpdateOperationsInput | $Enums.EventCategory
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recurring?: Prisma.NullableEnumRecurrenceFieldUpdateOperationsInput | $Enums.Recurrence | null
+  numberOfRecurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  allowCompletion?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type EventCreateManyUserInput = {
   id?: number
   category: $Enums.EventCategory
@@ -744,6 +854,7 @@ export type EventUpdateWithoutUserInput = {
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutUserInput = {
@@ -760,6 +871,7 @@ export type EventUncheckedUpdateWithoutUserInput = {
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  occurrenceOverrides?: Prisma.EventOccurrenceOverrideUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateManyWithoutUserInput = {
@@ -779,6 +891,35 @@ export type EventUncheckedUpdateManyWithoutUserInput = {
 }
 
 
+/**
+ * Count Type EventCountOutputType
+ */
+
+export type EventCountOutputType = {
+  occurrenceOverrides: number
+}
+
+export type EventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  occurrenceOverrides?: boolean | EventCountOutputTypeCountOccurrenceOverridesArgs
+}
+
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EventCountOutputType
+   */
+  select?: Prisma.EventCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountOccurrenceOverridesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EventOccurrenceOverrideWhereInput
+}
+
 
 export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -796,6 +937,8 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.Event$userArgs<ExtArgs>
+  occurrenceOverrides?: boolean | Prisma.Event$occurrenceOverridesArgs<ExtArgs>
+  _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -854,6 +997,8 @@ export type EventSelectScalar = {
 export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "category" | "title" | "date" | "startTime" | "endTime" | "description" | "recurring" | "numberOfRecurrences" | "allowCompletion" | "completed" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
 export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.Event$userArgs<ExtArgs>
+  occurrenceOverrides?: boolean | Prisma.Event$occurrenceOverridesArgs<ExtArgs>
+  _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.Event$userArgs<ExtArgs>
@@ -866,6 +1011,7 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   name: "Event"
   objects: {
     user: Prisma.$UserPayload<ExtArgs> | null
+    occurrenceOverrides: Prisma.$EventOccurrenceOverridePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1277,6 +1423,7 @@ readonly fields: EventFieldRefs;
 export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.Event$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  occurrenceOverrides<T extends Prisma.Event$occurrenceOverridesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$occurrenceOverridesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventOccurrenceOverridePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1737,6 +1884,30 @@ export type Event$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * Event.occurrenceOverrides
+ */
+export type Event$occurrenceOverridesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EventOccurrenceOverride
+   */
+  select?: Prisma.EventOccurrenceOverrideSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EventOccurrenceOverride
+   */
+  omit?: Prisma.EventOccurrenceOverrideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventOccurrenceOverrideInclude<ExtArgs> | null
+  where?: Prisma.EventOccurrenceOverrideWhereInput
+  orderBy?: Prisma.EventOccurrenceOverrideOrderByWithRelationInput | Prisma.EventOccurrenceOverrideOrderByWithRelationInput[]
+  cursor?: Prisma.EventOccurrenceOverrideWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EventOccurrenceOverrideScalarFieldEnum | Prisma.EventOccurrenceOverrideScalarFieldEnum[]
 }
 
 /**

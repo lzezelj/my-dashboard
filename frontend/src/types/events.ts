@@ -9,6 +9,15 @@ export const eventCategories = [
 ] as const;
 export const recurrences = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'] as const;
 export type EventCategory = (typeof eventCategories)[number];
+export const eventCategoryLabels: Record<EventCategory, string> = {
+  APPOINTMENT: 'Appointment',
+  BIRTHDAY: 'Birthday',
+  MOVIE: 'Movie',
+  TV_SHOW: 'TV show',
+  GAME: 'Game',
+  TODO: 'Todo',
+  OTHER: 'Other',
+};
 export type Recurrence = (typeof recurrences)[number];
 export interface DashboardEvent {
   id: number;
@@ -26,6 +35,7 @@ export interface DashboardEvent {
   createdAt: string;
   updatedAt: string;
   occurrenceDate?: string;
+  sourceOccurrenceDate?: string;
 }
 export type EventInput = Omit<
   DashboardEvent,
