@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "backup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backup-database.ps1",
+    "backup:test": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-backup-restore.ps1",
     "dev": "tsx watch src/app.ts",
     "start": "node dist/app.js",
     "build": "tsc",
@@ -32,11 +36,14 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.4.1",
+    "@types/supertest": "^7.2.1",
     "eslint": "^10.9.0",
     "globals": "^17.11.0",
     "prisma": "^7.10.0",
+    "supertest": "^7.3.1",
     "tsx": "^4.23.13",
     "typescript": "~6.0.2",
-    "typescript-eslint": "^8.67.0"
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^5.0.4"
   }
 }

@@ -5,7 +5,7 @@ import authenticationRoutes from './routes/authentication.routes.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
-const app = express();
+export const app = express();
 const PORT = 3000;
 
 app.use(
@@ -25,6 +25,8 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}

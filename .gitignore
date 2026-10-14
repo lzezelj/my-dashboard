@@ -4,6 +4,7 @@ node_modules/
 # Build output
 dist/
 build/
+backups/
 
 # Environment variables
 .env

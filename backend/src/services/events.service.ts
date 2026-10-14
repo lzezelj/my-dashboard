@@ -146,7 +146,7 @@ export function validateEventInput(input: EventInput, partial = false): EventInp
     invalid('details must be an object containing string values.');
   return { ...input, title: input.title?.trim() };
 }
-const toData = (input: EventInput) => ({
+const toData = (input: Partial<EventInput>) => ({
   category: input.category,
   title: input.title,
   date: input.date === undefined ? undefined : input.date === null ? null : parseDate(input.date),
@@ -193,7 +193,7 @@ const toData = (input: EventInput) => ({
 export async function getEventsService(
   filters: { category?: EventCategory; from?: string; to?: string },
   userId: number,
-) {
+): Promise<Array<Event | EventOccurrence>> {
   const events = await prisma.event.findMany({
     where: {
       userId,
@@ -455,7 +455,11 @@ export async function createEventService(input: EventInput, userId: number) {
   data.user = { connect: { id: userId } };
   return prisma.event.create({ data });
 }
-export async function updateEventService(id: number, input: EventInput, userId: number) {
+export async function updateEventService(
+  id: number,
+  input: Partial<EventInput>,
+  userId: number,
+) {
   const current = await getEventService(id, userId);
   if (!current) return null;
   const existing: EventInput = {

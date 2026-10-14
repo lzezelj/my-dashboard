@@ -2,42 +2,49 @@
 
 ## Phase 1: Architecture and Database
 
-- [ ] Finalize the unified Event schema
-- [ ] Define event categories, date/time handling, recurrence, and completion
-- [ ] Create the User model and event ownership relationship
-- [ ] Apply and test Prisma migrations
+- [x] Finalize the unified Event schema
+- [x] Define event categories, date/time handling, recurrence, and completion
+- [x] Create the User model and event ownership relationship
+- [x] Apply and test Prisma migrations
 
 ## Phase 2: Authentication
 
-- [ ] Implement Google sign-in
-- [ ] Create or retrieve internal user accounts
-- [ ] Implement secure cookie-based sessions
-- [ ] Implement logout and session expiration
-- [ ] Protect API endpoints and enforce user ownership
+- [x] Implement Google sign-in
+- [x] Create or retrieve internal user accounts
+- [x] Implement secure cookie-based sessions
+- [x] Implement logout and session expiration
+- [x] Protect API endpoints and enforce user ownership
 
 ## Phase 3: Calendar and Events
 
-- [ ] Implement event creation, editing, and deletion
-- [ ] Finish calendar integration
-- [ ] Handle date-only events and timezones correctly
-- [ ] Add input validation and error handling
-- [ ] Implement recurrence when needed
+- [x] Implement event creation, editing, and deletion
+- [x] Finish calendar integration
+- [x] Handle date-only events and timezones correctly
+- [x] Add input validation and error handling
+- [x] Implement recurrence when needed
 
 ## Phase 4: Data Import and Export
 
-- [ ] Implement CSV export
-- [ ] Implement CSV import with validation and preview
-- [ ] Handle duplicates and invalid files
-- [ ] Implement account deletion and data cleanup
+- [x] Implement CSV export
+- [x] Implement CSV import with validation and preview
+- [x] Handle duplicates and invalid files
+- [x] Implement account deletion and data cleanup
 
 ## Phase 5: Testing and Security
 
-- [ ] Test authentication and authorization
-- [ ] Test that users cannot access other users' data
-- [ ] Test event CRUD and CSV import/export
-- [ ] Test database migrations on a fresh database
-- [ ] Configure database backups and test restoration
-- [ ] Add automated tests
+- [x] Add the backend testing framework and test database configuration
+- [x] Test authentication middleware and session handling
+- [x] Test that users cannot read, edit, or delete another user’s events
+- [x] Test event creation, retrieval, editing, and deletion
+- [x] Test individual, selected, and all-event deletion
+- [x] Test JSON v2 import and export
+- [x] Test ICS parsing, preview, import, export, and malformed files
+- [x] Test finite, date-limited, and infinite recurrence
+- [x] Test account deletion and cascading data removal
+- [x] Test all migrations against a fresh database
+- [x] Review request limits, cookie settings, CORS, and input validation
+- [x] Configure database backups and test restoration
+- [x] Add frontend interaction tests
 
 ## Phase 6: Legal and Privacy
 
