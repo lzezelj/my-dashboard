@@ -18,8 +18,18 @@ const getGooglePayload = async (req: Request, res: Response): Promise<TokenPaylo
 
   try {
     const payload = await verifyGoogleToken(credential);
+
     if (!payload?.sub || !payload.email || !payload.email_verified) {
       res.status(401).json({ message: 'Invalid Google account information' });
+      return null;
+    }
+    const allowedEmails = (process.env.ALLOWED_GOOGLE_EMAILS ?? '')
+      .split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (allowedEmails.length > 0 && !allowedEmails.includes(payload.email.toLowerCase())) {
+      res.status(403).json({ message: 'This application is currently private' });
       return null;
     }
     return payload;
