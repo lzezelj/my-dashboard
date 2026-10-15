@@ -45,7 +45,7 @@ export default function Navbar({ user, onLogin, onLogout, onDeleteAccount }: Nav
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'personal-dashboard-calendar.json';
+      link.download = 'calendar-dashboard.json';
       link.click();
       URL.revokeObjectURL(url);
     } catch {

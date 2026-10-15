@@ -68,7 +68,9 @@ export function parseIcsService(ics: string): IcsPreviewEvent[] {
         : null;
     const warnings: string[] = [];
     let details: Record<string, string> | null = null;
-    const rawDetails = component.getFirstPropertyValue('x-personal-dashboard-details');
+    const rawDetails =
+      component.getFirstPropertyValue('x-calendar-dashboard-details') ??
+      component.getFirstPropertyValue('x-personal-dashboard-details');
     if (typeof rawDetails === 'string') {
       try {
         const parsed = JSON.parse(rawDetails) as unknown;
@@ -79,17 +81,19 @@ export function parseIcsService(ics: string): IcsPreviewEvent[] {
           Object.values(parsed).every((value) => typeof value === 'string')
         )
           details = parsed as Record<string, string>;
-        else warnings.push('Dashboard-specific category details could not be read.');
+        else warnings.push('Calendar Dashboard-specific category details could not be read.');
       } catch {
-        warnings.push('Dashboard-specific category details could not be read.');
+        warnings.push('Calendar Dashboard-specific category details could not be read.');
       }
     }
     if (recurrenceRule && !simpleRecurrence)
       warnings.push(
-        'The recurrence rule is preserved, but the dashboard does not yet expand this rule.',
+        'The recurrence rule is preserved, but Calendar Dashboard does not yet expand this rule.',
       );
     if (event.isRecurrenceException())
-      warnings.push('This is a recurrence exception and is currently imported as a separate event.');
+      warnings.push(
+        'This is a recurrence exception and is currently imported as a separate event.',
+      );
 
     return {
       sourceIndex: sourceIndex + 1,
@@ -112,7 +116,7 @@ export function parseIcsService(ics: string): IcsPreviewEvent[] {
       recurrenceDates: rawValues(component, 'rdate'),
       exclusionDates: rawValues(component, 'exdate'),
       recurring: simpleRecurrence,
-      numberOfRecurrences: simpleRecurrence ? recurrenceObject?.count ?? null : null,
+      numberOfRecurrences: simpleRecurrence ? (recurrenceObject?.count ?? null) : null,
       recurrenceEndDate: recurrenceObject?.until
         ? recurrenceObject.until.toString().slice(0, 10)
         : null,
@@ -139,7 +143,11 @@ export async function importIcsService(ics: string, selectedIndexes: number[], u
 }
 
 const compactUtc = (value: Date) =>
-  value.toISOString().replaceAll('-', '').replaceAll(':', '').replace(/\.\d{3}Z$/, 'Z');
+  value
+    .toISOString()
+    .replaceAll('-', '')
+    .replaceAll(':', '')
+    .replace(/\.\d{3}Z$/, 'Z');
 const dateOnlyIcs = (value: Date) => value.toISOString().slice(0, 10).replaceAll('-', '');
 
 export async function exportIcsService(userId: number) {
@@ -150,27 +158,29 @@ export async function exportIcsService(userId: number) {
   });
   const calendar = new ICAL.Component('vcalendar');
   calendar.addPropertyWithValue('version', '2.0');
-  calendar.addPropertyWithValue('prodid', '-//Personal Dashboard//Calendar//EN');
+  calendar.addPropertyWithValue('prodid', '-//Calendar Dashboard//Calendar//EN');
   calendar.addPropertyWithValue('calscale', 'GREGORIAN');
 
   for (const event of events) {
     const component = new ICAL.Component('vevent');
-    component.addPropertyWithValue('uid', event.externalUid || `event-${event.id}@personal-dashboard`);
+    component.addPropertyWithValue(
+      'uid',
+      event.externalUid || `event-${event.id}@calendar-dashboard`,
+    );
     component.addPropertyWithValue('dtstamp', ICAL.Time.fromJSDate(event.updatedAt, true));
     component.addPropertyWithValue('summary', event.title);
     if (event.description) component.addPropertyWithValue('description', event.description);
     if (event.details && typeof event.details === 'object' && !Array.isArray(event.details))
-      component.addPropertyWithValue(
-        'x-personal-dashboard-details',
-        JSON.stringify(event.details),
-      );
+      component.addPropertyWithValue('x-calendar-dashboard-details', JSON.stringify(event.details));
     if (event.location) component.addPropertyWithValue('location', event.location);
     if (event.url) component.addPropertyWithValue('url', event.url);
     component.addPropertyWithValue('categories', event.category);
     if (event.status) component.addPropertyWithValue('status', event.status);
     if (event.sequence !== null) component.addPropertyWithValue('sequence', event.sequence);
     if (event.date) {
-      component.addProperty(ICAL.Property.fromString(`DTSTART;VALUE=DATE:${dateOnlyIcs(event.date)}`));
+      component.addProperty(
+        ICAL.Property.fromString(`DTSTART;VALUE=DATE:${dateOnlyIcs(event.date)}`),
+      );
     } else if (event.startTime) {
       component.addProperty(ICAL.Property.fromString(`DTSTART:${compactUtc(event.startTime)}`));
       if (event.endTime)
@@ -189,8 +199,7 @@ export async function exportIcsService(userId: number) {
             .filter(Boolean)
             .join(';')
         : null);
-    if (recurrenceRule)
-      component.addProperty(ICAL.Property.fromString(`RRULE:${recurrenceRule}`));
+    if (recurrenceRule) component.addProperty(ICAL.Property.fromString(`RRULE:${recurrenceRule}`));
     for (const { value } of event.recurrenceDates)
       component.addProperty(ICAL.Property.fromString(`RDATE:${value}`));
     for (const { value } of event.exclusionDates)

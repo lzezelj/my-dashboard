@@ -1,4 +1,4 @@
-import { afterAll, afterEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, inject, it } from 'vitest';
 import { EventCategory, Recurrence } from '../src/generated/prisma/client.js';
 import { prisma } from '../src/lib/prisma.js';
 import {
@@ -21,8 +21,18 @@ import {
 const createUser = (suffix: string) =>
   prisma.user.create({ data: { email: `${suffix}@example.com`, googleId: `google-${suffix}` } });
 
+const testSchema = inject('databaseTestSchema');
+
+beforeAll(async () => {
+  const result = await prisma.$queryRaw<Array<{ current_schema: string }>>`SELECT current_schema()`;
+  if (result[0]?.current_schema !== testSchema)
+    throw new Error(
+      `Refusing to run integration tests outside ${testSchema}; connected to ${result[0]?.current_schema}`,
+    );
+});
+
 afterEach(async () => {
-  await prisma.user.deleteMany();
+  await prisma.user.deleteMany({ where: { email: { endsWith: '@example.com' } } });
 });
 
 afterAll(async () => {
@@ -303,6 +313,10 @@ describe('JSON and ICS portability', () => {
       expect.objectContaining({ title: 'Imported event', date: '2026-11-05' }),
     ]);
     expect(await importIcsService(ics, [1], user.id)).toEqual({ imported: 1, skipped: [] });
+    expect(await prisma.user.findUnique({ where: { id: user.id } })).toMatchObject({
+      id: user.id,
+      email: user.email,
+    });
     const exported = await exportIcsService(user.id);
     expect(exported).toContain('SUMMARY:Imported event');
     expect(parseIcsService(exported)).toHaveLength(1);
@@ -315,6 +329,36 @@ describe('JSON and ICS portability', () => {
 });
 
 describe('recurrence expansion', () => {
+  it('limits each recurring series for the upcoming-events view', async () => {
+    const user = await createUser('upcoming-limits');
+    const recurrences = [
+      [Recurrence.DAILY, 30],
+      [Recurrence.WEEKLY, 4],
+      [Recurrence.MONTHLY, 1],
+      [Recurrence.YEARLY, 1],
+    ] as const;
+
+    for (const [recurring] of recurrences) {
+      await createEventService(
+        {
+          category: EventCategory.OTHER,
+          title: recurring,
+          date: '2026-10-01',
+          recurring,
+        },
+        user.id,
+      );
+    }
+
+    const events = await getEventsService(
+      { from: '2026-10-15', upcoming: true },
+      user.id,
+    );
+    for (const [recurring, expectedCount] of recurrences) {
+      expect(events.filter((event) => event.recurring === recurring)).toHaveLength(expectedCount);
+    }
+  });
+
   it('expands finite recurrence', async () => {
     const user = await createUser('finite');
     await createEventService(

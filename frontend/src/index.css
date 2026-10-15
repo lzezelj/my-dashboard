@@ -1391,12 +1391,51 @@ code {
 }
 
 .event-manager__results-window {
+  scroll-margin-top: 90px;
   margin-top: 18px;
   padding: 16px 18px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--social-bg);
   box-shadow: var(--shadow);
+}
+
+.event-manager__delete-menu > summary {
+  border-color: var(--danger, #e0526f);
+  color: var(--danger, #ff6685);
+}
+
+.duplicate-results-modal {
+  width: min(760px, calc(100vw - 32px));
+}
+
+.duplicate-results {
+  display: grid;
+  max-height: 55vh;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+.duplicate-results__group {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.duplicate-results__event {
+  display: grid;
+  grid-template-columns: minmax(130px, auto) 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 6px;
+  background: var(--social-bg);
+}
+
+.duplicate-results__event + .duplicate-results__event strong {
+  color: var(--danger, #ff6685);
 }
 
 .event-manager__results-window > .event-pagination:first-child {
@@ -1534,6 +1573,15 @@ code {
 .event-manager__entry {
   display: grid;
   gap: 12px;
+}
+
+.event-manager__entry--current {
+  scroll-margin-top: 110px;
+}
+
+.event-manager__entry--current > .event-manager__card {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-bg);
 }
 
 .import-preview {
@@ -2503,3 +2551,59 @@ code {
   }
 }
 
+.site-footer {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px 16px;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.site-footer a,
+.legal-document a,
+.welcome-page__legal a {
+  color: var(--accent);
+}
+
+.legal-page {
+  width: min(900px, calc(100% - 32px));
+  margin: 32px auto;
+}
+
+.legal-document {
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--social-bg);
+  box-shadow: var(--shadow);
+}
+
+.legal-document h1 {
+  margin-top: 0;
+}
+
+.legal-document h2 {
+  margin-top: 30px;
+  font-size: 1.2rem;
+}
+
+.legal-document p,
+.legal-document li,
+.legal-document address {
+  line-height: 1.65;
+}
+
+.legal-document address {
+  font-style: normal;
+}
+
+.legal-document__updated,
+.welcome-page__legal {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.welcome-page__legal {
+  text-align: center;
+}

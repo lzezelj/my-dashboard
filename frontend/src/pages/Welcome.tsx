@@ -62,6 +62,10 @@ export default function Welcome({ user }: { user: AuthUser | null }) {
       <Link className="welcome-page__continue" to="/home">
         {hasImported ? 'Continue' : 'Continue without importing'}
       </Link>
+      <p className="welcome-page__legal">
+        Before continuing, please review the <Link to="/privacy">Privacy Policy</Link> and{' '}
+        <Link to="/imprint">Impressum</Link>.
+      </p>
     </main>
   );
 }

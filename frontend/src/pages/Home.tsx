@@ -29,7 +29,7 @@ export default function Home({
         <Toast message={deletionNotice} />
         <main className="home-landing">
           <section className="home-landing__hero">
-            <p className="home-landing__eyebrow">Personal dashboard</p>
+            <p className="home-landing__eyebrow">Calendar Dashboard</p>
             <h1>Keep your plans in one place.</h1>
             <p className="home-landing__copy">
               Organize appointments, birthdays, movies, tasks, and more. See what is coming up,

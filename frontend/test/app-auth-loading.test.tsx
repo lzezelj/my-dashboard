@@ -24,7 +24,7 @@ describe('App authentication loading state', () => {
 
     render(<MemoryRouter initialEntries={['/home']}><App /></MemoryRouter>);
 
-    expect(screen.getByRole('status')).toHaveTextContent('Loading your dashboard…');
+    expect(screen.getByRole('status')).toHaveTextContent('Loading Calendar Dashboard…');
     expect(screen.queryByText('Keep your plans in one place.')).not.toBeInTheDocument();
 
     resolveSession({ id: 1, email: 'person@example.com', name: 'Test Person' });

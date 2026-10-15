@@ -1,4 +1,4 @@
-# my-dashboard
+# Calendar Dashboard
 
 Node.js has to be installed and has to be added to PATH.\
 Docker and wsl need to be installed\

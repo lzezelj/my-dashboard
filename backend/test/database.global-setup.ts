@@ -5,17 +5,30 @@ import { Pool } from 'pg';
 import type { TestProject } from 'vitest/node';
 
 const safeDatabaseUrl = () => {
-  const value = process.env.DATABASE_URL;
-  if (!value) throw new Error('DATABASE_URL is required for database tests.');
+  const value = process.env.TEST_DATABASE_URL;
+  if (!value)
+    throw new Error(
+      'TEST_DATABASE_URL is required. Database tests never use the development DATABASE_URL.',
+    );
   const url = new URL(value);
   if (!['localhost', '127.0.0.1', '::1'].includes(url.hostname))
     throw new Error('Database tests are restricted to a local PostgreSQL server.');
+  if (process.env.DATABASE_URL) {
+    const developmentUrl = new URL(process.env.DATABASE_URL);
+    if (
+      developmentUrl.hostname === url.hostname &&
+      developmentUrl.port === url.port &&
+      developmentUrl.pathname === url.pathname
+    )
+      throw new Error('TEST_DATABASE_URL must use a different database than DATABASE_URL.');
+  }
   url.searchParams.delete('schema');
   return url.toString();
 };
 
 export default async function setup(project: TestProject) {
   const connectionString = safeDatabaseUrl();
+  process.env.DATABASE_URL = connectionString;
   const schema = `dashboard_test_${process.pid}_${Date.now()}`;
   const pool = new Pool({ connectionString, max: 1 });
   const client = await pool.connect();

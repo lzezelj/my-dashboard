@@ -191,7 +191,7 @@ const toData = (input: Partial<EventInput>) => ({
 });
 
 export async function getEventsService(
-  filters: { category?: EventCategory; from?: string; to?: string },
+  filters: { category?: EventCategory; from?: string; to?: string; upcoming?: boolean },
   userId: number,
 ): Promise<Array<Event | EventOccurrence>> {
   const events = await prisma.event.findMany({
@@ -269,6 +269,7 @@ export async function findImportDuplicatesService(
       return date ? [key(event.title, date)] : [];
     }),
   );
+  const seenKeys = new Set(existingKeys);
   return importedEvents.flatMap((event, index) => {
     const date =
       typeof event.date === 'string'
@@ -276,9 +277,11 @@ export async function findImportDuplicatesService(
         : typeof event.startTime === 'string'
           ? event.startTime.slice(0, 10)
           : null;
-    return typeof event.title === 'string' && date && existingKeys.has(key(event.title, date))
-      ? [index]
-      : [];
+    if (typeof event.title !== 'string' || !date) return [];
+    const eventKey = key(event.title, date);
+    const duplicate = seenKeys.has(eventKey);
+    seenKeys.add(eventKey);
+    return duplicate ? [index] : [];
   });
 }
 
@@ -628,7 +631,7 @@ function isOccurrenceDate(
 
 export function expandEvent(
   event: EventWithOverrides,
-  filters: { from?: string; to?: string } = {},
+  filters: { from?: string; to?: string; upcoming?: boolean } = {},
 ): EventOccurrence[] {
   const original = event.date ?? event.startTime;
   if (!original) return [];
@@ -655,7 +658,15 @@ export function expandEvent(
       occurrence.occurrenceDate <= (filters.to ?? '9999-12-31')
     )
       occurrences.push(occurrence);
-    if (!filters.to && occurrences.length >= 100) break;
+    const upcomingLimit =
+      event.recurring === Recurrence.DAILY
+        ? 30
+        : event.recurring === Recurrence.WEEKLY
+          ? 4
+          : event.recurring === Recurrence.MONTHLY || event.recurring === Recurrence.YEARLY
+            ? 1
+            : 1;
+    if (!filters.to && occurrences.length >= (filters.upcoming ? upcomingLimit : 100)) break;
   }
   return occurrences;
 }

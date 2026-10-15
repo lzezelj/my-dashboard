@@ -13,10 +13,12 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   }
   return response.status === 204 ? (undefined as T) : (response.json() as Promise<T>);
 }
-export function getEvents(filters: { category?: EventCategory; from?: string; to?: string } = {}) {
+export function getEvents(
+  filters: { category?: EventCategory; from?: string; to?: string; upcoming?: boolean } = {},
+) {
   const query = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {
-    if (value) query.set(key, value);
+    if (value) query.set(key, String(value));
   });
   return request<DashboardEvent[]>(`${baseUrl}${query.size ? `?${query}` : ''}`);
 }

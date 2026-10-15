@@ -45,15 +45,21 @@ const createSession = (
   user: { id: number; email: string | null; name: string | null },
 ) => {
   const token = generateJwt(user.id);
-  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('auth_token', token, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
+    ...sessionCookieOptions(),
     maxAge: 24 * 60 * 60 * 1000,
-    path: '/',
   });
   return res.status(200).json({ message: 'Google authentication successful', user });
+};
+
+const sessionCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true as const,
+    secure: isProduction,
+    sameSite: isProduction ? ('none' as const) : ('lax' as const),
+    path: '/',
+  };
 };
 
 export const loginWithGoogle = async (req: Request, res: Response) => {
@@ -101,12 +107,7 @@ export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) =
 };
 
 export const logout = (_req: Request, res: Response) => {
-  res.clearCookie('auth_token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-  });
+  res.clearCookie('auth_token', sessionCookieOptions());
   return res.status(200).json({ message: 'Logged out successfully' });
 };
 
@@ -122,12 +123,7 @@ export const deleteAccount = async (req: AuthenticatedRequest, res: Response) =>
       await transaction.user.delete({ where: { id: userId } });
     });
 
-    res.clearCookie('auth_token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
+    res.clearCookie('auth_token', sessionCookieOptions());
     return res.status(204).send();
   } catch (error) {
     console.error('Could not delete account:', error);

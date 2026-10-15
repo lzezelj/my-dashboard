@@ -180,7 +180,9 @@ export default function Calendar() {
   }, [month]);
   const loadUpcoming = useCallback(async () => {
     const filters =
-      upcomingCategory === 'ALL' ? { from: today } : { from: today, category: upcomingCategory };
+      upcomingCategory === 'ALL'
+        ? { from: today, upcoming: true as const }
+        : { from: today, category: upcomingCategory, upcoming: true as const };
     try {
       const items = await getEvents(filters);
       setUpcomingEvents(

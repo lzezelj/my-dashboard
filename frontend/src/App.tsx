@@ -8,6 +8,9 @@ import { deleteAccount, getCurrentUser, logout, type AuthUser } from './services
 import Unauthorized from './pages/Unauthorized.tsx';
 import Import from './pages/Import.tsx';
 import Welcome from './pages/Welcome.tsx';
+import Privacy from './pages/Privacy.tsx';
+import Imprint from './pages/Imprint.tsx';
+import Footer from './components/Footer.tsx';
 
 function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -56,7 +59,8 @@ function App() {
     }
   };
 
-  const showNavbar = user !== null || location.pathname !== '/home';
+  const isPublicLegalPage = location.pathname === '/privacy' || location.pathname === '/imprint';
+  const showNavbar = user !== null || (location.pathname !== '/home' && !isPublicLegalPage);
   const handleLogin = (authenticatedUser: AuthUser, isNewUser: boolean) => {
     setUser(authenticatedUser);
     if (isNewUser) navigate('/welcome', { replace: true });
@@ -66,7 +70,7 @@ function App() {
     return (
       <main className="app-loading" role="status" aria-live="polite">
         <div className="app-loading__spinner" aria-hidden="true" />
-        <p>Loading your dashboard…</p>
+        <p>Loading Calendar Dashboard…</p>
       </main>
     );
   }
@@ -95,6 +99,8 @@ function App() {
         />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/welcome" element={<Welcome user={user} />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/imprint" element={<Imprint />} />
         <Route path="/edit/*" element={<Navigate to="/events" replace />} />
         <Route path="/events" element={<Edit />}>
           <Route index element={<EventManager />} />
@@ -120,6 +126,7 @@ function App() {
           <Route path="school" element={<EventManager key="school" initialCategory="SCHOOL" />} />
         </Route>
       </Routes>
+      <Footer />
     </>
   );
 }

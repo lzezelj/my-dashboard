@@ -49,10 +49,11 @@ export async function getEvents(req: AuthenticatedRequest, res: Response) {
       typeof req.query.category === 'string' ? (req.query.category as EventCategory) : undefined;
     if (category && !Object.values(EventCategory).includes(category))
       return res.status(400).json({ message: 'category is invalid.' });
-    const filters: { category?: EventCategory; from?: string; to?: string } = {};
+    const filters: { category?: EventCategory; from?: string; to?: string; upcoming?: boolean } = {};
     if (category) filters.category = category;
     if (typeof req.query.from === 'string') filters.from = req.query.from;
     if (typeof req.query.to === 'string') filters.to = req.query.to;
+    if (req.query.upcoming === 'true') filters.upcoming = true;
     return res.json(await getEventsService(filters, userId));
   } catch (error) {
     return fail(res, error);
@@ -62,7 +63,7 @@ export async function exportEvents(req: AuthenticatedRequest, res: Response) {
   const userId = getUserId(req, res);
   if (userId === null) return;
   try {
-    res.setHeader('Content-Disposition', 'attachment; filename="dashboard-events.json"');
+    res.setHeader('Content-Disposition', 'attachment; filename="calendar-dashboard-events.json"');
     return res.json(await exportEventsService(userId));
   } catch (error) {
     return fail(res, error);
@@ -73,7 +74,7 @@ export async function exportIcs(req: AuthenticatedRequest, res: Response) {
   if (userId === null) return;
   try {
     res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="dashboard-events.ics"');
+    res.setHeader('Content-Disposition', 'attachment; filename="calendar-dashboard-events.ics"');
     return res.send(await exportIcsService(userId));
   } catch (error) {
     return fail(res, error);

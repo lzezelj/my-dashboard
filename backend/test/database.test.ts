@@ -3,7 +3,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, inject, it } from 'vi
 import { Pool } from 'pg';
 
 const schema = inject('databaseTestSchema');
-const databaseUrl = new URL(process.env.DATABASE_URL!);
+if (!process.env.TEST_DATABASE_URL)
+  throw new Error('TEST_DATABASE_URL is required for database tests.');
+const databaseUrl = new URL(process.env.TEST_DATABASE_URL);
 databaseUrl.searchParams.delete('schema');
 const pool = new Pool({
   connectionString: databaseUrl.toString(),
@@ -12,7 +14,11 @@ const pool = new Pool({
 });
 
 beforeAll(async () => {
-  await pool.query('SELECT 1');
+  const result = await pool.query<{ current_schema: string }>('SELECT current_schema()');
+  if (result.rows[0]?.current_schema !== schema)
+    throw new Error(
+      `Refusing to run database tests outside ${schema}; connected to ${result.rows[0]?.current_schema}`,
+    );
 });
 
 afterEach(async () => {

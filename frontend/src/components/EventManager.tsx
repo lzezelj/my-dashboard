@@ -13,11 +13,20 @@ import {
   updateEvent,
   updateOccurrence,
 } from '../services/events.api';
-import { dateOnlyToDisplay } from '../utils/dateUtils';
+import { dateOnlyToDisplay, localDateInputValue } from '../utils/dateUtils';
 import EventForm from './EventForm';
 import Modal from './Modal';
 
 const EVENTS_PER_PAGE = 25;
+const eventDate = (event: DashboardEvent) =>
+  event.date?.slice(0, 10) ?? event.startTime?.slice(0, 10) ?? '';
+const sortEvents = (events: DashboardEvent[]) =>
+  [...events].sort(
+    (a, b) =>
+      eventDate(a).localeCompare(eventDate(b)) ||
+      (a.startTime ?? '').localeCompare(b.startTime ?? '') ||
+      a.id - b.id,
+  );
 
 export default function EventManager({ initialCategory }: { initialCategory?: EventCategory }) {
   const [filterCategory, setFilterCategory] = useState<EventCategory | 'ALL'>(
@@ -39,13 +48,38 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
   const [eventSearch, setEventSearch] = useState('');
   const [searchField, setSearchField] = useState<'title' | 'description'>('title');
   const [eventPage, setEventPage] = useState(1);
+  const [duplicateGroups, setDuplicateGroups] = useState<
+    Array<{ original: DashboardEvent; duplicates: DashboardEvent[] }> | null
+  >(null);
+  const hasSetInitialPage = useRef(false);
+  const hasScrolledToInitialEvent = useRef(false);
+  const [initialEventId, setInitialEventId] = useState<number | null>(null);
+  const eventListRef = useRef<HTMLDivElement>(null);
+  const resultsWindowRef = useRef<HTMLElement>(null);
   const deleteMenuRef = useRef<HTMLDetailsElement>(null);
   const transferMenuRef = useRef<HTMLDetailsElement>(null);
   const navigate = useNavigate();
   const load = useCallback(async () => {
     try {
       setError(null);
-      setEvents(await getEvents(filterCategory === 'ALL' ? {} : { category: filterCategory }));
+      const loadedEvents = await getEvents(
+        filterCategory === 'ALL' ? {} : { category: filterCategory },
+      );
+      setEvents(loadedEvents);
+      if (!hasSetInitialPage.current) {
+        const sorted = sortEvents(loadedEvents);
+        const today = localDateInputValue();
+        const todaysOccurrences = await getEvents({ from: today, to: today });
+        const firstTodayId = todaysOccurrences[0]?.id;
+        const todayIndex = firstTodayId
+          ? sorted.findIndex((event) => event.id === firstTodayId)
+          : -1;
+        const currentIndex =
+          todayIndex >= 0 ? todayIndex : sorted.findIndex((event) => eventDate(event) >= today);
+        setEventPage(currentIndex < 0 ? 1 : Math.floor(currentIndex / EVENTS_PER_PAGE) + 1);
+        setInitialEventId(currentIndex < 0 ? null : sorted[currentIndex]!.id);
+        hasSetInitialPage.current = true;
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load events.');
     }
@@ -80,12 +114,7 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
   }, []);
   const matchingEvents = useMemo(() => {
     const query = eventSearch.trim().toLocaleLowerCase();
-    const sorted = [...events].sort(
-      (a, b) =>
-        (a.date ?? a.startTime?.slice(0, 10) ?? '').localeCompare(
-          b.date ?? b.startTime?.slice(0, 10) ?? '',
-        ) || (a.startTime ?? '').localeCompare(b.startTime ?? ''),
-    );
+    const sorted = sortEvents(events);
     if (!query) return sorted;
     return sorted.filter((event) =>
       (searchField === 'title' ? event.title : (event.description ?? ''))
@@ -99,6 +128,25 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
     (currentEventPage - 1) * EVENTS_PER_PAGE,
     currentEventPage * EVENTS_PER_PAGE,
   );
+  useEffect(() => {
+    if (initialEventId === null || hasScrolledToInitialEvent.current) return;
+    const frame = window.requestAnimationFrame(() => {
+      const target = eventListRef.current?.querySelector<HTMLElement>(
+        `[data-event-id="${initialEventId}"]`,
+      );
+      if (!target) return;
+      target.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+      hasScrolledToInitialEvent.current = true;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [currentEventPage, initialEventId, visibleEvents]);
+  const changeEventPage = (page: number) => {
+    setEventPage(page);
+    window.requestAnimationFrame(() => {
+      eventListRef.current?.scrollTo?.({ top: 0 });
+      resultsWindowRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    });
+  };
   const closeForm = () => {
     setShowCreate(false);
     setEditingEvent(null);
@@ -142,7 +190,7 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
       const file = new Blob([JSON.stringify(eventExport, null, 2)], { type: 'application/json' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(file);
-      link.download = `dashboard-events-${new Date().toISOString().slice(0, 10)}.json`;
+      link.download = `calendar-dashboard-events-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(link.href);
     } catch (err) {
@@ -155,7 +203,7 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
       const file = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(file);
-      link.download = `dashboard-events-${new Date().toISOString().slice(0, 10)}.ics`;
+      link.download = `calendar-dashboard-events-${new Date().toISOString().slice(0, 10)}.ics`;
       link.click();
       URL.revokeObjectURL(link.href);
     } catch (err) {
@@ -167,6 +215,7 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
       if (bulkDeleteMode === 'all') await deleteAllEvents();
       else if (bulkDeleteMode === 'selected') await deleteEvents([...selectedEventIds]);
       setSelectedEventIds(new Set());
+      setDuplicateGroups(null);
       setBulkDeleteMode(null);
       closeForm();
       await load();
@@ -175,8 +224,66 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
       setBulkDeleteMode(null);
     }
   };
+  const checkForDuplicates = async () => {
+    try {
+      setError(null);
+      const allEvents = sortEvents(await getEvents());
+      const groupsByKey = new Map<string, DashboardEvent[]>();
+      const duplicateIds = new Set<number>();
+      for (const event of allEvents) {
+        const date = eventDate(event);
+        if (!date) continue;
+        const key = `${event.title.trim().toLocaleLowerCase()}\u0000${date}`;
+        groupsByKey.set(key, [...(groupsByKey.get(key) ?? []), event]);
+      }
+      const groups = [...groupsByKey.values()]
+        .filter((group) => group.length > 1)
+        .map(([original, ...duplicates]) => ({ original: original!, duplicates }));
+      groups.forEach(({ duplicates }) =>
+        duplicates.forEach((duplicate) => duplicateIds.add(duplicate.id)),
+      );
+
+      setFilterCategory('ALL');
+      setEventSearch('');
+      setEvents(allEvents);
+      setSelectedEventIds(duplicateIds);
+      setDuplicateGroups(groups);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not check for duplicate events.');
+    }
+  };
   return (
     <div className="event-manager">
+      <Modal
+        isOpen={duplicateGroups !== null}
+        title="Duplicate check results"
+        confirmLabel="Close"
+        showCancel={false}
+        onCancel={() => setDuplicateGroups(null)}
+        onConfirm={() => setDuplicateGroups(null)}
+        className="duplicate-results-modal"
+      >
+        {duplicateGroups?.length === 0 ? (
+          <p>No duplicate events were found.</p>
+        ) : (
+          <>
+            <p>
+              Suspected duplicates are selected for deletion. Review the original and duplicate
+              copies below, then close this window and use Delete selected if they should be removed.
+            </p>
+            <div className="duplicate-results">
+              {duplicateGroups?.map(({ original, duplicates }) => (
+                <section className="duplicate-results__group" key={original.id}>
+                  <DuplicateEvent event={original} label="Original" />
+                  {duplicates.map((duplicate) => (
+                    <DuplicateEvent event={duplicate} label="Suspected duplicate" key={duplicate.id} />
+                  ))}
+                </section>
+              ))}
+            </div>
+          </>
+        )}
+      </Modal>
       <Modal
         isOpen={bulkDeleteMode !== null}
         title={bulkDeleteMode === 'all' ? 'Delete all events?' : 'Delete selected events?'}
@@ -219,6 +326,7 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
                 next.delete(eventToDelete.id);
                 return next;
               });
+              setDuplicateGroups(null);
               return load();
             })
             .finally(() => setEventToDelete(null));
@@ -239,6 +347,7 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
                 value={filterCategory}
                 onChange={(e) => {
                   setFilterCategory(e.target.value as EventCategory | 'ALL');
+                  setDuplicateGroups(null);
                   setEventPage(1);
                   closeForm();
                 }}
@@ -260,6 +369,9 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
               }}
             >
               {showCreate ? 'Close form' : 'Add event'}
+            </button>
+            <button type="button" onClick={() => void checkForDuplicates()}>
+              Check for duplicates
             </button>
             <details
               className="event-manager__menu event-manager__delete-menu"
@@ -382,13 +494,17 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
           onCancel={closeForm}
         />
       )}
-      <section className="event-manager__results-window" aria-label="Event search results">
+      <section
+        className="event-manager__results-window"
+        aria-label="Event search results"
+        ref={resultsWindowRef}
+      >
         <EventManagerPagination
           currentPage={currentEventPage}
           pageCount={eventPageCount}
-          onChange={setEventPage}
+          onChange={changeEventPage}
         />
-        <div className="event-manager__list" aria-label="Saved events">
+        <div className="event-manager__list" aria-label="Saved events" ref={eventListRef}>
         {visibleEvents.length === 0 ? (
           <p className="event-list-empty">
             {eventSearch.trim()
@@ -397,7 +513,11 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
           </p>
         ) : (
           visibleEvents.map((event) => (
-            <div className="event-manager__entry" key={event.id}>
+            <div
+              className={`event-manager__entry${event.id === initialEventId ? ' event-manager__entry--current' : ''}`}
+              data-event-id={event.id}
+              key={event.id}
+            >
               <article className="event-manager__card">
                 <div className="event-manager__card-header">
                   <h3>{event.title}</h3>
@@ -553,7 +673,7 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
         <EventManagerPagination
           currentPage={currentEventPage}
           pageCount={eventPageCount}
-          onChange={setEventPage}
+          onChange={changeEventPage}
         />
       </section>
     </div>
@@ -589,5 +709,16 @@ function EventManagerPagination({
         ))}
       </div>
     </nav>
+  );
+}
+
+function DuplicateEvent({ event, label }: { event: DashboardEvent; label: string }) {
+  return (
+    <article className="duplicate-results__event">
+      <strong>{label}</strong>
+      <span>{event.title}</span>
+      <span>{dateOnlyToDisplay(eventDate(event))}</span>
+      <span>{eventCategoryLabels[event.category]}</span>
+    </article>
   );
 }

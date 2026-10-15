@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import {
+  checkImportDuplicates,
   importIcs,
   previewIcsImport,
   type IcsPreviewEvent,
@@ -16,6 +17,8 @@ export default function IcsImportPreview({ onImported }: { onImported?: () => vo
   const [result, setResult] = useState<ImportEventsResult | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [duplicates, setDuplicates] = useState<Set<number>>(new Set());
+  const [duplicatesChecked, setDuplicatesChecked] = useState(false);
 
   const load = async (file?: File) => {
     if (!file) return;
@@ -25,11 +28,35 @@ export default function IcsImportPreview({ onImported }: { onImported?: () => vo
       setSource(ics);
       setEvents(preview.events);
       setSelected(new Set(preview.events.map((event) => event.sourceIndex)));
+      setDuplicates(new Set());
+      setDuplicatesChecked(false);
       setResult(null);
       setError(null);
     } catch (loadError) {
       setEvents([]);
       setError(loadError instanceof Error ? loadError.message : 'Could not read ICS file.');
+    }
+  };
+
+  const checkDuplicates = async () => {
+    try {
+      const checked = await checkImportDuplicates(events);
+      const duplicateIndexes = new Set(
+        checked.duplicates
+          .map((index) => events[index]?.sourceIndex)
+          .filter((index): index is number => index !== undefined),
+      );
+      setDuplicates(duplicateIndexes);
+      setSelected((current) => {
+        const next = new Set(current);
+        duplicateIndexes.forEach((index) => next.delete(index));
+        return next;
+      });
+      setDuplicatesChecked(true);
+    } catch (checkError) {
+      setError(
+        checkError instanceof Error ? checkError.message : 'Could not check for duplicates.',
+      );
     }
   };
 
@@ -58,7 +85,7 @@ export default function IcsImportPreview({ onImported }: { onImported?: () => vo
         onCancel={() => !importing && setConfirming(false)}
         onConfirm={() => !importing && void submit()}
       >
-        <p>The selected events will be added to your dashboard.</p>
+        <p>The selected events will be added to Calendar Dashboard.</p>
       </Modal>
       <header>
         <div>
@@ -82,6 +109,13 @@ export default function IcsImportPreview({ onImported }: { onImported?: () => vo
           {result.imported} events imported successfully.
         </p>
       )}
+      {duplicatesChecked && (
+        <p className="import-preview__result" role="status">
+          {duplicates.size === 0
+            ? 'No duplicates were found.'
+            : `${duplicates.size} possible duplicate${duplicates.size === 1 ? '' : 's'} found and unselected.`}
+        </p>
+      )}
       {events.map((event) => (
         <article className="import-preview__event" key={event.sourceIndex}>
           <label className="import-preview__event-header">
@@ -99,6 +133,11 @@ export default function IcsImportPreview({ onImported }: { onImported?: () => vo
             />
             <strong>{event.title}</strong>
             <span>{event.date ?? event.startTime ?? 'No date'}</span>
+            {duplicates.has(event.sourceIndex) && (
+              <span className="import-preview__status import-preview__status--warning">
+                Possible duplicate
+              </span>
+            )}
           </label>
           {event.warnings.length > 0 && (
             <ul className="ics-import-warnings">
@@ -111,6 +150,9 @@ export default function IcsImportPreview({ onImported }: { onImported?: () => vo
       ))}
       {events.length > 0 && (
         <div className="import-preview__actions">
+          <button type="button" onClick={() => void checkDuplicates()}>
+            Check for duplicates
+          </button>
           <button
             type="button"
             className="primary-button"

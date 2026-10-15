@@ -1,4 +1,4 @@
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 import type { AuthUser } from '../services/authentication.api';
 import { apiUrl } from '../config';
 
@@ -6,7 +6,7 @@ type GoogleLoginButtonProps = {
   onLogin: (user: AuthUser, isNewUser: boolean) => void;
 };
 
-export default function GoogleLoginButton({ onLogin }: GoogleLoginButtonProps) {
+function GoogleLoginButtonContent({ onLogin }: GoogleLoginButtonProps) {
   // Supported by Google Identity Services and this package at runtime, but omitted
   // from the package's bundled GsiButtonConfiguration TypeScript declaration.
   const englishLocale = { locale: 'en' } as { locale: string };
@@ -52,5 +52,13 @@ export default function GoogleLoginButton({ onLogin }: GoogleLoginButtonProps) {
         console.error('Google login failed');
       }}
     />
+  );
+}
+
+export default function GoogleLoginButton(props: GoogleLoginButtonProps) {
+  return (
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <GoogleLoginButtonContent {...props} />
+    </GoogleOAuthProvider>
   );
 }

@@ -222,7 +222,7 @@ export default function EventForm({
       <header className="event-form__header">
         <div>
           <h2>{isEditing ? `Edit ${categoryLabel}` : `Create ${categoryLabel}`}</h2>
-          <p>{isEditing ? 'Update the details below.' : 'Add an event to your dashboard.'}</p>
+          <p>{isEditing ? 'Update the details below.' : 'Add an event to Calendar Dashboard.'}</p>
         </div>
         <button type="button" className="event-form__close" onClick={onCancel}>
           Close
