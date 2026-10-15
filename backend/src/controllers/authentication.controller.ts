@@ -45,10 +45,11 @@ const createSession = (
   user: { id: number; email: string | null; name: string | null },
 ) => {
   const token = generateJwt(user.id);
+  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('auth_token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: 24 * 60 * 60 * 1000,
     path: '/',
   });
