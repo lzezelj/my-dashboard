@@ -1,5 +1,7 @@
 import type { DashboardEvent, EventCategory, EventInput } from '../types/events';
-const baseUrl = 'http://localhost:3000/api/events';
+import { apiUrl } from '../config';
+
+const baseUrl = `${apiUrl}/api/events`;
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { ...init, credentials: 'include' });
   if (!response.ok) {

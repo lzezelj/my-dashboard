@@ -1,5 +1,6 @@
 import { GoogleLogin } from '@react-oauth/google';
 import type { AuthUser } from '../services/authentication.api';
+import { apiUrl } from '../config';
 
 type GoogleLoginButtonProps = {
   onLogin: (user: AuthUser) => void;
@@ -16,7 +17,7 @@ export default function GoogleLoginButton({ onLogin }: GoogleLoginButtonProps) {
 
         try {
           const authenticate = (endpoint: 'login' | 'register') =>
-            fetch(`http://localhost:3000/api/auth/google/${endpoint}`, {
+            fetch(`${apiUrl}/api/auth/google/${endpoint}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',

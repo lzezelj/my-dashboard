@@ -1,10 +1,12 @@
+import { apiUrl } from '../config';
+
 export type AuthUser = {
   id: number;
   email: string | null;
   name: string | null;
 };
 
-const authUrl = 'http://localhost:3000/api/auth';
+const authUrl = `${apiUrl}/api/auth`;
 
 export async function getCurrentUser(): Promise<AuthUser | null> {
   const response = await fetch(`${authUrl}/me`, { credentials: 'include' });
