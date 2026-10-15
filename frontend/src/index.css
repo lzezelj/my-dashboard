@@ -503,7 +503,81 @@ code {
 }
 
 .home-landing__login {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 360px);
   margin-top: 28px;
+  align-self: center;
+}
+
+.home-landing__login > div:first-child {
+  justify-self: center;
+}
+
+.home-landing__login-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.home-landing__login-divider::before,
+.home-landing__login-divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--border);
+}
+
+.demo-login {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+}
+
+.demo-login__title {
+  color: var(--text-h);
+  font-weight: 600;
+  text-align: center;
+}
+
+.demo-login label,
+.demo-account-form label {
+  display: grid;
+  gap: 5px;
+  color: var(--text-h);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.demo-login input,
+.demo-account-form input {
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-h);
+  background: var(--bg);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.demo-login button,
+.demo-credentials button {
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  color: white;
+  background: var(--accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.demo-login button:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 .home-landing__features {
@@ -2602,6 +2676,103 @@ code {
 .welcome-page__legal {
   color: var(--text);
   font-size: 0.9rem;
+}
+
+.demo-accounts-page {
+  width: min(900px, calc(100% - 32px));
+  margin: 32px auto;
+  text-align: left;
+}
+
+.demo-accounts-page__header,
+.demo-account-panel {
+  padding: clamp(22px, 4vw, 36px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--social-bg);
+  box-shadow: var(--shadow);
+}
+
+.demo-accounts-page__header {
+  text-align: center;
+  background: linear-gradient(135deg, var(--accent-bg), var(--social-bg) 65%);
+}
+
+.demo-accounts-page__header h1 {
+  margin: 0 0 10px;
+}
+
+.demo-account-panel {
+  margin-top: 18px;
+}
+
+.demo-account-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.demo-account-form button {
+  grid-column: 1 / -1;
+  min-height: 42px;
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.demo-credentials {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  background: var(--accent-bg);
+}
+
+.demo-credentials code {
+  overflow-wrap: anywhere;
+}
+
+.demo-credentials button {
+  justify-self: start;
+}
+
+.demo-account-list {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.demo-account-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg);
+}
+
+.demo-account-list li div {
+  display: grid;
+  gap: 3px;
+}
+
+.demo-account-list span {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .demo-account-form {
+    grid-template-columns: 1fr;
+  }
 }
 
 .welcome-page__legal {

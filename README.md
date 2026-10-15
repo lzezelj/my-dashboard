@@ -16,3 +16,17 @@ When in backend, set up the database, run:\
 &nbsp;&nbsp;&nbsp;&nbsp;npx prisma migrate deploy\
 &nbsp;&nbsp;&nbsp;&nbsp;(optional) npx prisma studio\
 
+The Google account `lovro.zezelj@gmail.com` can manage portfolio demo accounts from **My Account → Demo accounts**. Set `OWNER_GOOGLE_EMAIL` in the backend environment to override the owner address. New demo accounts have empty calendars, use a server-generated one-time password, and can be deleted from the same page.
+
+## Backend tests
+
+Backend tests use a separate local database and never fall back to the development database. Create it once in the running Docker container:
+
+```powershell
+docker compose exec -T postgres createdb -U dashboard dashboard_test
+Copy-Item backend/.env.test.example backend/.env.test
+npm.cmd --prefix backend test
+```
+
+Each test run resets only the `public` schema inside `dashboard_test`, applies all migrations, runs the tests, and leaves that test schema empty afterward. Safety checks require a local database whose name contains `test` and reject the development database URL. The local `backend/.env.test` file is ignored by Git.
+

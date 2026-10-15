@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, describe, expect, inject, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { EventCategory, Recurrence } from '../src/generated/prisma/client.js';
 import { prisma } from '../src/lib/prisma.js';
 import {
@@ -21,13 +21,22 @@ import {
 const createUser = (suffix: string) =>
   prisma.user.create({ data: { email: `${suffix}@example.com`, googleId: `google-${suffix}` } });
 
-const testSchema = inject('databaseTestSchema');
+if (!process.env.TEST_DATABASE_URL)
+  throw new Error('TEST_DATABASE_URL is required for integration tests.');
+const testDatabaseName = new URL(process.env.TEST_DATABASE_URL).pathname.replace(/^\//, '');
+if (!/(?:^|_)test(?:_|$)/i.test(testDatabaseName))
+  throw new Error('Refusing to run tests against a database without "test" in its name.');
 
 beforeAll(async () => {
-  const result = await prisma.$queryRaw<Array<{ current_schema: string }>>`SELECT current_schema()`;
-  if (result[0]?.current_schema !== testSchema)
+  const result = await prisma.$queryRaw<
+    Array<{ current_database: string; current_schema: string }>
+  >`SELECT current_database(), current_schema()`;
+  if (
+    result[0]?.current_database !== testDatabaseName ||
+    result[0]?.current_schema !== 'public'
+  )
     throw new Error(
-      `Refusing to run integration tests outside ${testSchema}; connected to ${result[0]?.current_schema}`,
+      `Refusing to run integration tests outside ${testDatabaseName}.public`,
     );
 });
 

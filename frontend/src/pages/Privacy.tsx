@@ -19,7 +19,14 @@ export default function Privacy() {
 
         <h2>2. Data we process</h2>
         <ul>
-          <li>Google account identifier, verified email address and display name;</li>
+          <li>
+            for Google accounts, the Google account identifier, verified email address and display
+            name;
+          </li>
+          <li>
+            for operator-created demo accounts, a demo username, optional company label and a
+            salted, one-way password hash; the plaintext password is not stored;
+          </li>
           <li>
             calendar content, including titles, dates, times, descriptions, locations, links,
             categories, recurrence information and completion status;
@@ -49,6 +56,10 @@ export default function Privacy() {
             Account creation, authentication and calendar functionality: Article 6(1)(b) GDPR.
           </li>
           <li>
+            Providing operator-created demo access to portfolio reviewers: Article 6(1)(f) GDPR,
+            based on the legitimate interest in presenting and allowing evaluation of the project.
+          </li>
+          <li>
             Security, abuse prevention and reliable operation: Article 6(1)(f) GDPR, based on our
             legitimate interest in operating and protecting the service.
           </li>
@@ -69,7 +80,7 @@ export default function Privacy() {
           during sign-in.
         </p>
 
-        <h2>5. Google sign-in</h2>
+        <h2>5. Authentication</h2>
         <p>
           Google Identity Services provides sign-in. The Google component is loaded when a sign-in
           button is displayed. Loading or using it may send technical information, including your IP
@@ -80,6 +91,12 @@ export default function Privacy() {
             Google Privacy Policy
           </a>
           .
+        </p>
+        <p>
+          The operator may create isolated demo accounts for portfolio reviewers. Reviewers sign in
+          using the supplied demo username and password. Passwords are processed only to verify the
+          login and are stored solely as salted one-way hashes. Demo accounts and all events created
+          in them can be deleted by the operator or by the signed-in reviewer.
         </p>
 
         <h2>6. Hosting and recipients</h2>
@@ -119,11 +136,14 @@ export default function Privacy() {
           </li>
         </ul>
         <p>
-          Railway states that its primary operations take place in the United States and its DPA
-          provides for the EU–US Data Privacy Framework where applicable and EU Standard Contractual
-          Clauses otherwise. Cloudflare's DPA likewise incorporates transfer safeguards including
-          the EU Standard Contractual Clauses. Google may process data internationally under the
-          safeguards described in its privacy documentation.
+          Although the backend and database are deployed in Railway's EU West region in Amsterdam,
+          selecting that region does not mean that all processing is restricted exclusively to the
+          European Union or European Economic Area. Railway states that its primary processing
+          operations take place in the United States and may use subprocessors in other countries.
+          Railway's DPA provides for the EU-US Data Privacy Framework where applicable and EU
+          Standard Contractual Clauses otherwise. Cloudflare's DPA likewise incorporates transfer
+          safeguards including the EU Standard Contractual Clauses. Google may process data
+          internationally under the safeguards described in its privacy documentation.
         </p>
 
         <h2>7. Retention, export and deletion</h2>
@@ -157,9 +177,10 @@ export default function Privacy() {
 
         <h2>9. Required data and automated decisions</h2>
         <p>
-          Google identity data is required to create and authenticate an account. Calendar data is
-          otherwise supplied voluntarily, although required form fields must be provided to create
-          an event. We do not use automated decision-making or profiling under Article 22 GDPR.
+          Google identity data is required for a Google account. A demo username and password are
+          required to authenticate a demo account. Calendar data is otherwise supplied voluntarily,
+          although required form fields must be provided to create an event. We do not use automated
+          decision-making or profiling under Article 22 GDPR.
         </p>
 
         <h2>10. Changes</h2>

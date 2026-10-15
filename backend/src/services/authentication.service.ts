@@ -1,6 +1,34 @@
 import { OAuth2Client } from 'google-auth-library';
 import type { TokenPayload } from 'google-auth-library';
+import { promisify } from 'node:util';
+import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import { prisma } from '../lib/prisma.js';
+
+const scrypt = promisify(scryptCallback);
+const PASSWORD_KEY_LENGTH = 64;
+
+const derivePasswordKey = async (password: string, salt: string) =>
+  (await scrypt(password, salt, PASSWORD_KEY_LENGTH)) as Buffer;
+
+export const normalizeDemoUsername = (username: string) => username.trim().toLowerCase();
+
+export const hashDemoPassword = async (password: string) => {
+  const salt = randomBytes(16).toString('hex');
+  const key = await derivePasswordKey(password, salt);
+  return `scrypt$${salt}$${key.toString('hex')}`;
+};
+
+export const verifyDemoPassword = async (password: string, storedHash: string | null) => {
+  const [, salt, expectedHex] = storedHash?.split('$') ?? [];
+  if (!salt || !expectedHex) {
+    await derivePasswordKey(password, 'invalid-demo-account');
+    return false;
+  }
+
+  const expected = Buffer.from(expectedHex, 'hex');
+  const actual = await derivePasswordKey(password, salt);
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
+};
 
 export async function verifyGoogleToken(idToken: string) {
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -34,4 +62,51 @@ export async function registerGoogleUser(payload: TokenPayload) {
       name: payload.name ?? null,
     },
   });
+}
+
+export async function authenticateDemoUser(username: string, password: string) {
+  const user = await prisma.user.findUnique({
+    where: { demoUsername: normalizeDemoUsername(username) },
+  });
+
+  if (!user?.isDemo || !(await verifyDemoPassword(password, user.passwordHash))) return null;
+  return user;
+}
+
+export async function createDemoUser(username: string, label: string | null) {
+  const password = randomBytes(18).toString('base64url');
+  const user = await prisma.user.create({
+    data: {
+      demoUsername: normalizeDemoUsername(username),
+      passwordHash: await hashDemoPassword(password),
+      isDemo: true,
+      name: label,
+    },
+    select: {
+      id: true,
+      demoUsername: true,
+      name: true,
+      createdAt: true,
+    },
+  });
+
+  return { user, password };
+}
+
+export function listDemoUsers() {
+  return prisma.user.findMany({
+    where: { isDemo: true },
+    select: {
+      id: true,
+      demoUsername: true,
+      name: true,
+      createdAt: true,
+      _count: { select: { events: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+export function deleteDemoUser(id: number) {
+  return prisma.user.deleteMany({ where: { id, isDemo: true } });
 }

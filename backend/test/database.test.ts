@@ -1,23 +1,30 @@
 import 'dotenv/config';
-import { afterAll, afterEach, beforeAll, describe, expect, inject, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Pool } from 'pg';
 
-const schema = inject('databaseTestSchema');
 if (!process.env.TEST_DATABASE_URL)
   throw new Error('TEST_DATABASE_URL is required for database tests.');
 const databaseUrl = new URL(process.env.TEST_DATABASE_URL);
 databaseUrl.searchParams.delete('schema');
+databaseUrl.searchParams.delete('options');
+const testDatabaseName = databaseUrl.pathname.replace(/^\//, '');
+if (!/(?:^|_)test(?:_|$)/i.test(testDatabaseName))
+  throw new Error('Refusing to run tests against a database without "test" in its name.');
 const pool = new Pool({
   connectionString: databaseUrl.toString(),
   max: 1,
-  options: `-c search_path=${schema}`,
 });
 
 beforeAll(async () => {
-  const result = await pool.query<{ current_schema: string }>('SELECT current_schema()');
-  if (result.rows[0]?.current_schema !== schema)
+  const result = await pool.query<{ current_database: string; current_schema: string }>(
+    'SELECT current_database(), current_schema()',
+  );
+  if (
+    result.rows[0]?.current_database !== testDatabaseName ||
+    result.rows[0]?.current_schema !== 'public'
+  )
     throw new Error(
-      `Refusing to run database tests outside ${schema}; connected to ${result.rows[0]?.current_schema}`,
+      `Refusing to run database tests outside ${testDatabaseName}.public`,
     );
 });
 
@@ -35,7 +42,7 @@ describe('database configuration', () => {
       `SELECT table_name
        FROM information_schema.tables
        WHERE table_schema = $1`,
-      [schema],
+      ['public'],
     );
     const tables = result.rows.map(({ table_name }) => table_name);
 

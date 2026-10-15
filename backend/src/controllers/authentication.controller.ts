@@ -1,8 +1,13 @@
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import type { TokenPayload } from 'google-auth-library';
 import type { AuthenticatedRequest } from '../middleware/authenticationMiddleware.js';
 import {
+  authenticateDemoUser,
+  createDemoUser,
+  deleteDemoUser,
   findGoogleUser,
+  listDemoUsers,
+  normalizeDemoUsername,
   registerGoogleUser,
   verifyGoogleToken,
 } from '../services/authentication.service.js';
@@ -42,15 +47,40 @@ const getGooglePayload = async (req: Request, res: Response): Promise<TokenPaylo
 
 const createSession = (
   res: Response,
-  user: { id: number; email: string | null; name: string | null },
+  user: {
+    id: number;
+    email: string | null;
+    name: string | null;
+    googleId?: string | null;
+    isDemo?: boolean;
+  },
 ) => {
   const token = generateJwt(user.id);
   res.cookie('auth_token', token, {
     ...sessionCookieOptions(),
     maxAge: 24 * 60 * 60 * 1000,
   });
-  return res.status(200).json({ message: 'Google authentication successful', user });
+  return res.status(200).json({
+    message: 'Authentication successful',
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      isDemo: user.isDemo === true,
+      canManageDemoAccounts:
+        Boolean(user.googleId) && user.email?.toLowerCase() === getOwnerGoogleEmail(),
+    },
+  });
 };
+
+const getOwnerGoogleEmail = () =>
+  (process.env.OWNER_GOOGLE_EMAIL ?? 'lovro.zezelj@gmail.com').trim().toLowerCase();
+
+const isValidDemoUsername = (username: string) =>
+  /^[a-z0-9][a-z0-9._-]{2,63}$/.test(normalizeDemoUsername(username));
+
+const isPrismaUniqueConstraintError = (error: unknown) =>
+  typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002';
 
 const sessionCookieOptions = () => {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -91,15 +121,126 @@ export const registerWithGoogle = async (req: Request, res: Response) => {
   }
 };
 
+export const loginWithDemoAccount = async (req: Request, res: Response) => {
+  const { username, password } = req.body ?? {};
+  if (
+    typeof username !== 'string' ||
+    typeof password !== 'string' ||
+    !isValidDemoUsername(username) ||
+    password.length < 12 ||
+    password.length > 128
+  ) {
+    return res.status(401).json({ message: 'Invalid username or password' });
+  }
+
+  try {
+    const user = await authenticateDemoUser(username, password);
+    if (!user) return res.status(401).json({ message: 'Invalid username or password' });
+    return createSession(res, user);
+  } catch (error) {
+    console.error('Could not log in to demo account:', error);
+    return res.status(500).json({ message: 'Could not complete login' });
+  }
+};
+
+export const requireDemoAccountOwner = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (req.userId === undefined) return res.status(401).json({ message: 'Authentication required' });
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { email: true, googleId: true },
+    });
+    if (!user?.googleId || user.email?.toLowerCase() !== getOwnerGoogleEmail()) {
+      return res.status(403).json({ message: 'Owner access required' });
+    }
+    next();
+  } catch (error) {
+    console.error('Could not verify demo-account owner:', error);
+    return res.status(500).json({ message: 'Could not verify owner access' });
+  }
+};
+
+export const createDemoAccount = async (req: Request, res: Response) => {
+  const { username, label } = req.body ?? {};
+  if (typeof username !== 'string' || !isValidDemoUsername(username)) {
+    return res.status(400).json({
+      message: 'Username must be 3-64 characters using letters, numbers, dots, dashes or underscores',
+    });
+  }
+  if (label !== undefined && (typeof label !== 'string' || label.trim().length > 100)) {
+    return res.status(400).json({ message: 'Label must be 100 characters or fewer' });
+  }
+
+  try {
+    const result = await createDemoUser(username, label?.trim() || null);
+    return res.status(201).json({
+      account: {
+        ...result.user,
+        eventCount: 0,
+      },
+      password: result.password,
+    });
+  } catch (error) {
+    if (isPrismaUniqueConstraintError(error)) {
+      return res.status(409).json({ message: 'That demo username is already in use' });
+    }
+    console.error('Could not create demo account:', error);
+    return res.status(500).json({ message: 'Could not create demo account' });
+  }
+};
+
+export const getDemoAccounts = async (_req: Request, res: Response) => {
+  try {
+    const accounts = (await listDemoUsers()).map(({ _count, ...account }) => ({
+      ...account,
+      eventCount: _count.events,
+    }));
+    return res.status(200).json({ accounts });
+  } catch (error) {
+    console.error('Could not list demo accounts:', error);
+    return res.status(500).json({ message: 'Could not list demo accounts' });
+  }
+};
+
+export const removeDemoAccount = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    return res.status(400).json({ message: 'Invalid demo account id' });
+  }
+
+  try {
+    const result = await deleteDemoUser(id);
+    if (result.count === 0) return res.status(404).json({ message: 'Demo account not found' });
+    return res.status(204).send();
+  } catch (error) {
+    console.error('Could not delete demo account:', error);
+    return res.status(500).json({ message: 'Could not delete demo account' });
+  }
+};
+
 export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
   if (req.userId === undefined) return res.status(401).json({ message: 'Authentication required' });
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { id: true, email: true, name: true },
+      select: { id: true, email: true, name: true, googleId: true, isDemo: true },
     });
     if (!user) return res.status(401).json({ message: 'User no longer exists' });
-    return res.status(200).json({ user });
+    return res.status(200).json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        isDemo: user.isDemo,
+        canManageDemoAccounts:
+          Boolean(user.googleId) && user.email?.toLowerCase() === getOwnerGoogleEmail(),
+      },
+    });
   } catch (error) {
     console.error('Failed to retrieve current user:', error);
     return res.status(500).json({ message: 'Could not retrieve user' });

@@ -3,8 +3,13 @@ import jwt from 'jsonwebtoken';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const authService = vi.hoisted(() => ({
+  authenticateDemoUser: vi.fn(),
+  createDemoUser: vi.fn(),
+  deleteDemoUser: vi.fn(),
   verifyGoogleToken: vi.fn(),
   findGoogleUser: vi.fn(),
+  listDemoUsers: vi.fn(),
+  normalizeDemoUsername: (username: string) => username.trim().toLowerCase(),
   registerGoogleUser: vi.fn(),
 }));
 

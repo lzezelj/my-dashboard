@@ -78,7 +78,7 @@ export default function Navbar({ user, onLogin, onLogout, onDeleteAccount }: Nav
           void onLogout();
         }}
       >
-        <p>You will need to sign in with Google again to access your events.</p>
+        <p>You will need to sign in again to access your events.</p>
       </Modal>
       <Modal
         isOpen={showDeleteAccountConfirmation}
@@ -119,6 +119,15 @@ export default function Navbar({ user, onLogin, onLogout, onDeleteAccount }: Nav
                 <Link to="/events" role="menuitem" onClick={() => setIsAccountMenuOpen(false)}>
                   Events
                 </Link>
+                {user.canManageDemoAccounts && (
+                  <Link
+                    to="/demo-accounts"
+                    role="menuitem"
+                    onClick={() => setIsAccountMenuOpen(false)}
+                  >
+                    Demo accounts
+                  </Link>
+                )}
               <button
                 type="button"
                 onClick={() => {

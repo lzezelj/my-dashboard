@@ -11,6 +11,7 @@ import Welcome from './pages/Welcome.tsx';
 import Privacy from './pages/Privacy.tsx';
 import Imprint from './pages/Imprint.tsx';
 import Footer from './components/Footer.tsx';
+import DemoAccounts from './pages/DemoAccounts.tsx';
 
 function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -101,6 +102,12 @@ function App() {
         <Route path="/welcome" element={<Welcome user={user} />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/imprint" element={<Imprint />} />
+        <Route
+          path="/demo-accounts"
+          element={
+            user?.canManageDemoAccounts ? <DemoAccounts /> : <Navigate to="/home" replace />
+          }
+        />
         <Route path="/edit/*" element={<Navigate to="/events" replace />} />
         <Route path="/events" element={<Edit />}>
           <Route index element={<EventManager />} />

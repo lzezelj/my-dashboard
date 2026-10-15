@@ -1,5 +1,6 @@
 import Calendar from '../components/Calendar';
 import GoogleLoginButton from '../components/GoogleLoginButton';
+import DemoLoginForm from '../components/DemoLoginForm';
 import type { AuthUser } from '../services/authentication.api';
 import Toast from '../components/Toast';
 import { useEffect } from 'react';
@@ -37,6 +38,8 @@ export default function Home({
             </p>
             <div className="home-landing__login">
               <GoogleLoginButton onLogin={onLogin} />
+              <span className="home-landing__login-divider">or</span>
+              <DemoLoginForm onLogin={onLogin} />
             </div>
           </section>
           <section className="home-landing__features" aria-label="Dashboard features">
