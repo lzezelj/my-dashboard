@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import type { DashboardEvent, EventCategory, EventInput, Recurrence } from '../types/events';
-import { eventCategories, eventCategoryLabels, recurrences } from '../types/events';
+import {
+  eventCategories,
+  eventCategoryLabels,
+  recurrenceLabels,
+  recurrences,
+} from '../types/events';
 import { createEvent, updateEvent } from '../services/events.api';
 import { localDateInputValue } from '../utils/dateUtils';
 import Modal from './Modal';
@@ -78,10 +83,59 @@ const categoryDetailFields: Record<EventCategory, DetailField[]> = {
     { key: 'project', label: 'Project or list' },
     { key: 'estimatedMinutes', label: 'Estimated minutes', type: 'number' },
   ],
+  EVENT: [
+    { key: 'eventType', label: 'Event type', placeholder: 'Concert, party, conference...' },
+    { key: 'organizer', label: 'Organizer or host' },
+    { key: 'ticketNumber', label: 'Ticket or confirmation number' },
+  ],
+  TRAVEL: [
+    { key: 'origin', label: 'Origin' },
+    { key: 'destination', label: 'Destination' },
+    {
+      key: 'transportType',
+      label: 'Transport type',
+      type: 'select',
+      options: ['Flight', 'Train', 'Bus', 'Car', 'Ferry', 'Other'],
+    },
+    { key: 'carrier', label: 'Airline or carrier' },
+    { key: 'bookingReference', label: 'Booking reference' },
+    { key: 'accommodation', label: 'Accommodation' },
+  ],
+  WORK: [
+    { key: 'organization', label: 'Organization or client' },
+    { key: 'project', label: 'Project' },
+    { key: 'meetingWith', label: 'Meeting with' },
+    {
+      key: 'priority',
+      label: 'Priority',
+      type: 'select',
+      options: ['Low', 'Medium', 'High'],
+    },
+  ],
+  SCHOOL: [
+    { key: 'course', label: 'Course or subject' },
+    { key: 'institution', label: 'School or institution' },
+    { key: 'instructor', label: 'Teacher or instructor' },
+    { key: 'room', label: 'Room' },
+    {
+      key: 'schoolEventType',
+      label: 'School event type',
+      type: 'select',
+      options: ['Class', 'Exam', 'Assignment', 'Presentation', 'Study session', 'Other'],
+    },
+  ],
   OTHER: [],
 };
 
-const categoriesWithPlace = new Set<EventCategory>(['APPOINTMENT', 'MOVIE', 'OTHER']);
+const categoriesWithPlace = new Set<EventCategory>([
+  'APPOINTMENT',
+  'MOVIE',
+  'EVENT',
+  'TRAVEL',
+  'WORK',
+  'SCHOOL',
+  'OTHER',
+]);
 
 export default function EventForm({
   category,
@@ -338,7 +392,7 @@ export default function EventForm({
             <option value="">One-time</option>
             {recurrences.map((item) => (
               <option key={item} value={item}>
-                {item}
+                {recurrenceLabels[item]}
               </option>
             ))}
           </select>

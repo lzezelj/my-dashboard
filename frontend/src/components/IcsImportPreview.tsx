@@ -7,7 +7,7 @@ import {
 } from '../services/events.api';
 import Modal from './Modal';
 
-export default function IcsImportPreview() {
+export default function IcsImportPreview({ onImported }: { onImported?: () => void } = {}) {
   const fileInput = useRef<HTMLInputElement>(null);
   const [source, setSource] = useState('');
   const [events, setEvents] = useState<IcsPreviewEvent[]>([]);
@@ -38,6 +38,7 @@ export default function IcsImportPreview() {
     try {
       const importResult = await importIcs(source, [...selected]);
       setResult(importResult);
+      if (importResult.imported > 0) onImported?.();
       setEvents((items) => items.filter((item) => !selected.has(item.sourceIndex)));
       setSelected(new Set());
       setConfirming(false);

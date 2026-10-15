@@ -2,7 +2,7 @@ import GoogleLoginButton from '../components/GoogleLoginButton';
 import type { AuthUser } from '../services/authentication.api';
 
 type LoginProps = {
-  onLogin: (user: AuthUser) => void;
+  onLogin: (user: AuthUser, isNewUser: boolean) => void;
 };
 
 export default function Login({ onLogin }: LoginProps) {

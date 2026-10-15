@@ -42,9 +42,10 @@ describe('EventManager bulk selection', () => {
     render(<MemoryRouter><EventManager /></MemoryRouter>);
 
     await waitFor(() => expect(screen.getByText('Event 1')).toBeInTheDocument());
-    const checkboxes = screen.getAllByRole('checkbox', { name: 'Select event' });
+    const checkboxes = screen.getAllByRole('checkbox', { name: 'Select for deletion' });
     await user.click(checkboxes[0]);
     await user.click(checkboxes[1]);
+    await user.click(screen.getByText('Delete', { selector: 'summary' }));
     await user.click(screen.getByRole('button', { name: 'Delete selected (2)' }));
     expect(screen.getByRole('dialog', { name: 'Delete selected events?' })).toBeInTheDocument();
     expect(screen.getByText('This permanently deletes 2 selected events.')).toBeInTheDocument();
@@ -54,6 +55,7 @@ describe('EventManager bulk selection', () => {
     getEvents.mockResolvedValue(events);
     const user = userEvent.setup();
     render(<MemoryRouter><EventManager /></MemoryRouter>);
+    await user.click(screen.getByText('Delete', { selector: 'summary' }));
     await user.click(screen.getByRole('button', { name: 'Delete all events' }));
     expect(screen.getByRole('dialog', { name: 'Delete all events?' })).toBeInTheDocument();
   });

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { DashboardEvent, EventCategory } from '../types/events';
 import { eventCategories, eventCategoryLabels, eventDetailLabels } from '../types/events';
@@ -17,6 +17,8 @@ import { dateOnlyToDisplay } from '../utils/dateUtils';
 import EventForm from './EventForm';
 import Modal from './Modal';
 
+const EVENTS_PER_PAGE = 25;
+
 export default function EventManager({ initialCategory }: { initialCategory?: EventCategory }) {
   const [filterCategory, setFilterCategory] = useState<EventCategory | 'ALL'>(
     initialCategory ?? 'ALL',
@@ -34,6 +36,11 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
   const [showOccurrenceSaveConfirmation, setShowOccurrenceSaveConfirmation] = useState(false);
   const [selectedEventIds, setSelectedEventIds] = useState<Set<number>>(new Set());
   const [bulkDeleteMode, setBulkDeleteMode] = useState<'selected' | 'all' | null>(null);
+  const [eventSearch, setEventSearch] = useState('');
+  const [searchField, setSearchField] = useState<'title' | 'description'>('title');
+  const [eventPage, setEventPage] = useState(1);
+  const deleteMenuRef = useRef<HTMLDetailsElement>(null);
+  const transferMenuRef = useRef<HTMLDetailsElement>(null);
   const navigate = useNavigate();
   const load = useCallback(async () => {
     try {
@@ -47,6 +54,51 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
     const timer = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(timer);
   }, [load]);
+  useEffect(() => {
+    const closeMenus = () => {
+      if (deleteMenuRef.current) deleteMenuRef.current.open = false;
+      if (transferMenuRef.current) transferMenuRef.current.open = false;
+    };
+    const closeWhenOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        !deleteMenuRef.current?.contains(target) &&
+        !transferMenuRef.current?.contains(target)
+      ) {
+        closeMenus();
+      }
+    };
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeMenus();
+    };
+    document.addEventListener('mousedown', closeWhenOutside);
+    document.addEventListener('keydown', closeWithEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeWhenOutside);
+      document.removeEventListener('keydown', closeWithEscape);
+    };
+  }, []);
+  const matchingEvents = useMemo(() => {
+    const query = eventSearch.trim().toLocaleLowerCase();
+    const sorted = [...events].sort(
+      (a, b) =>
+        (a.date ?? a.startTime?.slice(0, 10) ?? '').localeCompare(
+          b.date ?? b.startTime?.slice(0, 10) ?? '',
+        ) || (a.startTime ?? '').localeCompare(b.startTime ?? ''),
+    );
+    if (!query) return sorted;
+    return sorted.filter((event) =>
+      (searchField === 'title' ? event.title : (event.description ?? ''))
+        .toLocaleLowerCase()
+        .includes(query),
+    );
+  }, [eventSearch, events, searchField]);
+  const eventPageCount = Math.max(1, Math.ceil(matchingEvents.length / EVENTS_PER_PAGE));
+  const currentEventPage = Math.min(eventPage, eventPageCount);
+  const visibleEvents = matchingEvents.slice(
+    (currentEventPage - 1) * EVENTS_PER_PAGE,
+    currentEventPage * EVENTS_PER_PAGE,
+  );
   const closeForm = () => {
     setShowCreate(false);
     setEditingEvent(null);
@@ -175,62 +227,146 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
         <p>Delete “{eventToDelete?.title}”? This cannot be undone.</p>
       </Modal>
       <header className="event-manager__header">
-        <div>
+        <div className="event-manager__heading">
           <h1>Events</h1>
-          <p>Browse, add, and update your events.</p>
+          <p>Browse, add and update your events</p>
         </div>
         <div className="event-manager__controls">
-          <label className="category-selector">
-            Category
-            <select
-              value={filterCategory}
-              onChange={(e) => {
-                setFilterCategory(e.target.value as EventCategory | 'ALL');
-                closeForm();
+          <div className="event-manager__primary-controls">
+            <label className="category-selector">
+              Category
+              <select
+                value={filterCategory}
+                onChange={(e) => {
+                  setFilterCategory(e.target.value as EventCategory | 'ALL');
+                  setEventPage(1);
+                  closeForm();
+                }}
+              >
+                <option value="ALL">All categories</option>
+                {eventCategories.map((item) => (
+                  <option key={item} value={item}>
+                    {eventCategoryLabels[item]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              className="primary-button"
+              type="button"
+              onClick={() => {
+                setEditingEvent(null);
+                setShowCreate((open) => !open);
               }}
             >
-              <option value="ALL">All categories</option>
-              {eventCategories.map((item) => (
-                <option key={item} value={item}>
-                  {eventCategoryLabels[item]}
-                </option>
-              ))}
-            </select>
+              {showCreate ? 'Close form' : 'Add event'}
+            </button>
+            <details
+              className="event-manager__menu event-manager__delete-menu"
+              ref={deleteMenuRef}
+            >
+              <summary>Delete</summary>
+              <div className="event-manager__menu-items">
+                <button
+                  type="button"
+                  className="danger-button"
+                  disabled={selectedEventIds.size === 0}
+                  onClick={() => {
+                    deleteMenuRef.current!.open = false;
+                    setBulkDeleteMode('selected');
+                  }}
+                >
+                  Delete selected ({selectedEventIds.size})
+                </button>
+                <button
+                  type="button"
+                  className="danger-button"
+                  onClick={() => {
+                    deleteMenuRef.current!.open = false;
+                    setBulkDeleteMode('all');
+                  }}
+                >
+                  Delete all events
+                </button>
+              </div>
+            </details>
+          </div>
+          <details
+            className="event-manager__menu event-manager__transfer-menu"
+            ref={transferMenuRef}
+          >
+            <summary>Import/Export Calendar</summary>
+            <div className="event-manager__menu-items">
+              <button
+                type="button"
+                onClick={() => {
+                  transferMenuRef.current!.open = false;
+                  void downloadExport();
+                }}
+              >
+                Export as JSON
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  transferMenuRef.current!.open = false;
+                  void downloadIcsExport();
+                }}
+              >
+                Export as ICS
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  transferMenuRef.current!.open = false;
+                  navigate('/events/import');
+                }}
+              >
+                Import calendar
+              </button>
+            </div>
+          </details>
+        </div>
+        <div className="event-manager__browser-controls">
+          <label className="event-search-field">
+            Search events
+            <input
+              type="search"
+              value={eventSearch}
+              placeholder={`Search by ${searchField}`}
+              onChange={(changeEvent) => {
+                setEventSearch(changeEvent.target.value);
+                setEventPage(1);
+              }}
+            />
           </label>
-          <button
-            className="primary-button"
-            type="button"
-            onClick={() => {
-              setEditingEvent(null);
-              setShowCreate((open) => !open);
-            }}
-          >
-            {showCreate ? 'Close form' : 'Add event'}
-          </button>
-          <button type="button" onClick={() => void downloadExport()}>
-            Export JSON
-          </button>
-          <button type="button" onClick={() => void downloadIcsExport()}>
-            Export ICS
-          </button>
-          <button type="button" onClick={() => navigate('/edit/import')}>
-            Import calendar
-          </button>
-          <button
-            type="button"
-            className="danger-button"
-            disabled={selectedEventIds.size === 0}
-            onClick={() => setBulkDeleteMode('selected')}
-          >
-            Delete selected ({selectedEventIds.size})
-          </button>
-          <button
-            type="button"
-            className="danger-button"
-            onClick={() => setBulkDeleteMode('all')}
-          >
-            Delete all events
-          </button>
+          <fieldset className="event-search-selector">
+            <legend>Search in</legend>
+            <label>
+              <input
+                type="radio"
+                name="managed-event-search-field"
+                checked={searchField === 'title'}
+                onChange={() => {
+                  setSearchField('title');
+                  setEventPage(1);
+                }}
+              />
+              Title
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="managed-event-search-field"
+                checked={searchField === 'description'}
+                onChange={() => {
+                  setSearchField('description');
+                  setEventPage(1);
+                }}
+              />
+              Description
+            </label>
+          </fieldset>
         </div>
       </header>
       {error && (
@@ -246,29 +382,41 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
           onCancel={closeForm}
         />
       )}
-      <section className="event-manager__list" aria-label="Saved events">
-        {events.length === 0 ? (
-          <p className="event-list-empty">No events in this category.</p>
+      <section className="event-manager__results-window" aria-label="Event search results">
+        <EventManagerPagination
+          currentPage={currentEventPage}
+          pageCount={eventPageCount}
+          onChange={setEventPage}
+        />
+        <div className="event-manager__list" aria-label="Saved events">
+        {visibleEvents.length === 0 ? (
+          <p className="event-list-empty">
+            {eventSearch.trim()
+              ? `No events contain “${eventSearch.trim()}” in their ${searchField}.`
+              : 'No events in this category.'}
+          </p>
         ) : (
-          events.map((event) => (
+          visibleEvents.map((event) => (
             <div className="event-manager__entry" key={event.id}>
               <article className="event-manager__card">
-                <label className="event-manager__select">
-                  <input
-                    type="checkbox"
-                    checked={selectedEventIds.has(event.id)}
-                    onChange={(changeEvent) =>
-                      setSelectedEventIds((current) => {
-                        const next = new Set(current);
-                        if (changeEvent.target.checked) next.add(event.id);
-                        else next.delete(event.id);
-                        return next;
-                      })
-                    }
-                  />
-                  Select event
-                </label>
-                <h3>{event.title}</h3>
+                <div className="event-manager__card-header">
+                  <h3>{event.title}</h3>
+                  <label className="event-manager__select">
+                    <input
+                      type="checkbox"
+                      checked={selectedEventIds.has(event.id)}
+                      onChange={(changeEvent) =>
+                        setSelectedEventIds((current) => {
+                          const next = new Set(current);
+                          if (changeEvent.target.checked) next.add(event.id);
+                          else next.delete(event.id);
+                          return next;
+                        })
+                      }
+                    />
+                    Select for deletion
+                  </label>
+                </div>
                 <p>
                   {eventCategoryLabels[event.category]} ·{' '}
                   {dateOnlyToDisplay(event.date ?? event.startTime?.slice(0, 10) ?? '')}
@@ -282,10 +430,11 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
                 )}
                 {Object.entries(event.details ?? {}).map(([key, value]) => (
                   <p key={key}>
-                    {eventDetailLabels[key] ?? key}: {value}
+                    <strong>{eventDetailLabels[key] ?? key}:</strong> {value}
                   </p>
                 ))}
-                {event.allowCompletion && (
+                <div className="event-manager__card-actions">
+                  {event.allowCompletion && (
                   <button
                     type="button"
                     onClick={async () => {
@@ -295,8 +444,8 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
                   >
                     {event.completed ? 'Mark incomplete' : 'Complete'}
                   </button>
-                )}
-                <button
+                  )}
+                  <button
                   type="button"
                   onClick={() => {
                     setShowCreate(false);
@@ -305,18 +454,19 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
                 >
                   Edit
                 </button>
-                {event.recurring && (
-                  <button type="button" onClick={() => void toggleOccurrences(event)}>
-                    {occurrenceEventId === event.id ? 'Close occurrences' : 'Edit occurrences'}
+                  {event.recurring && (
+                    <button type="button" onClick={() => void toggleOccurrences(event)}>
+                      {occurrenceEventId === event.id ? 'Close occurrences' : 'Edit occurrences'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="danger-button event-manager__delete-event"
+                    onClick={() => setEventToDelete(event)}
+                  >
+                    Delete
                   </button>
-                )}
-                <button
-                  type="button"
-                  className="danger-button"
-                  onClick={() => setEventToDelete(event)}
-                >
-                  Delete
-                </button>
+                </div>
               </article>
               {editingEvent?.id === event.id && (
                 <EventForm
@@ -345,16 +495,26 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
                       <button
                         type="button"
                         onClick={() => {
+                          const isEditingThisOccurrence =
+                            editingOccurrence?.occurrenceDate === occurrence.occurrenceDate;
+                          if (isEditingThisOccurrence) {
+                            setEditingOccurrence(null);
+                            setOccurrenceDescription('');
+                            setOccurrenceDate('');
+                            return;
+                          }
                           setEditingOccurrence(occurrence);
                           setOccurrenceDescription(occurrence.description ?? '');
                           setOccurrenceDate(occurrence.occurrenceDate ?? '');
                         }}
                       >
-                        Edit occurrence
+                        {editingOccurrence?.occurrenceDate === occurrence.occurrenceDate
+                          ? 'Close occurrence'
+                          : 'Edit occurrence'}
                       </button>
                       {editingOccurrence?.occurrenceDate === occurrence.occurrenceDate && (
                         <div className="occurrences-window__editor">
-                          <label className="form-field">
+                          <label className="form-field occurrences-window__date">
                             Date
                             <input
                               type="date"
@@ -389,7 +549,45 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
             </div>
           ))
         )}
+        </div>
+        <EventManagerPagination
+          currentPage={currentEventPage}
+          pageCount={eventPageCount}
+          onChange={setEventPage}
+        />
       </section>
     </div>
+  );
+}
+
+function EventManagerPagination({
+  currentPage,
+  pageCount,
+  onChange,
+}: {
+  currentPage: number;
+  pageCount: number;
+  onChange: (page: number) => void;
+}) {
+  return (
+    <nav className="event-pagination" aria-label="Managed event pages">
+      <span>
+        Page {currentPage} of {pageCount}
+      </span>
+      <div className="event-pagination__pages">
+        {Array.from({ length: pageCount }, (_, index) => index + 1).map((page) => (
+          <button
+            type="button"
+            key={page}
+            className={page === currentPage ? 'active' : undefined}
+            aria-current={page === currentPage ? 'page' : undefined}
+            aria-label={`Go to managed event page ${page}`}
+            onClick={() => onChange(page)}
+          >
+            {page}
+          </button>
+        ))}
+      </div>
+    </nav>
   );
 }

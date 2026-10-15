@@ -1,15 +1,23 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DashboardEvent, EventCategory } from '../types/events';
-import { eventCategories, eventCategoryLabels, eventDetailLabels } from '../types/events';
+import {
+  eventCategories,
+  eventCategoryLabels,
+  eventDetailLabels,
+  recurrenceLabels,
+} from '../types/events';
 import { getEvents, updateEvent, updateOccurrence } from '../services/events.api';
 import { dateOnlyToDisplay, localDateInputValue } from '../utils/dateUtils';
 import EventForm from './EventForm';
 import Modal from './Modal';
 
+const EVENTS_PER_PAGE = 25;
+
 const eventDate = (event: DashboardEvent) =>
   event.occurrenceDate ?? event.date?.slice(0, 10) ?? event.startTime?.slice(0, 10) ?? '';
-const isSameEvent = (first: DashboardEvent | null, second: DashboardEvent) =>
-  first?.id === second.id && eventDate(first) === eventDate(second);
+const eventTime = (value: string) =>
+  new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
 function EventDetails({
   event,
   onSaved,
@@ -39,7 +47,7 @@ function EventDetails({
     }
   };
   return (
-    <aside className="event-details" aria-live="polite">
+    <div className="event-details" aria-live="polite">
       <Modal
         isOpen={showSaveConfirmation}
         title="Save occurrence changes?"
@@ -49,16 +57,65 @@ function EventDetails({
       >
         <p>This changes only this occurrence, not the full recurring event.</p>
       </Modal>
-      <p>{event.description?.trim() || 'No description has been added for this event.'}</p>
-      {event.location && <p>Location: {event.location}</p>}
+      <dl className="event-details__summary">
+        <div>
+          <dt>Category</dt>
+          <dd>{eventCategoryLabels[event.category]}</dd>
+        </div>
+        <div>
+          <dt>Date</dt>
+          <dd>{dateOnlyToDisplay(eventDate(event))}</dd>
+        </div>
+        {event.startTime && (
+          <div>
+            <dt>Time</dt>
+            <dd>
+              {eventTime(event.startTime)}
+              {event.endTime ? ` – ${eventTime(event.endTime)}` : ''}
+            </dd>
+          </div>
+        )}
+        {(event.recurring || event.recurrenceRule) && (
+          <div>
+            <dt>Recurrence</dt>
+            <dd>
+              {event.recurring ? recurrenceLabels[event.recurring] : event.recurrenceRule}
+              {event.numberOfRecurrences
+                ? `, ${event.numberOfRecurrences} occurrences`
+                : event.recurrenceEndDate
+                  ? `, until ${dateOnlyToDisplay(event.recurrenceEndDate.slice(0, 10))}`
+                  : ''}
+            </dd>
+          </div>
+        )}
+        {event.allowCompletion && (
+          <div>
+            <dt>Status</dt>
+            <dd>{event.completed ? 'Completed' : 'Not completed'}</dd>
+          </div>
+        )}
+        {event.location && (
+          <div>
+            <dt>Location</dt>
+            <dd>{event.location}</dd>
+          </div>
+        )}
+      </dl>
+      <section className="event-details__description-block">
+        <h3>Description</h3>
+        <p>{event.description?.trim() || 'No description has been added for this event.'}</p>
+      </section>
       {event.url && (
         <p>
-          Link: <a href={event.url}>{event.url}</a>
+          Link:{' '}
+          <a href={event.url} target="_blank" rel="noreferrer">
+            {event.url}
+          </a>
         </p>
       )}
       {Object.entries(event.details ?? {}).map(([key, value]) => (
         <p key={key}>
-          {eventDetailLabels[key] ?? key}: {value}
+          <strong>{eventDetailLabels[key] ?? key}:</strong> {value}
         </p>
       ))}
       {event.recurring && (
@@ -96,7 +153,7 @@ function EventDetails({
           )}
         </>
       )}
-    </aside>
+    </div>
   );
 }
 
@@ -107,8 +164,10 @@ export default function Calendar() {
   const [upcomingEvents, setUpcomingEvents] = useState<DashboardEvent[]>([]);
   const [selected, setSelected] = useState(today);
   const [upcomingCategory, setUpcomingCategory] = useState<EventCategory | 'ALL'>('ALL');
-  const [selectedDayEvent, setSelectedDayEvent] = useState<DashboardEvent | null>(null);
-  const [selectedUpcomingEvent, setSelectedUpcomingEvent] = useState<DashboardEvent | null>(null);
+  const [eventSearch, setEventSearch] = useState('');
+  const [searchField, setSearchField] = useState<'title' | 'description'>('title');
+  const [eventPage, setEventPage] = useState(1);
+  const [selectedEvent, setSelectedEvent] = useState<DashboardEvent | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const loadMonth = useCallback(async () => {
     const start = `${month}-01`;
@@ -124,11 +183,32 @@ export default function Calendar() {
       upcomingCategory === 'ALL' ? { from: today } : { from: today, category: upcomingCategory };
     try {
       const items = await getEvents(filters);
-      setUpcomingEvents(items.sort((a, b) => eventDate(a).localeCompare(eventDate(b))).slice(0, 5));
+      setUpcomingEvents(
+        items.sort(
+          (a, b) =>
+            eventDate(a).localeCompare(eventDate(b)) ||
+            (a.startTime ?? '').localeCompare(b.startTime ?? ''),
+        ),
+      );
     } catch (error) {
       console.error(error);
     }
   }, [today, upcomingCategory]);
+  const matchingUpcomingEvents = useMemo(() => {
+    const query = eventSearch.trim().toLocaleLowerCase();
+    if (!query) return upcomingEvents;
+    return upcomingEvents.filter((event) =>
+      (searchField === 'title' ? event.title : (event.description ?? ''))
+        .toLocaleLowerCase()
+        .includes(query),
+    );
+  }, [eventSearch, searchField, upcomingEvents]);
+  const eventPageCount = Math.max(1, Math.ceil(matchingUpcomingEvents.length / EVENTS_PER_PAGE));
+  const currentEventPage = Math.min(eventPage, eventPageCount);
+  const visibleUpcomingEvents = matchingUpcomingEvents.slice(
+    (currentEventPage - 1) * EVENTS_PER_PAGE,
+    currentEventPage * EVENTS_PER_PAGE,
+  );
   useEffect(() => {
     const timer = window.setTimeout(() => void loadMonth(), 0);
     return () => window.clearTimeout(timer);
@@ -158,12 +238,33 @@ export default function Calendar() {
   const changeMonth = (offset: number) => {
     const currentMonth = new Date(Number(month.slice(0, 4)), Number(month.slice(5)) - 1, 1);
     currentMonth.setMonth(currentMonth.getMonth() + offset);
-    setMonth(
-      `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`,
-    );
+    const nextMonth = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
+    setMonth(nextMonth);
+    setSelected(`${nextMonth}-01`);
+    setSelectedEvent(null);
+    setShowCreateForm(false);
   };
   return (
     <>
+      <Modal
+        isOpen={selectedEvent !== null}
+        title={selectedEvent?.title ?? 'Event details'}
+        confirmLabel="Close"
+        showCancel={false}
+        className="event-details-modal"
+        onCancel={() => setSelectedEvent(null)}
+        onConfirm={() => setSelectedEvent(null)}
+      >
+        {selectedEvent && (
+          <EventDetails
+            event={selectedEvent}
+            onSaved={async () => {
+              setSelectedEvent(null);
+              await Promise.all([loadMonth(), loadUpcoming()]);
+            }}
+          />
+        )}
+      </Modal>
       <div className="calendar">
         <div className="calendar-month-controls">
           <button
@@ -174,7 +275,16 @@ export default function Calendar() {
           >
             <span className="calendar-month-chevron calendar-month-chevron--previous" aria-hidden="true" />
           </button>
-          <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
+          <input
+            type="month"
+            value={month}
+            onChange={(e) => {
+              setMonth(e.target.value);
+              setSelected(`${e.target.value}-01`);
+              setSelectedEvent(null);
+              setShowCreateForm(false);
+            }}
+          />
           <button
             type="button"
             className="calendar-month-button"
@@ -189,7 +299,7 @@ export default function Calendar() {
             onClick={() => {
               setMonth(today.slice(0, 7));
               setSelected(today);
-              setSelectedDayEvent(null);
+              setSelectedEvent(null);
               setShowCreateForm(false);
             }}
           >
@@ -217,7 +327,7 @@ export default function Calendar() {
                 onClick={() => {
                   setMonth(date.slice(0, 7));
                   setSelected(date);
-                  setSelectedDayEvent(null);
+                  setSelectedEvent(null);
                   setShowCreateForm(false);
                 }}
               >
@@ -234,12 +344,19 @@ export default function Calendar() {
                 key={date}
                 onClick={() => {
                   setSelected(date);
-                  setSelectedDayEvent(null);
+                  setSelectedEvent(null);
                   setShowCreateForm(false);
                 }}
               >
                 <span>{index + 1}</span>
-                {items.length > 0 && <span className="event-count">{items.length}</span>}
+                {items.length > 0 && (
+                  <span
+                    className="event-count"
+                    aria-label={`${items.length} event${items.length === 1 ? '' : 's'}`}
+                  >
+                    {items.length}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -260,9 +377,7 @@ export default function Calendar() {
                 <button
                   className="event-list-item"
                   type="button"
-                  onClick={() =>
-                    setSelectedDayEvent((current) => (isSameEvent(current, event) ? null : event))
-                  }
+                  onClick={() => setSelectedEvent(event)}
                 >
                   <strong>{event.title}</strong>
                   <span>
@@ -279,9 +394,6 @@ export default function Calendar() {
                     )}
                   </span>
                 </button>
-                {isSameEvent(selectedDayEvent, event) && (
-                  <EventDetails event={event} onSaved={loadMonth} />
-                )}
               </div>
             ))
           )}
@@ -325,15 +437,59 @@ export default function Calendar() {
         </section>
       </div>
       <section className="upcoming-events-window" aria-labelledby="upcoming-events-title">
-        <div className="upcoming-events-window__header">
-          <h2 id="upcoming-events-title">Next five events</h2>
+        <h2 id="upcoming-events-title">Upcoming events</h2>
+        <div className="upcoming-events-window__toolbar">
+          <div className="event-search-controls">
+            <label className="event-search-field">
+              Search events
+              <input
+                type="search"
+                value={eventSearch}
+                placeholder={`Search by ${searchField}`}
+                onChange={(event) => {
+                  setEventSearch(event.target.value);
+                  setEventPage(1);
+                }}
+              />
+            </label>
+            <fieldset className="event-search-selector">
+              <legend>Search in</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="event-search-field"
+                  value="title"
+                  checked={searchField === 'title'}
+                  onChange={() => {
+                    setSearchField('title');
+                    setEventPage(1);
+                  }}
+                />
+                Title
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="event-search-field"
+                  value="description"
+                  checked={searchField === 'description'}
+                  onChange={() => {
+                    setSearchField('description');
+                    setEventPage(1);
+                  }}
+                />
+                Description
+              </label>
+            </fieldset>
+          </div>
           <label className="category-selector">
             Category
             <select
               value={upcomingCategory}
               onChange={(e) => {
                 setUpcomingCategory(e.target.value as EventCategory | 'ALL');
-                setSelectedUpcomingEvent(null);
+                setEventPage(1);
+                setSelectedEvent(null);
               }}
             >
               <option value="ALL">All categories</option>
@@ -345,11 +501,20 @@ export default function Calendar() {
             </select>
           </label>
         </div>
+        <EventPagination
+          currentPage={currentEventPage}
+          pageCount={eventPageCount}
+          onChange={setEventPage}
+        />
         <div className="upcoming-events-list">
-          {upcomingEvents.length === 0 ? (
-            <p className="event-list-empty">No upcoming events in this category.</p>
+          {visibleUpcomingEvents.length === 0 ? (
+            <p className="event-list-empty">
+              {eventSearch.trim()
+                ? `No events contain “${eventSearch.trim()}” in their ${searchField}.`
+                : 'No upcoming events in this category.'}
+            </p>
           ) : (
-            upcomingEvents.map((event) => (
+            visibleUpcomingEvents.map((event) => (
               <div
                 className="event-list-entry"
                 key={`${event.id}-${event.occurrenceDate ?? eventDate(event)}`}
@@ -357,11 +522,7 @@ export default function Calendar() {
                 <button
                   className="event-list-item"
                   type="button"
-                  onClick={() =>
-                    setSelectedUpcomingEvent((current) =>
-                      isSameEvent(current, event) ? null : event,
-                    )
-                  }
+                  onClick={() => setSelectedEvent(event)}
                 >
                   <strong>{event.title}</strong>
                   <span>
@@ -369,19 +530,48 @@ export default function Calendar() {
                     {eventCategoryLabels[event.category]}
                   </span>
                 </button>
-                {isSameEvent(selectedUpcomingEvent, event) && (
-                  <EventDetails
-                    event={event}
-                    onSaved={async () => {
-                      await Promise.all([loadMonth(), loadUpcoming()]);
-                    }}
-                  />
-                )}
               </div>
             ))
           )}
         </div>
+        <EventPagination
+          currentPage={currentEventPage}
+          pageCount={eventPageCount}
+          onChange={setEventPage}
+        />
       </section>
     </>
+  );
+}
+
+function EventPagination({
+  currentPage,
+  pageCount,
+  onChange,
+}: {
+  currentPage: number;
+  pageCount: number;
+  onChange: (page: number) => void;
+}) {
+  return (
+    <nav className="event-pagination" aria-label="Event pages">
+      <span>
+        Page {currentPage} of {pageCount}
+      </span>
+      <div className="event-pagination__pages">
+        {Array.from({ length: pageCount }, (_, index) => index + 1).map((page) => (
+          <button
+            type="button"
+            key={page}
+            className={page === currentPage ? 'active' : undefined}
+            aria-current={page === currentPage ? 'page' : undefined}
+            aria-label={`Go to event page ${page}`}
+            onClick={() => onChange(page)}
+          >
+            {page}
+          </button>
+        ))}
+      </div>
+    </nav>
   );
 }

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 
 type ModalProps = {
   isOpen: boolean;
@@ -9,6 +9,8 @@ type ModalProps = {
   onConfirm: () => void;
   onCancel: () => void;
   destructive?: boolean;
+  showCancel?: boolean;
+  className?: string;
 };
 
 export default function Modal({
@@ -20,7 +22,11 @@ export default function Modal({
   onConfirm,
   onCancel,
   destructive = false,
+  showCancel = true,
+  className,
 }: ModalProps) {
+  const titleId = useId();
+
   if (!isOpen) {
     return null;
   }
@@ -28,18 +34,20 @@ export default function Modal({
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onCancel}>
       <section
-        className="modal"
+        className={`modal${className ? ` ${className}` : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="modal-title"
+        aria-labelledby={titleId}
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <h2 id="modal-title">{title}</h2>
+        <h2 id={titleId}>{title}</h2>
         <div className="modal-content">{children}</div>
         <div className="modal-actions">
-          <button type="button" onClick={onCancel}>
-            {cancelLabel}
-          </button>
+          {showCancel && (
+            <button type="button" onClick={onCancel}>
+              {cancelLabel}
+            </button>
+          )}
           <button
             type="button"
             className={destructive ? 'danger-button' : 'primary-button'}

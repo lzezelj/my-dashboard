@@ -86,7 +86,7 @@ function problems(event: ImportedEvent) {
   return result;
 }
 
-export default function ImportPreview() {
+export default function ImportPreview({ onImported }: { onImported?: () => void } = {}) {
   const fileInput = useRef<HTMLInputElement>(null);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -220,6 +220,7 @@ export default function ImportPreview() {
         ),
       );
       setImportResult(result);
+      if (result.imported > 0) onImported?.();
       setShowImportConfirmation(false);
     } catch (error) {
       setFileError(error instanceof Error ? error.message : 'Could not import events.');

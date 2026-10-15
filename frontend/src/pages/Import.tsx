@@ -4,9 +4,13 @@ import IcsImportPreview from '../components/IcsImportPreview';
 export default function Import() {
   return (
     <main className="import-page">
-      <Link to="/edit">Back to events</Link>
-      <IcsImportPreview />
-      <ImportPreview />
+      <Link to="/events">Back to events</Link>
+      <section id="ics-import">
+        <IcsImportPreview />
+      </section>
+      <section id="json-import">
+        <ImportPreview />
+      </section>
     </main>
   );
 }

@@ -30,6 +30,7 @@ describe('authentication sessions', () => {
   beforeEach(() => {
     vi.stubEnv('JWT_SECRET', 'test-session-secret');
     vi.stubEnv('NODE_ENV', 'test');
+    vi.stubEnv('ALLOWED_GOOGLE_EMAILS', '');
     authService.verifyGoogleToken.mockReset();
     authService.findGoogleUser.mockReset();
   });

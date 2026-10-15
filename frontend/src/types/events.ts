@@ -1,10 +1,14 @@
 export const eventCategories = [
   'APPOINTMENT',
   'BIRTHDAY',
-  'MOVIE',
-  'TV_SHOW',
+  'EVENT',
   'GAME',
+  'MOVIE',
+  'SCHOOL',
   'TODO',
+  'TRAVEL',
+  'TV_SHOW',
+  'WORK',
   'OTHER',
 ] as const;
 export const recurrences = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'] as const;
@@ -16,6 +20,10 @@ export const eventCategoryLabels: Record<EventCategory, string> = {
   TV_SHOW: 'TV show',
   GAME: 'Game',
   TODO: 'Todo',
+  EVENT: 'Event',
+  TRAVEL: 'Travel',
+  WORK: 'Work',
+  SCHOOL: 'School',
   OTHER: 'Other',
 };
 export const eventDetailLabels: Record<string, string> = {
@@ -35,8 +43,30 @@ export const eventDetailLabels: Record<string, string> = {
   priority: 'Priority',
   project: 'Project or list',
   estimatedMinutes: 'Estimated minutes',
+  eventType: 'Event type',
+  organizer: 'Organizer',
+  ticketNumber: 'Ticket or confirmation number',
+  origin: 'Origin',
+  destination: 'Destination',
+  transportType: 'Transport type',
+  carrier: 'Carrier',
+  bookingReference: 'Booking reference',
+  accommodation: 'Accommodation',
+  organization: 'Organization',
+  meetingWith: 'Meeting with',
+  course: 'Course or subject',
+  institution: 'School or institution',
+  instructor: 'Teacher or instructor',
+  room: 'Room',
+  schoolEventType: 'School event type',
 };
 export type Recurrence = (typeof recurrences)[number];
+export const recurrenceLabels: Record<Recurrence, string> = {
+  DAILY: 'Daily',
+  WEEKLY: 'Weekly',
+  MONTHLY: 'Monthly',
+  YEARLY: 'Yearly',
+};
 export interface DashboardEvent {
   id: number;
   userId: number | null;

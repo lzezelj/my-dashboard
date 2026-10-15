@@ -30,6 +30,36 @@ afterAll(async () => {
 });
 
 describe('event ownership and CRUD', () => {
+  it('creates and retrieves every event category with complete shared data', async () => {
+    const user = await createUser('all-categories');
+
+    for (const [index, category] of Object.values(EventCategory).entries()) {
+      const created = await createEventService(
+        {
+          category,
+          title: `${category} example`,
+          date: `2026-11-${String(index + 1).padStart(2, '0')}`,
+          description: `Complete ${category} description`,
+          location: `${category} location`,
+          url: `https://example.com/${category.toLowerCase()}`,
+          details: { testField: `${category} detail` },
+          recurring: Recurrence.YEARLY,
+          numberOfRecurrences: 2,
+        },
+        user.id,
+      );
+
+      expect(await getEventService(created.id, user.id)).toMatchObject({
+        category,
+        title: `${category} example`,
+        description: `Complete ${category} description`,
+        location: `${category} location`,
+        details: { testField: `${category} detail` },
+        recurring: Recurrence.YEARLY,
+        numberOfRecurrences: 2,
+      });
+    }
+  });
   it('prevents users from reading, editing, or deleting another user’s event', async () => {
     const owner = await createUser('owner');
     const stranger = await createUser('stranger');
@@ -107,6 +137,116 @@ describe('event ownership and CRUD', () => {
 });
 
 describe('JSON and ICS portability', () => {
+  it('preserves ISO timestamps and timezone identifiers through JSON v2', async () => {
+    const user = await createUser('json-timezone');
+    await createEventService(
+      {
+        category: EventCategory.TRAVEL,
+        title: 'Berlin departure',
+        startTime: '2026-07-15T08:00:00.000Z',
+        endTime: '2026-07-15T09:30:00.000Z',
+        timeZone: 'Europe/Berlin',
+      },
+      user.id,
+    );
+
+    const exported = await exportEventsService(user.id);
+    expect(exported.events[0]).toMatchObject({
+      startTime: '2026-07-15T08:00:00.000Z',
+      endTime: '2026-07-15T09:30:00.000Z',
+      timeZone: 'Europe/Berlin',
+    });
+    const exportedIcs = await exportIcsService(user.id);
+    expect(exportedIcs).toContain('DTSTART:20260715T080000Z');
+    expect(exportedIcs).toContain('DTEND:20260715T093000Z');
+  });
+
+  it('parses UTC ICS timestamps without shifting them', () => {
+    const [event] = parseIcsService(
+      [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'BEGIN:VEVENT',
+        'UID:utc@example.com',
+        'DTSTART:20260715T080000Z',
+        'DTEND:20260715T093000Z',
+        'SUMMARY:UTC event',
+        'END:VEVENT',
+        'END:VCALENDAR',
+        '',
+      ].join('\r\n'),
+    );
+
+    expect(event).toMatchObject({
+      startTime: '2026-07-15T08:00:00.000Z',
+      endTime: '2026-07-15T09:30:00.000Z',
+      timeZone: 'UTC',
+    });
+  });
+
+  it('applies Europe/Berlin winter and summer offsets from ICS timezone data', () => {
+    const events = parseIcsService(
+      [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'BEGIN:VTIMEZONE',
+        'TZID:Europe/Berlin',
+        'BEGIN:STANDARD',
+        'DTSTART:19701025T030000',
+        'TZOFFSETFROM:+0200',
+        'TZOFFSETTO:+0100',
+        'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
+        'END:STANDARD',
+        'BEGIN:DAYLIGHT',
+        'DTSTART:19700329T020000',
+        'TZOFFSETFROM:+0100',
+        'TZOFFSETTO:+0200',
+        'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU',
+        'END:DAYLIGHT',
+        'END:VTIMEZONE',
+        'BEGIN:VEVENT',
+        'UID:winter@example.com',
+        'DTSTART;TZID=Europe/Berlin:20260115T100000',
+        'SUMMARY:Winter event',
+        'END:VEVENT',
+        'BEGIN:VEVENT',
+        'UID:summer@example.com',
+        'DTSTART;TZID=Europe/Berlin:20260715T100000',
+        'SUMMARY:Summer event',
+        'END:VEVENT',
+        'END:VCALENDAR',
+        '',
+      ].join('\r\n'),
+    );
+
+    expect(events[0]).toMatchObject({
+      startTime: '2026-01-15T09:00:00.000Z',
+      timeZone: 'Europe/Berlin',
+    });
+    expect(events[1]).toMatchObject({
+      startTime: '2026-07-15T08:00:00.000Z',
+      timeZone: 'Europe/Berlin',
+    });
+  });
+
+  it('keeps date-only ICS events on the same calendar day', () => {
+    const [event] = parseIcsService(
+      [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'BEGIN:VEVENT',
+        'UID:date-only@example.com',
+        'DTSTART;VALUE=DATE:20260329',
+        'SUMMARY:DST date-only event',
+        'END:VEVENT',
+        'END:VCALENDAR',
+        '',
+      ].join('\r\n'),
+    );
+
+    expect(event).toMatchObject({ date: '2026-03-29', startTime: null, timeZone: null, allDay: true });
+  });
+
   it('round-trips all event data through JSON v2', async () => {
     const user = await createUser('json');
     await createEventService(

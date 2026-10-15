@@ -15,6 +15,10 @@ export const EventCategory = {
   TV_SHOW: 'TV_SHOW',
   GAME: 'GAME',
   BIRTHDAY: 'BIRTHDAY',
+  EVENT: 'EVENT',
+  TRAVEL: 'TRAVEL',
+  WORK: 'WORK',
+  SCHOOL: 'SCHOOL',
   OTHER: 'OTHER',
   TODO: 'TODO'
 } as const

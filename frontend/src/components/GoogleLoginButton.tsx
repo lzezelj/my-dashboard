@@ -3,12 +3,17 @@ import type { AuthUser } from '../services/authentication.api';
 import { apiUrl } from '../config';
 
 type GoogleLoginButtonProps = {
-  onLogin: (user: AuthUser) => void;
+  onLogin: (user: AuthUser, isNewUser: boolean) => void;
 };
 
 export default function GoogleLoginButton({ onLogin }: GoogleLoginButtonProps) {
+  // Supported by Google Identity Services and this package at runtime, but omitted
+  // from the package's bundled GsiButtonConfiguration TypeScript declaration.
+  const englishLocale = { locale: 'en' } as { locale: string };
+
   return (
     <GoogleLogin
+      {...englishLocale}
       onSuccess={async (credentialResponse) => {
         if (!credentialResponse.credential) {
           console.error('No Google credential received');
@@ -25,7 +30,8 @@ export default function GoogleLoginButton({ onLogin }: GoogleLoginButtonProps) {
             });
 
           let response = await authenticate('login');
-          if (response.status === 404) response = await authenticate('register');
+          const isNewUser = response.status === 404;
+          if (isNewUser) response = await authenticate('register');
 
           const data = (await response.json()) as { message?: string; user?: AuthUser };
 
@@ -37,7 +43,7 @@ export default function GoogleLoginButton({ onLogin }: GoogleLoginButtonProps) {
             throw new Error('Backend did not return a user');
           }
 
-          onLogin(data.user);
+          onLogin(data.user, isNewUser);
         } catch (error) {
           console.error('Backend authentication error:', error);
         }

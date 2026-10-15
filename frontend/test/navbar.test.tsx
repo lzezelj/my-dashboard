@@ -19,11 +19,11 @@ const renderNavbar = () =>
   );
 
 describe('Navbar account menu', () => {
-  it('closes after Edit is selected', async () => {
+  it('closes after Events is selected', async () => {
     const user = userEvent.setup();
     renderNavbar();
     await user.click(screen.getByRole('button', { name: 'My Account' }));
-    await user.click(screen.getByRole('menuitem', { name: 'Edit' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Events' }));
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 

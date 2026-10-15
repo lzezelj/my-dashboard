@@ -7,7 +7,7 @@ import { exportEvents } from '../services/events.api';
 
 type NavbarProps = {
   user: AuthUser | null;
-  onLogin: (user: AuthUser) => void;
+  onLogin: (user: AuthUser, isNewUser: boolean) => void;
   onLogout: () => Promise<void>;
   onDeleteAccount: () => Promise<void>;
 };
@@ -116,8 +116,8 @@ export default function Navbar({ user, onLogin, onLogout, onDeleteAccount }: Nav
             </button>
             {isAccountMenuOpen && (
               <div className="account-menu__items" role="menu">
-                <Link to="/edit" role="menuitem" onClick={() => setIsAccountMenuOpen(false)}>
-                  Edit
+                <Link to="/events" role="menuitem" onClick={() => setIsAccountMenuOpen(false)}>
+                  Events
                 </Link>
               <button
                 type="button"

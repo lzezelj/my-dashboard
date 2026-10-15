@@ -2,12 +2,16 @@ import { Link } from 'react-router-dom';
 export default function EditNavbar() {
   return (
     <nav className="edit-navbar" aria-label="Edit categories">
-      <Link to="/edit/movies">Movies</Link>
-      <Link to="/edit/tv-shows">TV Shows</Link>
-      <Link to="/edit/games">Games</Link>
-      <Link to="/edit/birthdays">Birthdays</Link>
-      <Link to="/edit/appointments">Appointments</Link>
-      <Link to="/edit/todos">Todos</Link>
+      <Link to="/events/appointments">Appointments</Link>
+      <Link to="/events/birthdays">Birthdays</Link>
+      <Link to="/events/events">Events</Link>
+      <Link to="/events/games">Games</Link>
+      <Link to="/events/movies">Movies</Link>
+      <Link to="/events/school">School</Link>
+      <Link to="/events/todos">Todos</Link>
+      <Link to="/events/travel">Travel</Link>
+      <Link to="/events/tv-shows">TV Shows</Link>
+      <Link to="/events/work">Work</Link>
     </nav>
   );
 }

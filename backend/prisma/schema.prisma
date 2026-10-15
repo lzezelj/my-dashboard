@@ -4,6 +4,10 @@ enum EventCategory {
   TV_SHOW
   GAME
   BIRTHDAY
+  EVENT
+  TRAVEL
+  WORK
+  SCHOOL
   OTHER
   TODO
 }

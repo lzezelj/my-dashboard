@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 
 type HomeProps = {
   user: AuthUser | null;
-  onLogin: (user: AuthUser) => void;
+  onLogin: (user: AuthUser, isNewUser: boolean) => void;
   deletionNotice: string | null;
   onDismissDeletionNotice: () => void;
 };
@@ -55,8 +55,7 @@ export default function Home({
   }
 
   return (
-    <main className="home-dashboard">
-      <h1>Welcome back{user.name ? `, ${user.name}` : ''}</h1>
+    <main className="home-dashboard" aria-label="Personal calendar">
       <Calendar />
     </main>
   );
