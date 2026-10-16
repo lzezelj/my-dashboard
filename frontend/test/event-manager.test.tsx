@@ -72,6 +72,31 @@ describe('EventManager bulk selection', () => {
     expect(screen.queryByText('Dated event 1')).not.toBeInTheDocument();
   });
 
+  it('displays and sorts a repeating series by its next repetition', async () => {
+    const repeatingEvent: DashboardEvent = {
+      ...events[0]!,
+      id: 20,
+      title: 'Repeating event',
+      date: '2020-01-01',
+      recurring: 'YEARLY',
+    };
+    getEvents.mockImplementation(async (filters = {}) =>
+      'upcoming' in filters
+        ? [{ ...repeatingEvent, occurrenceDate: '2026-10-20' }]
+        : [repeatingEvent],
+    );
+
+    render(
+      <MemoryRouter>
+        <EventManager />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Tuesday, 20/10/2026')).toBeInTheDocument();
+    expect(screen.getByText('Other · 20/10/2026')).toBeInTheDocument();
+    expect(screen.queryByText('01/01/2020')).not.toBeInTheDocument();
+  });
+
   it('selects multiple events and asks for confirmation before deleting them', async () => {
     getEvents.mockResolvedValue(events);
     const user = userEvent.setup();

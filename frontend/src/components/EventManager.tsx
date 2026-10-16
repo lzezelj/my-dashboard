@@ -25,7 +25,9 @@ import ScrollableWindow from './ScrollableWindow';
 
 const EVENTS_PER_PAGE = 25;
 const eventDate = (event: DashboardEvent) =>
-  event.date?.slice(0, 10) ?? event.startTime?.slice(0, 10) ?? '';
+  event.occurrenceDate ??
+  event.date?.slice(0, 10) ??
+  (event.startTime ? localDateInputValue(new Date(event.startTime)) : '');
 const sortEvents = (events: DashboardEvent[]) =>
   [...events].sort(
     (a, b) =>
@@ -68,24 +70,32 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
   const load = useCallback(async () => {
     try {
       setError(null);
-      const loadedEvents = await getEvents(
-        filterCategory === 'ALL' ? {} : { category: filterCategory },
-      );
-      setEvents(loadedEvents);
+      const categoryFilter = filterCategory === 'ALL' ? {} : { category: filterCategory };
+      const today = localDateInputValue();
+      const [loadedEvents, upcomingOccurrences] = await Promise.all([
+        getEvents(categoryFilter),
+        getEvents({ from: today, upcoming: true, ...categoryFilter }),
+      ]);
+      const nextOccurrenceByEvent = new Map<number, DashboardEvent>();
+      sortEvents(upcomingOccurrences).forEach((occurrence) => {
+        if (!nextOccurrenceByEvent.has(occurrence.id)) {
+          nextOccurrenceByEvent.set(occurrence.id, occurrence);
+        }
+      });
+      const displayedEvents = loadedEvents.map((event) => {
+        const nextOccurrence = event.recurring ? nextOccurrenceByEvent.get(event.id) : undefined;
+        return nextOccurrence
+          ? {
+              ...event,
+              occurrenceDate: nextOccurrence.occurrenceDate,
+              sourceOccurrenceDate: nextOccurrence.sourceOccurrenceDate,
+            }
+          : event;
+      });
+      setEvents(displayedEvents);
       if (!hasSetInitialPage.current) {
-        const sorted = sortEvents(loadedEvents);
-        const today = localDateInputValue();
-        const upcomingOccurrences = await getEvents({
-          from: today,
-          upcoming: true,
-          ...(filterCategory === 'ALL' ? {} : { category: filterCategory }),
-        });
-        const firstUpcoming = [...upcomingOccurrences].sort(
-          (a, b) =>
-            (a.occurrenceDate ?? eventDate(a)).localeCompare(b.occurrenceDate ?? eventDate(b)) ||
-            (a.startTime ?? '').localeCompare(b.startTime ?? '') ||
-            a.id - b.id,
-        )[0];
+        const sorted = sortEvents(displayedEvents);
+        const firstUpcoming = sortEvents(upcomingOccurrences)[0];
         const currentIndex = firstUpcoming
           ? sorted.findIndex((event) => event.id === firstUpcoming.id)
           : -1;
@@ -572,8 +582,7 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
                       </label>
                     </div>
                     <p>
-                      {eventCategoryLabels[event.category]} ·{' '}
-                      {dateOnlyToDisplay(event.date ?? event.startTime?.slice(0, 10) ?? '')}
+                      {eventCategoryLabels[event.category]} · {dateOnlyToDisplay(eventDate(event))}
                     </p>
                     {event.description && <p>{event.description}</p>}
                     {event.location && <p>Location: {event.location}</p>}
