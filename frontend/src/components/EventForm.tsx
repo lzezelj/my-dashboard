@@ -7,16 +7,29 @@ import {
   recurrences,
 } from '../types/events';
 import { checkImportDuplicates, createEvent, updateEvent } from '../services/events.api';
-import { localDateInputValue } from '../utils/dateUtils';
+import { isoToLocalDateTimeInputValue, localDateInputValue } from '../utils/dateUtils';
 import Modal from './Modal';
 import ScrollableWindow from './ScrollableWindow';
 
-const blankEvent = (category: EventCategory, date?: string): EventInput => ({
+const oneMinuteAfter = (iso: string) => {
+  const value = new Date(iso);
+  value.setSeconds(0, 0);
+  value.setMinutes(value.getMinutes() + 1);
+  return value.toISOString();
+};
+
+const currentMinute = () => {
+  const value = new Date();
+  value.setSeconds(0, 0);
+  return value.toISOString();
+};
+
+const blankEvent = (category: EventCategory, date?: string, startTime?: string): EventInput => ({
   category,
   title: '',
-  date: date ?? localDateInputValue(),
-  startTime: null,
-  endTime: null,
+  date: startTime ? null : (date ?? localDateInputValue()),
+  startTime: startTime ?? null,
+  endTime: startTime ? oneMinuteAfter(startTime) : null,
   description: null,
   details: null,
   location: null,
@@ -31,6 +44,7 @@ type EventFormProps = {
   category?: EventCategory;
   event?: DashboardEvent;
   initialDate?: string;
+  initialStartTime?: string;
   onSaved: () => void | Promise<void>;
   onCancel: () => void;
 };
@@ -142,13 +156,14 @@ export default function EventForm({
   category,
   event,
   initialDate,
+  initialStartTime,
   onSaved,
   onCancel,
 }: EventFormProps) {
   const [form, setForm] = useState<EventInput>(() =>
     event
       ? { ...event, date: event.date?.slice(0, 10) ?? null }
-      : blankEvent(category ?? 'OTHER', initialDate),
+      : blankEvent(category ?? 'OTHER', initialDate, initialStartTime),
   );
   const [categorySelected, setCategorySelected] = useState(Boolean(category || event));
   const [error, setError] = useState<string | null>(null);
@@ -170,8 +185,13 @@ export default function EventForm({
   const submit = async (submitEvent: React.FormEvent) => {
     submitEvent.preventDefault();
     setError(null);
+    if (form.startTime && form.endTime && new Date(form.endTime) <= new Date(form.startTime)) {
+      setError('End time must be after start time.');
+      return;
+    }
     const payload: EventInput = {
       ...form,
+      timeZone: form.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
       description: form.description?.trim() || null,
       details: form.details
         ? Object.fromEntries(
@@ -274,11 +294,6 @@ export default function EventForm({
           <h2>{isEditing ? `Edit ${categoryLabel}` : `Create ${categoryLabel}`}</h2>
           <p>{isEditing ? 'Update the details below.' : 'Add an event to Calendar Dashboard.'}</p>
         </div>
-        {isEditing && (
-          <button type="button" className="event-form__close" onClick={onCancel}>
-            Close
-          </button>
-        )}
       </header>
       {error && (
         <p className="form-error" role="alert">
@@ -391,10 +406,19 @@ export default function EventForm({
               type="checkbox"
               checked={Boolean(form.startTime)}
               onChange={(e) =>
-                set(
-                  'startTime',
-                  e.target.checked ? new Date().toISOString().slice(0, 16) + ':00.000Z' : null,
-                )
+                setForm((current) => {
+                  if (!e.target.checked)
+                    return {
+                      ...current,
+                      date: current.startTime
+                        ? localDateInputValue(new Date(current.startTime))
+                        : current.date,
+                      startTime: null,
+                      endTime: null,
+                    };
+                  const startTime = currentMinute();
+                  return { ...current, date: null, startTime, endTime: oneMinuteAfter(startTime) };
+                })
               }
             />{' '}
             Timed event (Optional)
@@ -406,15 +430,25 @@ export default function EventForm({
                 <input
                   required
                   type="datetime-local"
-                  value={form.startTime.slice(0, 16)}
-                  onChange={(e) => set('startTime', new Date(e.target.value).toISOString())}
+                  value={isoToLocalDateTimeInputValue(form.startTime)}
+                  onChange={(e) => {
+                    const parsedStart = new Date(e.target.value);
+                    if (!e.target.value || Number.isNaN(parsedStart.getTime())) return;
+                    const startTime = parsedStart.toISOString();
+                    setForm((current) => ({
+                      ...current,
+                      startTime,
+                      endTime: oneMinuteAfter(startTime),
+                    }));
+                  }}
                 />
               </label>
               <label className="form-field">
                 End (Optional)
                 <input
                   type="datetime-local"
-                  value={form.endTime?.slice(0, 16) ?? ''}
+                  min={isoToLocalDateTimeInputValue(oneMinuteAfter(form.startTime))}
+                  value={form.endTime ? isoToLocalDateTimeInputValue(form.endTime) : ''}
                   onChange={(e) =>
                     set('endTime', e.target.value ? new Date(e.target.value).toISOString() : null)
                   }

@@ -363,6 +363,7 @@ function parseImportOverrides(
         override.occurrenceDate,
         event.numberOfRecurrences,
         event.recurrenceEndDate,
+        event.timeZone,
       )
     )
       invalid(`Occurrence override ${index + 1} has an invalid occurrenceDate.`);
@@ -584,6 +585,7 @@ export async function updateOccurrenceService(
       occurrence,
       event.numberOfRecurrences,
       event.recurrenceEndDate?.toISOString().slice(0, 10),
+      event.timeZone,
     ),
   );
   if (!validOccurrence) invalid('The occurrence does not belong to this event.');
@@ -641,16 +643,35 @@ function occurrenceDate(original: Date, recurrence: Recurrence, index: number) {
     ),
   );
 }
+
+function eventDateKey(value: Date, timeZone?: string | null) {
+  if (!timeZone) return value.toISOString().slice(0, 10);
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(value);
+    const part = (type: Intl.DateTimeFormatPartTypes) =>
+      parts.find((item) => item.type === type)?.value;
+    return `${part('year')}-${part('month')}-${part('day')}`;
+  } catch {
+    return value.toISOString().slice(0, 10);
+  }
+}
+
 function isOccurrenceDate(
   original: Date,
   recurrence: Recurrence,
   target: string,
   count?: number | null,
   endDate?: string | null,
+  timeZone?: string | null,
 ) {
   const maximum = count ?? 100_000;
   for (let index = 0; index < maximum; index += 1) {
-    const candidate = occurrenceDate(original, recurrence, index).toISOString().slice(0, 10);
+    const candidate = eventDateKey(occurrenceDate(original, recurrence, index), timeZone);
     if (endDate && candidate > endDate) return false;
     if (candidate === target) return true;
     if (candidate > target) return false;
@@ -668,7 +689,7 @@ export function expandEvent(
   const occurrences: EventOccurrence[] = [];
   for (let index = 0; index < maximum; index += 1) {
     const date = event.recurring ? occurrenceDate(original, event.recurring, index) : original;
-    const sourceOccurrenceDate = date.toISOString().slice(0, 10);
+    const sourceOccurrenceDate = eventDateKey(date, event.timeZone);
     const recurrenceEndDate = event.recurrenceEndDate?.toISOString().slice(0, 10);
     if (recurrenceEndDate && sourceOccurrenceDate > recurrenceEndDate) break;
     if (filters.to && sourceOccurrenceDate > filters.to) break;

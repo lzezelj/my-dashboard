@@ -148,6 +148,23 @@ describe('event ownership and CRUD', () => {
     expect(await getEventsService({}, user.id)).toHaveLength(0);
     expect(await getEventsService({}, other.id)).toHaveLength(1);
   });
+
+  it('groups a UTC timestamp by the event local calendar date', async () => {
+    const user = await createUser('local-date-owner');
+    await createEventService(
+      {
+        category: EventCategory.EVENT,
+        title: 'Late UTC evening',
+        startTime: '2026-10-13T23:00:00.000Z',
+        timeZone: 'Europe/Berlin',
+      },
+      user.id,
+    );
+
+    const events = await getEventsService({ from: '2026-10-14', to: '2026-10-14' }, user.id);
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ occurrenceDate: '2026-10-14' });
+  });
 });
 
 describe('JSON and ICS portability', () => {

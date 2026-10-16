@@ -13,7 +13,11 @@ import {
   updateEvent,
   updateOccurrence,
 } from '../services/events.api';
-import { dateOnlyToDisplay, localDateInputValue } from '../utils/dateUtils';
+import {
+  dateOnlyToDisplay,
+  dateOnlyToWeekdayDisplay,
+  localDateInputValue,
+} from '../utils/dateUtils';
 import EventForm from './EventForm';
 import Modal from './Modal';
 import Pagination from './Pagination';
@@ -172,11 +176,12 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
       return;
     }
     try {
+      setEditingEvent(null);
       setOccurrences(await getEventOccurrences(event.id));
       setOccurrenceEventId(event.id);
       setEditingOccurrence(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not load occurrences.');
+      setError(err instanceof Error ? err.message : 'Could not load repetitions.');
     }
   };
   const saveOccurrence = async () => {
@@ -191,7 +196,7 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
       setEditingOccurrence(null);
       setShowOccurrenceSaveConfirmation(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save occurrence changes.');
+      setError(err instanceof Error ? err.message : 'Could not save repetition changes.');
     }
   };
   const downloadExport = async () => {
@@ -319,12 +324,12 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
       </Modal>
       <Modal
         isOpen={showOccurrenceSaveConfirmation}
-        title="Save occurrence changes?"
+        title="Save repetition changes?"
         confirmLabel="Save changes"
         onCancel={() => setShowOccurrenceSaveConfirmation(false)}
         onConfirm={() => void saveOccurrence()}
       >
-        <p>This updates only the selected occurrence, not the entire repeating event.</p>
+        <p>This updates only the selected repetition, not the entire repeating event.</p>
       </Modal>
       <Modal
         isOpen={eventToDelete !== null}
@@ -536,12 +541,17 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
                   : 'There are no events.'}
               </p>
             ) : (
-              visibleEvents.map((event) => (
+              visibleEvents.map((event, index) => (
                 <div
                   className={`event-manager__entry${event.id === initialEventId ? ' event-manager__entry--current' : ''}`}
                   data-event-id={event.id}
                   key={event.id}
                 >
+                  {(index === 0 || eventDate(visibleEvents[index - 1]!) !== eventDate(event)) && (
+                    <div className="event-date-heading">
+                      {dateOnlyToWeekdayDisplay(eventDate(event))}
+                    </div>
+                  )}
                   <article className="event-manager__card">
                     <div className="event-manager__card-header">
                       <h3>{event.title}</h3>
@@ -592,16 +602,21 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
                       <button
                         type="button"
                         onClick={() => {
-                          setEditingEvent((current) => (current?.id === event.id ? null : event));
+                          setEditingEvent((current) => {
+                            if (current?.id === event.id) return null;
+                            setOccurrenceEventId(null);
+                            setEditingOccurrence(null);
+                            return event;
+                          });
                         }}
                       >
-                        Edit
+                        {editingEvent?.id === event.id ? 'Close' : 'Edit'}
                       </button>
                       {event.recurring && (
                         <button type="button" onClick={() => void toggleOccurrences(event)}>
                           {occurrenceEventId === event.id
-                            ? 'Close occurrences'
-                            : 'Edit occurrences'}
+                            ? 'Close repetitions'
+                            : 'Edit repetitions'}
                         </button>
                       )}
                       <button
@@ -625,70 +640,72 @@ export default function EventManager({ initialCategory }: { initialCategory?: Ev
                   {occurrenceEventId === event.id && (
                     <section
                       className="occurrences-window"
-                      aria-label={`Occurrences of ${event.title}`}
+                      aria-label={`Repetitions of ${event.title}`}
                     >
-                      <h4>Occurrences</h4>
-                      {occurrences.map((occurrence) => (
-                        <div className="occurrences-window__item" key={occurrence.occurrenceDate}>
-                          <div>
-                            <strong>{dateOnlyToDisplay(occurrence.occurrenceDate ?? '')}</strong>
-                            <p>
-                              {occurrence.description ||
-                                'No description has been added for this occurrence.'}
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const isEditingThisOccurrence =
-                                editingOccurrence?.occurrenceDate === occurrence.occurrenceDate;
-                              if (isEditingThisOccurrence) {
-                                setEditingOccurrence(null);
-                                setOccurrenceDescription('');
-                                setOccurrenceDate('');
-                                return;
-                              }
-                              setEditingOccurrence(occurrence);
-                              setOccurrenceDescription(occurrence.description ?? '');
-                              setOccurrenceDate(occurrence.occurrenceDate ?? '');
-                            }}
-                          >
-                            {editingOccurrence?.occurrenceDate === occurrence.occurrenceDate
-                              ? 'Close occurrence'
-                              : 'Edit occurrence'}
-                          </button>
-                          {editingOccurrence?.occurrenceDate === occurrence.occurrenceDate && (
-                            <div className="occurrences-window__editor">
-                              <label className="form-field occurrences-window__date">
-                                Date
-                                <input
-                                  type="date"
-                                  value={occurrenceDate}
-                                  onChange={(changeEvent) =>
-                                    setOccurrenceDate(changeEvent.target.value)
-                                  }
-                                />
-                              </label>
-                              <label className="form-field occurrences-window__description">
-                                Description
-                                <textarea
-                                  value={occurrenceDescription}
-                                  onChange={(changeEvent) =>
-                                    setOccurrenceDescription(changeEvent.target.value)
-                                  }
-                                />
-                              </label>
-                              <button
-                                className="primary-button"
-                                type="button"
-                                onClick={() => setShowOccurrenceSaveConfirmation(true)}
-                              >
-                                Save occurrence
-                              </button>
+                      <h4>Repetitions</h4>
+                      <ScrollableWindow className="occurrences-window__list">
+                        {occurrences.map((occurrence) => (
+                          <div className="occurrences-window__item" key={occurrence.occurrenceDate}>
+                            <div>
+                              <strong>{dateOnlyToDisplay(occurrence.occurrenceDate ?? '')}</strong>
+                              <p>
+                                {occurrence.description ||
+                                  'No description has been added for this repetition.'}
+                              </p>
                             </div>
-                          )}
-                        </div>
-                      ))}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const isEditingThisOccurrence =
+                                  editingOccurrence?.occurrenceDate === occurrence.occurrenceDate;
+                                if (isEditingThisOccurrence) {
+                                  setEditingOccurrence(null);
+                                  setOccurrenceDescription('');
+                                  setOccurrenceDate('');
+                                  return;
+                                }
+                                setEditingOccurrence(occurrence);
+                                setOccurrenceDescription(occurrence.description ?? '');
+                                setOccurrenceDate(occurrence.occurrenceDate ?? '');
+                              }}
+                            >
+                              {editingOccurrence?.occurrenceDate === occurrence.occurrenceDate
+                                ? 'Close repetition'
+                                : 'Edit repetition'}
+                            </button>
+                            {editingOccurrence?.occurrenceDate === occurrence.occurrenceDate && (
+                              <div className="occurrences-window__editor">
+                                <label className="form-field occurrences-window__date">
+                                  Date
+                                  <input
+                                    type="date"
+                                    value={occurrenceDate}
+                                    onChange={(changeEvent) =>
+                                      setOccurrenceDate(changeEvent.target.value)
+                                    }
+                                  />
+                                </label>
+                                <label className="form-field occurrences-window__description">
+                                  Description
+                                  <textarea
+                                    value={occurrenceDescription}
+                                    onChange={(changeEvent) =>
+                                      setOccurrenceDescription(changeEvent.target.value)
+                                    }
+                                  />
+                                </label>
+                                <button
+                                  className="primary-button"
+                                  type="button"
+                                  onClick={() => setShowOccurrenceSaveConfirmation(true)}
+                                >
+                                  Save repetition
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </ScrollableWindow>
                     </section>
                   )}
                 </div>

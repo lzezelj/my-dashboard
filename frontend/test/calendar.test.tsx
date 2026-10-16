@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import Calendar from '../src/components/Calendar';
@@ -88,6 +88,94 @@ describe('Calendar month grid', () => {
     expect(dialog).toHaveTextContent('Appointment');
     expect(dialog).toHaveTextContent('Routine check-up');
     expect(dialog).toHaveTextContent('City clinic');
+  });
+
+  it('separates timed events into hourly rows and date-only events into all-day events', async () => {
+    const user = userEvent.setup();
+    getEvents.mockResolvedValue([
+      {
+        id: 10,
+        userId: 1,
+        category: 'EVENT',
+        title: 'All-day conference',
+        date: '2026-10-16',
+        startTime: null,
+        endTime: null,
+        allDay: true,
+        recurring: null,
+        numberOfRecurrences: null,
+        allowCompletion: false,
+        completed: false,
+        createdAt: '2026-10-01T00:00:00.000Z',
+        updatedAt: '2026-10-01T00:00:00.000Z',
+      },
+      {
+        id: 11,
+        userId: 1,
+        category: 'APPOINTMENT',
+        title: 'Early appointment',
+        date: null,
+        startTime: '2026-10-16T01:00:00',
+        endTime: '2026-10-16T03:15:00',
+        allDay: false,
+        recurring: null,
+        numberOfRecurrences: null,
+        allowCompletion: false,
+        completed: false,
+        createdAt: '2026-10-01T00:00:00.000Z',
+        updatedAt: '2026-10-01T00:00:00.000Z',
+      },
+      {
+        id: 12,
+        userId: 1,
+        category: 'WORK',
+        title: 'Overlapping call',
+        date: null,
+        startTime: '2026-10-16T02:00:00',
+        endTime: '2026-10-16T02:30:00',
+        allDay: false,
+        recurring: null,
+        numberOfRecurrences: null,
+        allowCompletion: false,
+        completed: false,
+        createdAt: '2026-10-01T00:00:00.000Z',
+        updatedAt: '2026-10-01T00:00:00.000Z',
+      },
+    ]);
+    render(<Calendar />);
+
+    const timeline = await screen.findByLabelText('Hourly schedule');
+    const oneOClock = within(timeline).getByText('01:00').closest('.selected-day-hour');
+    expect(oneOClock).not.toBeNull();
+    const earlyEventLine = within(timeline).getByRole('button', {
+      name: /Early appointment, 01:00.*03:15/,
+    });
+    const overlappingEventLine = within(timeline).getByRole('button', {
+      name: /Overlapping call, 02:00.*02:30/,
+    });
+    expect(earlyEventLine).toHaveStyle({ top: '68px', left: '10px', height: '153px' });
+    expect(overlappingEventLine).toHaveStyle({ top: '136px', left: '24px', height: '34px' });
+    fireEvent.pointerMove(earlyEventLine, { clientX: 200, clientY: 300 });
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Early appointment');
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Appointment · 01:00–03:15');
+
+    const allDay = screen.getByLabelText('All-day events');
+    expect(within(allDay).getByRole('button', { name: /All-day conference/ })).toBeInTheDocument();
+    expect(within(allDay).queryByText('Early appointment')).not.toBeInTheDocument();
+    expect(within(allDay).getByRole('button', { name: 'Add event' })).toBeInTheDocument();
+    expect(screen.getByText('Events for Friday, 16/10/2026')).toBeInTheDocument();
+
+    await user.click(earlyEventLine);
+    expect(screen.getByRole('dialog', { name: 'Early appointment' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    await user.click(within(oneOClock!).getByRole('button', { name: 'Add event at 01:00' }));
+    const form = document.querySelector<HTMLElement>('.selected-date-events .event-form');
+    expect(form).not.toBeNull();
+    await user.selectOptions(within(form!).getByLabelText('Category'), 'EVENT');
+    expect(form!.querySelector<HTMLInputElement>('input[type="datetime-local"]')?.value).toBe(
+      '2026-10-16T01:00',
+    );
   });
 
   it('paginates 25 events and searches either titles or descriptions', async () => {

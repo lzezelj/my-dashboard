@@ -7,16 +7,53 @@ import {
   recurrenceLabels,
 } from '../types/events';
 import { getEvents, updateEvent, updateOccurrence } from '../services/events.api';
-import { dateOnlyToDisplay, localDateInputValue } from '../utils/dateUtils';
+import {
+  dateOnlyToDisplay,
+  dateOnlyToWeekdayDisplay,
+  localDateInputValue,
+} from '../utils/dateUtils';
 import EventForm from './EventForm';
 import Modal from './Modal';
 import Pagination from './Pagination';
 import ScrollableWindow from './ScrollableWindow';
 
 const EVENTS_PER_PAGE = 25;
+const HOUR_ROW_HEIGHT = 68;
 
 const eventDate = (event: DashboardEvent) =>
-  event.occurrenceDate ?? event.date?.slice(0, 10) ?? event.startTime?.slice(0, 10) ?? '';
+  event.occurrenceDate ??
+  event.date?.slice(0, 10) ??
+  (event.startTime ? localDateInputValue(new Date(event.startTime)) : '');
+
+const timedEventRange = (event: DashboardEvent) => {
+  const start = new Date(event.startTime!);
+  const startMinutes = start.getHours() * 60 + start.getMinutes();
+  let endMinutes = 24 * 60;
+  if (event.endTime) {
+    const end = new Date(event.endTime);
+    if (!Number.isNaN(end.getTime())) {
+      endMinutes =
+        localDateInputValue(end) === localDateInputValue(start)
+          ? end.getHours() * 60 + end.getMinutes()
+          : 24 * 60;
+    }
+  }
+  const durationMinutes = Math.max(15, Math.min(24 * 60 - startMinutes, endMinutes - startMinutes));
+  return { startMinutes, endMinutes: startMinutes + durationMinutes, durationMinutes };
+};
+
+const layoutTimedEventLines = (events: DashboardEvent[]) => {
+  const columnEnds: number[] = [];
+  return events.map((event, index) => {
+    const range = timedEventRange(event);
+    const freeColumn = columnEnds.findIndex((endMinutes) => endMinutes <= range.startMinutes);
+    const column = freeColumn === -1 ? columnEnds.length : freeColumn;
+    columnEnds[column] = range.endMinutes;
+    return { event, column, colorIndex: index, ...range };
+  });
+};
+
+const overlapMarkerColors = ['#7aa2ff', '#f59e7a', '#6dd6a8', '#c18cff', '#f2ca61', '#67c8e8'];
 const eventTime = (value: string) =>
   new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -44,7 +81,7 @@ function EventDetails({
       await onSaved();
     } catch (saveError) {
       setError(
-        saveError instanceof Error ? saveError.message : 'Could not save occurrence changes.',
+        saveError instanceof Error ? saveError.message : 'Could not save repetition changes.',
       );
     }
   };
@@ -52,12 +89,12 @@ function EventDetails({
     <div className="event-details" aria-live="polite">
       <Modal
         isOpen={showSaveConfirmation}
-        title="Save occurrence changes?"
+        title="Save repetition changes?"
         confirmLabel="Save changes"
         onCancel={() => setShowSaveConfirmation(false)}
         onConfirm={() => void saveOccurrence()}
       >
-        <p>This changes only this occurrence, not the full repeating event.</p>
+        <p>This changes only this repetition, not the full repeating event.</p>
       </Modal>
       <dl className="event-details__summary">
         <div>
@@ -127,7 +164,7 @@ function EventDetails({
             className="event-details__edit"
             onClick={() => setEditingDescription((open) => !open)}
           >
-            {editingDescription ? 'Cancel' : 'Edit this occurrence'}
+            {editingDescription ? 'Cancel' : 'Edit this repetition'}
           </button>
           {editingDescription && (
             <div className="event-details__editor">
@@ -149,7 +186,7 @@ function EventDetails({
                 className="primary-button"
                 onClick={() => setShowSaveConfirmation(true)}
               >
-                Save occurrence
+                Save repetition
               </button>
             </div>
           )}
@@ -170,7 +207,14 @@ export default function Calendar() {
   const [searchField, setSearchField] = useState<'title' | 'description'>('title');
   const [eventPage, setEventPage] = useState(1);
   const [selectedEvent, setSelectedEvent] = useState<DashboardEvent | null>(null);
+  const [timedEventTooltip, setTimedEventTooltip] = useState<{
+    event: DashboardEvent;
+    color: string;
+    x: number;
+    y: number;
+  } | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createStartTime, setCreateStartTime] = useState<string | null>(null);
   const loadMonth = useCallback(async () => {
     const start = `${month}-01`;
     const end = localDateInputValue(new Date(Number(month.slice(0, 4)), Number(month.slice(5)), 0));
@@ -235,6 +279,17 @@ export default function Calendar() {
   const previousMonthLastDate = new Date(Number(month.slice(0, 4)), Number(month.slice(5)) - 1, 0);
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const selectedDayEvents = byDate.get(selected) ?? [];
+  const timedSelectedDayEvents = selectedDayEvents
+    .filter(
+      (event) => event.startTime && !event.allDay && !Number.isNaN(Date.parse(event.startTime)),
+    )
+    .sort(
+      (first, second) => timedEventRange(first).startMinutes - timedEventRange(second).startMinutes,
+    );
+  const timedEventLines = layoutTimedEventLines(timedSelectedDayEvents);
+  const allDaySelectedDayEvents = selectedDayEvents.filter(
+    (event) => event.allDay || !event.startTime || Number.isNaN(Date.parse(event.startTime ?? '')),
+  );
   const changeMonth = (offset: number) => {
     const currentMonth = new Date(Number(month.slice(0, 4)), Number(month.slice(5)) - 1, 1);
     currentMonth.setMonth(currentMonth.getMonth() + offset);
@@ -265,6 +320,26 @@ export default function Calendar() {
           />
         )}
       </Modal>
+      {timedEventTooltip && (
+        <div
+          className="timed-event-tooltip"
+          role="tooltip"
+          style={{
+            left: timedEventTooltip.x,
+            top: timedEventTooltip.y,
+            borderColor: timedEventTooltip.color,
+          }}
+        >
+          <strong>{timedEventTooltip.event.title}</strong>
+          <span>
+            {eventCategoryLabels[timedEventTooltip.event.category]} ·{' '}
+            {eventTime(timedEventTooltip.event.startTime!)}
+            {timedEventTooltip.event.endTime
+              ? `–${eventTime(timedEventTooltip.event.endTime)}`
+              : '–End of day'}
+          </span>
+        </div>
+      )}
       <div className="calendar">
         <div className="calendar-month-controls">
           <button
@@ -371,37 +446,124 @@ export default function Calendar() {
           className="selected-date-events"
           aria-label={`Events for ${dateOnlyToDisplay(selected)}`}
         >
-          <h4>Events for {dateOnlyToDisplay(selected)}</h4>
+          <h4>Events for {dateOnlyToWeekdayDisplay(selected)}</h4>
           {selectedDayEvents.length === 0 ? (
             <p className="event-list-empty">No events scheduled for this day.</p>
           ) : (
-            selectedDayEvents.map((event) => (
-              <div
-                className="event-list-entry"
-                key={`${event.id}-${event.occurrenceDate ?? selected}`}
-              >
+            <div className="selected-day-agenda">
+              <ScrollableWindow className="selected-day-timeline" aria-label="Hourly schedule">
+                {Array.from({ length: 24 }, (_, hour) => {
+                  return (
+                    <div className="selected-day-hour" key={hour}>
+                      <time dateTime={`${String(hour).padStart(2, '0')}:00`}>
+                        {String(hour).padStart(2, '0')}:00
+                      </time>
+                      <div className="selected-day-hour__events" />
+                      <button
+                        className="selected-day-hour__add"
+                        type="button"
+                        aria-label={`Add event at ${String(hour).padStart(2, '0')}:00`}
+                        title={`Add event at ${String(hour).padStart(2, '0')}:00`}
+                        onClick={() => {
+                          setCreateStartTime(
+                            new Date(
+                              `${selected}T${String(hour).padStart(2, '0')}:00`,
+                            ).toISOString(),
+                          );
+                          setShowCreateForm(true);
+                        }}
+                      >
+                        <span aria-hidden="true">+</span>
+                      </button>
+                    </div>
+                  );
+                })}
+                <div className="selected-day-timed-events">
+                  {timedEventLines.map(
+                    ({ event, column, colorIndex, startMinutes, durationMinutes }) => {
+                      const color = overlapMarkerColors[colorIndex % overlapMarkerColors.length];
+                      return (
+                        <button
+                          className="timed-event-line"
+                          style={{
+                            top: (startMinutes / 60) * HOUR_ROW_HEIGHT,
+                            left: 10 + column * 14,
+                            height: (durationMinutes / 60) * HOUR_ROW_HEIGHT,
+                            backgroundColor: color,
+                          }}
+                          type="button"
+                          aria-label={`${event.title}, ${eventTime(event.startTime!)}${event.endTime ? ` to ${eventTime(event.endTime)}` : ' to end of day'}`}
+                          key={`${event.id}-${event.occurrenceDate ?? selected}`}
+                          onPointerMove={(pointerEvent) =>
+                            setTimedEventTooltip({
+                              event,
+                              color,
+                              x: Math.max(
+                                12,
+                                Math.min(pointerEvent.clientX + 16, window.innerWidth - 340),
+                              ),
+                              y: Math.max(
+                                12,
+                                Math.min(pointerEvent.clientY + 16, window.innerHeight - 90),
+                              ),
+                            })
+                          }
+                          onPointerLeave={() => setTimedEventTooltip(null)}
+                          onFocus={(focusEvent) => {
+                            const bounds = focusEvent.currentTarget.getBoundingClientRect();
+                            setTimedEventTooltip({
+                              event,
+                              color,
+                              x: Math.max(12, Math.min(bounds.right + 16, window.innerWidth - 340)),
+                              y: Math.max(12, Math.min(bounds.top + 8, window.innerHeight - 90)),
+                            });
+                          }}
+                          onBlur={() => setTimedEventTooltip(null)}
+                          onClick={() => {
+                            setTimedEventTooltip(null);
+                            setSelectedEvent(event);
+                          }}
+                        />
+                      );
+                    },
+                  )}
+                </div>
+              </ScrollableWindow>
+              <aside className="selected-day-all-day" aria-label="All-day events">
+                <h5>All-day events</h5>
+                <ScrollableWindow className="selected-day-all-day__list">
+                  {allDaySelectedDayEvents.length === 0 ? (
+                    <p className="event-list-empty">No all-day events.</p>
+                  ) : (
+                    allDaySelectedDayEvents.map((event) => (
+                      <button
+                        className="selected-day-event"
+                        type="button"
+                        key={`${event.id}-${event.occurrenceDate ?? selected}`}
+                        onClick={() => setSelectedEvent(event)}
+                      >
+                        <strong>{event.title}</strong>
+                        <span>{eventCategoryLabels[event.category]}</span>
+                      </button>
+                    ))
+                  )}
+                </ScrollableWindow>
                 <button
-                  className="event-list-item"
+                  className="selected-day-action primary-button"
                   type="button"
-                  onClick={() => setSelectedEvent(event)}
+                  onClick={() => {
+                    if (showCreateForm && createStartTime === null) {
+                      setShowCreateForm(false);
+                    } else {
+                      setCreateStartTime(null);
+                      setShowCreateForm(true);
+                    }
+                  }}
                 >
-                  <strong>{event.title}</strong>
-                  <span>
-                    {eventCategoryLabels[event.category]}
-                    {event.startTime && (
-                      <>
-                        {' '}
-                        {'\u2014'}{' '}
-                        {new Date(event.startTime).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </>
-                    )}
-                  </span>
+                  {showCreateForm && createStartTime === null ? 'Close form' : 'Add event'}
                 </button>
-              </div>
-            ))
+              </aside>
+            </div>
           )}
           {selectedDayEvents
             .filter((event) => event.allowCompletion)
@@ -422,17 +584,23 @@ export default function Calendar() {
                 {event.title}: {event.completed ? 'Completed' : 'Complete'}
               </button>
             ))}
-          <button
-            className="selected-day-action primary-button"
-            type="button"
-            onClick={() => setShowCreateForm((open) => !open)}
-          >
-            {showCreateForm ? 'Close form' : 'Add event'}
-          </button>
+          {selectedDayEvents.length === 0 && (
+            <button
+              className="selected-day-action primary-button"
+              type="button"
+              onClick={() => {
+                setCreateStartTime(null);
+                setShowCreateForm((open) => !open);
+              }}
+            >
+              {showCreateForm ? 'Close form' : 'Add event'}
+            </button>
+          )}
           {showCreateForm && (
             <EventForm
-              key={`calendar-create-${selected}`}
+              key={`calendar-create-${selected}-${createStartTime ?? 'all-day'}`}
               initialDate={selected}
+              initialStartTime={createStartTime ?? undefined}
               onCancel={() => setShowCreateForm(false)}
               onSaved={async () => {
                 setShowCreateForm(false);
@@ -528,11 +696,17 @@ export default function Calendar() {
                     : 'No upcoming events.'}
                 </p>
               ) : (
-                visibleUpcomingEvents.map((event) => (
+                visibleUpcomingEvents.map((event, index) => (
                   <div
                     className="event-list-entry"
                     key={`${event.id}-${event.occurrenceDate ?? eventDate(event)}`}
                   >
+                    {(index === 0 ||
+                      eventDate(visibleUpcomingEvents[index - 1]!) !== eventDate(event)) && (
+                      <div className="event-date-heading">
+                        {dateOnlyToWeekdayDisplay(eventDate(event))}
+                      </div>
+                    )}
                     <button
                       className="event-list-item"
                       type="button"

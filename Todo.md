@@ -71,3 +71,18 @@
 - [ ] Test the application on Android devices
 - [ ] Evaluate iOS development and release requirements
 - [ ] Build and test the iOS application
+
+The main remaining weaknesses are:
+
+1. CSRF protection
+   Production cookies use SameSite=None because Railway and Cloudflare are separate sites. State-changing endpoints should additionally verify the request Origin or use CSRF tokens.
+2. Security headers
+   The backend does not currently use Helmet or equivalent headers such as Content Security Policy, anti-framing protection, and MIME-sniffing protection.
+3. Rate-limit bypass/distribution
+   The limiter is stored in application memory and trusts X-Real-IP in production. It should use Railway’s verified proxy configuration and, for a larger deployment, a shared Redis-backed store.
+4. JWT revocation
+   Logging out clears the browser cookie, but a copied token remains valid until its 24-hour expiration. Account deletion limits the practical impact because the user lookup/data access then fails, but proper server-side session revocation would be stronger.
+5. Input-size limits
+   The total JSON body is capped at 6 MB, but many individual strings and imported arrays do not have strict field/count limits. Large or intentionally complex calendar imports could consume excess CPU or memory.
+6. Infrastructure security
+   Database TLS, Railway database exposure, credentials, least-privilege database users, backups, and secret rotation must be checked in Railway itself; those guarantees cannot be confirmed from the repository.

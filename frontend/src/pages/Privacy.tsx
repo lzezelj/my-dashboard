@@ -29,7 +29,7 @@ export default function Privacy() {
           </li>
           <li>
             calendar content, including titles, dates, times, descriptions, locations, links,
-            categories, recurrence information and completion status;
+            categories, repetition information and completion status;
           </li>
           <li>
             when you import ICS data, the original event component and interoperability metadata

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import EventForm from '../src/components/EventForm';
@@ -135,6 +135,22 @@ describe('EventForm interactions', () => {
     expect(screen.getByLabelText('Streaming service (Optional)')).toBeInTheDocument();
     expect(screen.getByLabelText('Genre (Optional)')).toBeInTheDocument();
     expect(screen.queryByLabelText('Season')).not.toBeInTheDocument();
+  });
+
+  it('defaults a timed event end to one minute after its start', async () => {
+    const user = userEvent.setup();
+    render(<EventForm category="EVENT" onSaved={vi.fn()} onCancel={vi.fn()} />);
+
+    await user.click(screen.getByLabelText('Timed event (Optional)'));
+    const start = screen.getByLabelText('Start');
+    const end = screen.getByLabelText('End (Optional)');
+    fireEvent.change(start, { target: { value: '2026-10-14T01:00' } });
+
+    expect(end).toHaveValue('2026-10-14T01:01');
+    expect(end).toHaveAttribute('min', '2026-10-14T01:01');
+
+    await user.click(screen.getByLabelText('Timed event (Optional)'));
+    expect(screen.getByLabelText('Date')).toHaveValue('2026-10-14');
   });
 
   it('shows controls for infinite, date-limited, and count-limited recurrence', async () => {
