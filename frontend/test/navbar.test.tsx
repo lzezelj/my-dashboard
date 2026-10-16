@@ -1,38 +1,38 @@
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import Navbar from '../src/components/Navbar';
 
-vi.mock('../src/services/events.api', () => ({ exportEvents: vi.fn() }));
-
-const renderNavbar = () =>
+const renderNavbar = (path = '/') =>
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[path]}>
       <Navbar
         user={{ id: 1, email: 'person@example.com', name: 'Test Person', picture: null }}
         onLogin={vi.fn()}
         onLogout={vi.fn()}
-        onDeleteAccount={vi.fn()}
       />
     </MemoryRouter>,
   );
 
-describe('Navbar account menu', () => {
-  it('closes after Events is selected', async () => {
-    const user = userEvent.setup();
+describe('Navbar account navigation', () => {
+  it('shows event management as primary navigation', () => {
     renderNavbar();
-    await user.click(screen.getByRole('button', { name: 'My Account' }));
-    await user.click(screen.getByRole('menuitem', { name: 'Events' }));
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Manage events' })).toHaveAttribute('href', '/events');
+    expect(screen.getByRole('link', { name: 'Add event' })).toHaveAttribute('href', '/events/add');
   });
 
-  it('closes when the user clicks outside it', async () => {
+  it('highlights the current primary page', () => {
+    renderNavbar('/events/add');
+    expect(screen.getByRole('link', { name: 'Add event' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Manage events' })).not.toHaveAttribute('aria-current');
+  });
+
+  it('opens My Account with Overview and Log out', async () => {
     const user = userEvent.setup();
     renderNavbar();
     await user.click(screen.getByRole('button', { name: 'My Account' }));
-    expect(screen.getByRole('menu')).toBeInTheDocument();
-    await user.click(document.body);
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Overview' })).toHaveAttribute('href', '/account');
+    expect(screen.getByRole('menuitem', { name: 'Log out' })).toBeInTheDocument();
   });
 });

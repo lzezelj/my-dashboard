@@ -4,7 +4,12 @@ import Navbar from './components/Navbar';
 import Edit from './pages/Edit.tsx';
 import Home from './pages/Home.tsx';
 import EventManager from './components/EventManager.tsx';
-import { deleteAccount, getCurrentUser, logout, type AuthUser } from './services/authentication.api';
+import {
+  deleteAccount,
+  getCurrentUser,
+  logout,
+  type AuthUser,
+} from './services/authentication.api';
 import Unauthorized from './pages/Unauthorized.tsx';
 import Import from './pages/Import.tsx';
 import Welcome from './pages/Welcome.tsx';
@@ -12,6 +17,8 @@ import Privacy from './pages/Privacy.tsx';
 import Imprint from './pages/Imprint.tsx';
 import Footer from './components/Footer.tsx';
 import DemoAccounts from './pages/DemoAccounts.tsx';
+import Account from './pages/Account.tsx';
+import AddEvent from './pages/AddEvent.tsx';
 
 function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -78,14 +85,7 @@ function App() {
 
   return (
     <>
-      {showNavbar && (
-        <Navbar
-          user={user}
-          onLogin={handleLogin}
-          onLogout={handleLogout}
-          onDeleteAccount={handleDeleteAccount}
-        />
-      )}
+      {showNavbar && <Navbar user={user} onLogin={handleLogin} onLogout={handleLogout} />}
       <Routes>
         <Route
           path="/home"
@@ -104,13 +104,22 @@ function App() {
         <Route path="/imprint" element={<Imprint />} />
         <Route
           path="/demo-accounts"
+          element={user?.canManageDemoAccounts ? <DemoAccounts /> : <Navigate to="/home" replace />}
+        />
+        <Route
+          path="/account"
           element={
-            user?.canManageDemoAccounts ? <DemoAccounts /> : <Navigate to="/home" replace />
+            user ? (
+              <Account user={user} onDeleteAccount={handleDeleteAccount} />
+            ) : (
+              <Navigate to="/home" replace />
+            )
           }
         />
         <Route path="/edit/*" element={<Navigate to="/events" replace />} />
         <Route path="/events" element={<Edit />}>
           <Route index element={<EventManager />} />
+          <Route path="add" element={<AddEvent />} />
           <Route path="import" element={<Import />} />
           <Route path="movies" element={<EventManager key="movie" initialCategory="MOVIE" />} />
           <Route

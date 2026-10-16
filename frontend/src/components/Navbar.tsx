@@ -1,152 +1,107 @@
-import { Link } from 'react-router-dom';
-import GoogleLoginButton from './GoogleLoginButton';
-import type { AuthUser } from '../services/authentication.api';
 import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import GoogleLoginButton from './GoogleLoginButton';
 import Modal from './Modal';
-import { exportEvents } from '../services/events.api';
+import type { AuthUser } from '../services/authentication.api';
 
 type NavbarProps = {
   user: AuthUser | null;
   onLogin: (user: AuthUser, isNewUser: boolean) => void;
   onLogout: () => Promise<void>;
-  onDeleteAccount: () => Promise<void>;
 };
 
-export default function Navbar({ user, onLogin, onLogout, onDeleteAccount }: NavbarProps) {
-  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
-  const [showDeleteAccountConfirmation, setShowDeleteAccountConfirmation] = useState(false);
-  const [accountError, setAccountError] = useState<string | null>(null);
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
-  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  const accountMenuRef = useRef<HTMLDivElement>(null);
+export default function Navbar({ user, onLogin, onLogout }: NavbarProps) {
+  const [open, setOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { pathname } = useLocation();
+  const linkClass = (active: boolean) => (active ? 'navbar__link--active' : undefined);
 
   useEffect(() => {
-    const closeWhenOutside = (event: MouseEvent) => {
-      if (!accountMenuRef.current?.contains(event.target as Node)) {
-        setIsAccountMenuOpen(false);
-      }
+    const outside = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setOpen(false);
     };
-    const closeWithEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsAccountMenuOpen(false);
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
     };
-
-    document.addEventListener('mousedown', closeWhenOutside);
-    document.addEventListener('keydown', closeWithEscape);
+    document.addEventListener('mousedown', outside);
+    document.addEventListener('keydown', escape);
     return () => {
-      document.removeEventListener('mousedown', closeWhenOutside);
-      document.removeEventListener('keydown', closeWithEscape);
+      document.removeEventListener('mousedown', outside);
+      document.removeEventListener('keydown', escape);
     };
   }, []);
-
-  const downloadCalendar = async () => {
-    try {
-      const calendar = await exportEvents();
-      const blob = new Blob([JSON.stringify(calendar, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'calendar-dashboard.json';
-      link.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      setAccountError('Your calendar could not be downloaded. Please try again before deleting your account.');
-    }
-  };
-
-  const confirmAccountDeletion = async () => {
-    setAccountError(null);
-    setIsDeletingAccount(true);
-    try {
-      await onDeleteAccount();
-      setShowDeleteAccountConfirmation(false);
-    } catch {
-      setAccountError('Your account could not be deleted. Please try again.');
-    } finally {
-      setIsDeletingAccount(false);
-    }
-  };
 
   return (
     <nav className="navbar">
       <Modal
-        isOpen={showLogoutConfirmation}
+        isOpen={confirmLogout}
         title="Log out?"
         confirmLabel="Log out"
-        onCancel={() => setShowLogoutConfirmation(false)}
+        onCancel={() => setConfirmLogout(false)}
         onConfirm={() => {
-          setShowLogoutConfirmation(false);
+          setConfirmLogout(false);
           void onLogout();
         }}
       >
         <p>You will need to sign in again to access your events.</p>
       </Modal>
-      <Modal
-        isOpen={showDeleteAccountConfirmation}
-        title="Delete your account?"
-        confirmLabel={isDeletingAccount ? 'Deleting…' : 'Delete account'}
-        onCancel={() => {
-          if (!isDeletingAccount) {
-            setShowDeleteAccountConfirmation(false);
-            setAccountError(null);
-          }
-        }}
-        onConfirm={() => void confirmAccountDeletion()}
-        destructive
-      >
-        <p>This permanently deletes your account and all calendar events. This cannot be undone.</p>
-        <button type="button" className="account-export-button" onClick={() => void downloadCalendar()}>
-          Download calendar JSON first
-        </button>
-        {accountError && <p className="form-error">{accountError}</p>}
-      </Modal>
       <div className="navbar__links">
-        <Link to="/home">Home</Link>
+        <Link
+          className={linkClass(pathname === '/home')}
+          aria-current={pathname === '/home' ? 'page' : undefined}
+          to="/home"
+        >
+          Home
+        </Link>
+        {user && (
+          <>
+            <Link
+              className={linkClass(pathname.startsWith('/events') && pathname !== '/events/add')}
+              aria-current={
+                pathname.startsWith('/events') && pathname !== '/events/add' ? 'page' : undefined
+              }
+              to="/events"
+            >
+              Manage events
+            </Link>
+            <Link
+              className={linkClass(pathname === '/events/add')}
+              aria-current={pathname === '/events/add' ? 'page' : undefined}
+              to="/events/add"
+            >
+              Add event
+            </Link>
+          </>
+        )}
       </div>
       <div className="navbar__auth">
         {user ? (
-          <div className="account-menu" ref={accountMenuRef}>
+          <div className="account-menu" ref={menuRef}>
             <button
+              className={`account-menu__trigger${pathname === '/account' ? ' navbar__link--active' : ''}`}
               type="button"
-              className="account-menu__trigger"
-              aria-expanded={isAccountMenuOpen}
               aria-haspopup="menu"
-              onClick={() => setIsAccountMenuOpen((isOpen) => !isOpen)}
+              aria-expanded={open}
+              onClick={() => setOpen((current) => !current)}
             >
               My Account
             </button>
-            {isAccountMenuOpen && (
+            {open && (
               <div className="account-menu__items" role="menu">
-                <Link to="/events" role="menuitem" onClick={() => setIsAccountMenuOpen(false)}>
-                  Events
+                <Link to="/account" role="menuitem" onClick={() => setOpen(false)}>
+                  Overview
                 </Link>
-                {user.canManageDemoAccounts && (
-                  <Link
-                    to="/demo-accounts"
-                    role="menuitem"
-                    onClick={() => setIsAccountMenuOpen(false)}
-                  >
-                    Demo accounts
-                  </Link>
-                )}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsAccountMenuOpen(false);
-                  setShowLogoutConfirmation(true);
-                }}
-              >
-                Log out
-              </button>
-              <button
-                type="button"
-                className="navbar__delete-account"
-                onClick={() => {
-                  setIsAccountMenuOpen(false);
-                  setShowDeleteAccountConfirmation(true);
-                }}
-              >
-                Delete account
-              </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setOpen(false);
+                    setConfirmLogout(true);
+                  }}
+                >
+                  Log out
+                </button>
               </div>
             )}
           </div>

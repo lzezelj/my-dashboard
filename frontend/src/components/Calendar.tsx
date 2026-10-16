@@ -10,6 +10,8 @@ import { getEvents, updateEvent, updateOccurrence } from '../services/events.api
 import { dateOnlyToDisplay, localDateInputValue } from '../utils/dateUtils';
 import EventForm from './EventForm';
 import Modal from './Modal';
+import Pagination from './Pagination';
+import ScrollableWindow from './ScrollableWindow';
 
 const EVENTS_PER_PAGE = 25;
 
@@ -55,7 +57,7 @@ function EventDetails({
         onCancel={() => setShowSaveConfirmation(false)}
         onConfirm={() => void saveOccurrence()}
       >
-        <p>This changes only this occurrence, not the full recurring event.</p>
+        <p>This changes only this occurrence, not the full repeating event.</p>
       </Modal>
       <dl className="event-details__summary">
         <div>
@@ -77,11 +79,11 @@ function EventDetails({
         )}
         {(event.recurring || event.recurrenceRule) && (
           <div>
-            <dt>Recurrence</dt>
+            <dt>Repeat</dt>
             <dd>
               {event.recurring ? recurrenceLabels[event.recurring] : event.recurrenceRule}
               {event.numberOfRecurrences
-                ? `, ${event.numberOfRecurrences} occurrences`
+                ? `, ${event.numberOfRecurrences} repeats`
                 : event.recurrenceEndDate
                   ? `, until ${dateOnlyToDisplay(event.recurrenceEndDate.slice(0, 10))}`
                   : ''}
@@ -230,11 +232,7 @@ export default function Calendar() {
   const days = new Date(Number(month.slice(0, 4)), Number(month.slice(5)), 0).getDate();
   const firstDayOffset =
     (new Date(Number(month.slice(0, 4)), Number(month.slice(5)) - 1, 1).getDay() + 6) % 7;
-  const previousMonthLastDate = new Date(
-    Number(month.slice(0, 4)),
-    Number(month.slice(5)) - 1,
-    0,
-  );
+  const previousMonthLastDate = new Date(Number(month.slice(0, 4)), Number(month.slice(5)) - 1, 0);
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const selectedDayEvents = byDate.get(selected) ?? [];
   const changeMonth = (offset: number) => {
@@ -275,7 +273,10 @@ export default function Calendar() {
             aria-label="Previous month"
             onClick={() => changeMonth(-1)}
           >
-            <span className="calendar-month-chevron calendar-month-chevron--previous" aria-hidden="true" />
+            <span
+              className="calendar-month-chevron calendar-month-chevron--previous"
+              aria-hidden="true"
+            />
           </button>
           <input
             type="month"
@@ -293,7 +294,10 @@ export default function Calendar() {
             aria-label="Next month"
             onClick={() => changeMonth(1)}
           >
-            <span className="calendar-month-chevron calendar-month-chevron--next" aria-hidden="true" />
+            <span
+              className="calendar-month-chevron calendar-month-chevron--next"
+              aria-hidden="true"
+            />
           </button>
           <button
             type="button"
@@ -305,7 +309,7 @@ export default function Calendar() {
               setShowCreateForm(false);
             }}
           >
-            Current Month
+            Today
           </button>
         </div>
         <div className="calendar-grid">
@@ -439,141 +443,121 @@ export default function Calendar() {
         </section>
       </div>
       <section className="upcoming-events-window" aria-labelledby="upcoming-events-title">
-        <h2 id="upcoming-events-title">Upcoming events</h2>
-        <div className="upcoming-events-window__toolbar">
-          <div className="event-search-controls">
-            <label className="event-search-field">
-              Search events
-              <input
-                type="search"
-                value={eventSearch}
-                placeholder={`Search by ${searchField}`}
-                onChange={(event) => {
-                  setEventSearch(event.target.value);
-                  setEventPage(1);
-                }}
-              />
-            </label>
-            <fieldset className="event-search-selector">
-              <legend>Search in</legend>
-              <label>
-                <input
-                  type="radio"
-                  name="event-search-field"
-                  value="title"
-                  checked={searchField === 'title'}
-                  onChange={() => {
-                    setSearchField('title');
-                    setEventPage(1);
-                  }}
-                />
-                Title
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="event-search-field"
-                  value="description"
-                  checked={searchField === 'description'}
-                  onChange={() => {
-                    setSearchField('description');
-                    setEventPage(1);
-                  }}
-                />
-                Description
-              </label>
-            </fieldset>
-          </div>
-          <label className="category-selector">
-            Category
-            <select
-              value={upcomingCategory}
-              onChange={(e) => {
-                setUpcomingCategory(e.target.value as EventCategory | 'ALL');
-                setEventPage(1);
-                setSelectedEvent(null);
-              }}
-            >
-              <option value="ALL">All categories</option>
-              {eventCategories.map((category) => (
-                <option key={category} value={category}>
-                  {eventCategoryLabels[category]}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <EventPagination
-          currentPage={currentEventPage}
-          pageCount={eventPageCount}
-          onChange={setEventPage}
-        />
-        <div className="upcoming-events-list">
-          {visibleUpcomingEvents.length === 0 ? (
-            <p className="event-list-empty">
-              {eventSearch.trim()
-                ? `No events contain “${eventSearch.trim()}” in their ${searchField}.`
-                : 'No upcoming events in this category.'}
-            </p>
-          ) : (
-            visibleUpcomingEvents.map((event) => (
-              <div
-                className="event-list-entry"
-                key={`${event.id}-${event.occurrenceDate ?? eventDate(event)}`}
-              >
-                <button
-                  className="event-list-item"
-                  type="button"
-                  onClick={() => setSelectedEvent(event)}
-                >
-                  <strong>{event.title}</strong>
-                  <span>
-                    {dateOnlyToDisplay(eventDate(event))} {'\u2014'}{' '}
-                    {eventCategoryLabels[event.category]}
-                  </span>
-                </button>
+        <h2 id="upcoming-events-title">
+          {upcomingEvents.length === 0 && upcomingCategory === 'ALL'
+            ? 'No upcoming events'
+            : 'Upcoming events'}
+        </h2>
+        {upcomingEvents.length === 0 && upcomingCategory === 'ALL' ? null : (
+          <>
+            <div className="upcoming-events-window__toolbar">
+              <div className="event-search-controls">
+                <label className="event-search-field">
+                  Search events
+                  <input
+                    type="search"
+                    value={eventSearch}
+                    placeholder={`Search by ${searchField}`}
+                    onChange={(event) => {
+                      setEventSearch(event.target.value);
+                      setEventPage(1);
+                    }}
+                  />
+                </label>
+                <fieldset className="event-search-selector">
+                  <legend>Search in</legend>
+                  <label>
+                    <input
+                      type="radio"
+                      name="event-search-field"
+                      value="title"
+                      checked={searchField === 'title'}
+                      onChange={() => {
+                        setSearchField('title');
+                        setEventPage(1);
+                      }}
+                    />
+                    Title
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="event-search-field"
+                      value="description"
+                      checked={searchField === 'description'}
+                      onChange={() => {
+                        setSearchField('description');
+                        setEventPage(1);
+                      }}
+                    />
+                    Description
+                  </label>
+                </fieldset>
               </div>
-            ))
-          )}
-        </div>
-        <EventPagination
-          currentPage={currentEventPage}
-          pageCount={eventPageCount}
-          onChange={setEventPage}
-        />
+              <label className="category-selector">
+                Category
+                <select
+                  value={upcomingCategory}
+                  onChange={(e) => {
+                    setUpcomingCategory(e.target.value as EventCategory | 'ALL');
+                    setEventPage(1);
+                    setSelectedEvent(null);
+                  }}
+                >
+                  <option value="ALL">All categories</option>
+                  {eventCategories.map((category) => (
+                    <option key={category} value={category}>
+                      {eventCategoryLabels[category]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            {matchingUpcomingEvents.length > 0 && (
+              <Pagination
+                currentPage={currentEventPage}
+                pageCount={eventPageCount}
+                onChange={setEventPage}
+              />
+            )}
+            <ScrollableWindow className="upcoming-events-list">
+              {visibleUpcomingEvents.length === 0 ? (
+                <p className="event-list-empty">
+                  {eventSearch.trim()
+                    ? `No events contain “${eventSearch.trim()}” in their ${searchField}.`
+                    : 'No upcoming events.'}
+                </p>
+              ) : (
+                visibleUpcomingEvents.map((event) => (
+                  <div
+                    className="event-list-entry"
+                    key={`${event.id}-${event.occurrenceDate ?? eventDate(event)}`}
+                  >
+                    <button
+                      className="event-list-item"
+                      type="button"
+                      onClick={() => setSelectedEvent(event)}
+                    >
+                      <strong>{event.title}</strong>
+                      <span>
+                        {dateOnlyToDisplay(eventDate(event))} {'\u2014'}{' '}
+                        {eventCategoryLabels[event.category]}
+                      </span>
+                    </button>
+                  </div>
+                ))
+              )}
+            </ScrollableWindow>
+            {matchingUpcomingEvents.length > 0 && (
+              <Pagination
+                currentPage={currentEventPage}
+                pageCount={eventPageCount}
+                onChange={setEventPage}
+              />
+            )}
+          </>
+        )}
       </section>
     </>
-  );
-}
-
-function EventPagination({
-  currentPage,
-  pageCount,
-  onChange,
-}: {
-  currentPage: number;
-  pageCount: number;
-  onChange: (page: number) => void;
-}) {
-  return (
-    <nav className="event-pagination" aria-label="Event pages">
-      <span>
-        Page {currentPage} of {pageCount}
-      </span>
-      <div className="event-pagination__pages">
-        {Array.from({ length: pageCount }, (_, index) => index + 1).map((page) => (
-          <button
-            type="button"
-            key={page}
-            className={page === currentPage ? 'active' : undefined}
-            aria-current={page === currentPage ? 'page' : undefined}
-            aria-label={`Go to event page ${page}`}
-            onClick={() => onChange(page)}
-          >
-            {page}
-          </button>
-        ))}
-      </div>
-    </nav>
   );
 }

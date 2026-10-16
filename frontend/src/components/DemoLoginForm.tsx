@@ -47,7 +47,11 @@ export default function DemoLoginForm({ onLogin }: DemoLoginFormProps) {
           required
         />
       </label>
-      {error && <p className="form-error" role="alert">{error}</p>}
+      {error && (
+        <p className="form-error" role="alert">
+          {error}
+        </p>
+      )}
       <button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Signing in…' : 'Sign in to demo'}
       </button>

@@ -4,10 +4,15 @@ import { describe, expect, it, vi } from 'vitest';
 import EventForm from '../src/components/EventForm';
 import type { EventCategory } from '../src/types/events';
 
-const eventApi = vi.hoisted(() => ({ createEvent: vi.fn(), updateEvent: vi.fn() }));
+const eventApi = vi.hoisted(() => ({
+  createEvent: vi.fn(),
+  updateEvent: vi.fn(),
+  checkImportDuplicates: vi.fn().mockResolvedValue({ duplicates: [], matches: [] }),
+}));
 vi.mock('../src/services/events.api', () => ({
   createEvent: eventApi.createEvent,
   updateEvent: eventApi.updateEvent,
+  checkImportDuplicates: eventApi.checkImportDuplicates,
 }));
 
 type CategoryCase = {
@@ -115,14 +120,20 @@ const categoryCases: CategoryCase[] = [
 ];
 
 describe('EventForm interactions', () => {
+  it('requires the user to select a category in the general add form', () => {
+    render(<EventForm onSaved={vi.fn()} onCancel={vi.fn()} />);
+
+    expect(screen.getByLabelText('Category')).toHaveValue('');
+    expect(screen.getByRole('option', { name: 'Select a category' })).toBeDisabled();
+    expect(screen.getByRole('heading', { name: 'Create event' })).toBeInTheDocument();
+  });
+
   it('uses category-specific titles and useful TV show fields', () => {
-    render(
-      <EventForm category="TV_SHOW" onSaved={vi.fn()} onCancel={vi.fn()} />,
-    );
+    render(<EventForm category="TV_SHOW" onSaved={vi.fn()} onCancel={vi.fn()} />);
 
     expect(screen.getByRole('heading', { name: 'Create TV show' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Streaming service')).toBeInTheDocument();
-    expect(screen.getByLabelText('Genre')).toBeInTheDocument();
+    expect(screen.getByLabelText('Streaming service (Optional)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Genre (Optional)')).toBeInTheDocument();
     expect(screen.queryByLabelText('Season')).not.toBeInTheDocument();
   });
 
@@ -130,15 +141,19 @@ describe('EventForm interactions', () => {
     const user = userEvent.setup();
     render(<EventForm category="OTHER" onSaved={vi.fn()} onCancel={vi.fn()} />);
 
-    await user.selectOptions(screen.getByLabelText('Recurrence'), 'WEEKLY');
-    const ends = screen.getByLabelText('Ends');
+    await user.selectOptions(screen.getByLabelText('Repeat (Optional)'), 'WEEKLY');
+    const ends = screen.getByLabelText('Ends (Optional)');
     expect(ends).toHaveValue('never');
 
     await user.selectOptions(ends, 'date');
     expect(screen.getByLabelText('End date')).toBeInTheDocument();
 
     await user.selectOptions(ends, 'count');
-    expect(screen.getByLabelText('Occurrences')).toHaveValue(1);
+    const repeatCount = screen.getByLabelText('Number of repeats');
+    expect(repeatCount).toHaveValue(1);
+    await user.click(repeatCount);
+    await user.keyboard('12');
+    expect(repeatCount).toHaveValue(12);
   });
 
   it.each([
@@ -148,16 +163,15 @@ describe('EventForm interactions', () => {
       ['Origin', 'Destination', 'Transport type', 'Airline or carrier', 'Booking reference'],
     ],
     ['WORK', ['Organization or client', 'Project', 'Meeting with', 'Priority']],
-    [
-      'SCHOOL',
-      ['Course or subject', 'School or institution', 'Teacher or instructor', 'Room'],
-    ],
+    ['SCHOOL', ['Course or subject', 'School or institution', 'Teacher or instructor', 'Room']],
   ] as const)('shows the expected %s fields', (category, fields) => {
     render(<EventForm category={category} onSaved={vi.fn()} onCancel={vi.fn()} />);
 
-    fields.forEach((field) => expect(screen.getByLabelText(field)).toBeInTheDocument());
-    expect(screen.getByLabelText('Location')).toBeInTheDocument();
-    expect(screen.getByLabelText('Related link')).toBeInTheDocument();
+    fields.forEach((field) =>
+      expect(screen.getByLabelText(`${field} (Optional)`)).toBeInTheDocument(),
+    );
+    expect(screen.getByLabelText('Location (Optional)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Related link (Optional)')).toBeInTheDocument();
   });
 
   it.each(categoryCases)(
@@ -169,19 +183,22 @@ describe('EventForm interactions', () => {
       render(<EventForm category={category} onSaved={vi.fn()} onCancel={vi.fn()} />);
 
       await user.type(screen.getByLabelText(titleLabel), `${category} example`);
-      await user.type(screen.getByLabelText('Description'), `${category} description`);
+      await user.type(screen.getByLabelText('Description (Optional)'), `${category} description`);
       for (const field of fields) {
-        const control = screen.getByLabelText(field.label);
+        const control = screen.getByLabelText(`${field.label} (Optional)`);
         if (field.select) await user.selectOptions(control, field.value);
         else await user.type(control, field.value);
       }
       if (hasLocation) {
-        await user.type(screen.getByLabelText('Location'), `${category} location`);
-        await user.type(screen.getByLabelText('Related link'), 'https://example.com/event');
+        await user.type(screen.getByLabelText('Location (Optional)'), `${category} location`);
+        await user.type(
+          screen.getByLabelText('Related link (Optional)'),
+          'https://example.com/event',
+        );
       }
-      await user.selectOptions(screen.getByLabelText('Recurrence'), 'YEARLY');
-      await user.selectOptions(screen.getByLabelText('Ends'), 'count');
-      const occurrences = screen.getByLabelText('Occurrences');
+      await user.selectOptions(screen.getByLabelText('Repeat (Optional)'), 'YEARLY');
+      await user.selectOptions(screen.getByLabelText('Ends (Optional)'), 'count');
+      const occurrences = screen.getByLabelText('Number of repeats');
       await user.clear(occurrences);
       await user.type(occurrences, '2');
       await user.click(screen.getByRole('button', { name: /^Create / }));

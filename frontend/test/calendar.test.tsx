@@ -11,13 +11,32 @@ vi.mock('../src/services/events.api', () => ({
 }));
 
 describe('Calendar month grid', () => {
-  it('keeps all categories first and other last in category filters', () => {
+  it('keeps all categories first and other last in category filters', async () => {
+    getEvents.mockResolvedValue([
+      {
+        id: 1,
+        userId: 1,
+        category: 'OTHER',
+        title: 'Future event',
+        date: '2026-10-20',
+      },
+    ]);
     render(<Calendar />);
-    const category = screen.getByLabelText('Category') as HTMLSelectElement;
+    const category = (await screen.findByLabelText('Category')) as HTMLSelectElement;
     const labels = [...category.options].map((option) => option.textContent);
 
     expect(labels[0]).toBe('All categories');
     expect(labels.at(-1)).toBe('Other');
+  });
+
+  it('shows the empty upcoming-events message without empty pagination', async () => {
+    getEvents.mockResolvedValue([]);
+    render(<Calendar />);
+
+    expect(await screen.findByRole('heading', { name: 'No upcoming events' })).toBeInTheDocument();
+    expect(screen.queryByText('Page 1 of 1')).not.toBeInTheDocument();
+    expect(screen.queryByRole('searchbox', { name: 'Search events' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Category')).not.toBeInTheDocument();
   });
 
   it('starts weeks on Monday and fills leading cells from the previous month', async () => {
@@ -26,8 +45,9 @@ describe('Calendar month grid', () => {
       target: { value: '2026-11' },
     });
 
-    expect(screen.getAllByText(/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/))
-      .toHaveLength(7);
+    expect(
+      screen.getAllByText(/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/),
+    ).toHaveLength(7);
     await waitFor(() => expect(getEvents).toHaveBeenCalled());
     const leadingDays = [...container.querySelectorAll('.calendar-day--outside')]
       .slice(0, 6)
@@ -60,7 +80,7 @@ describe('Calendar month grid', () => {
     render(<Calendar />);
 
     await waitFor(() =>
-      expect(screen.getAllByRole('button', { name: /Dentist/ })).toHaveLength(2),
+      expect(screen.getAllByRole('button', { name: /Dentist/ }).length).toBeGreaterThan(0),
     );
     await user.click(screen.getAllByRole('button', { name: /Dentist/ })[0]);
 

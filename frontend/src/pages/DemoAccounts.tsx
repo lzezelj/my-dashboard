@@ -24,7 +24,9 @@ export default function DemoAccounts() {
     void getDemoAccounts()
       .then(setAccounts)
       .catch((caughtError: unknown) =>
-        setError(caughtError instanceof Error ? caughtError.message : 'Could not load demo accounts'),
+        setError(
+          caughtError instanceof Error ? caughtError.message : 'Could not load demo accounts',
+        ),
       )
       .finally(() => setIsLoading(false));
   }, []);
@@ -41,20 +43,25 @@ export default function DemoAccounts() {
       setUsername('');
       setLabel('');
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : 'Could not create demo account');
+      setError(
+        caughtError instanceof Error ? caughtError.message : 'Could not create demo account',
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const remove = async (account: DemoAccount) => {
-    if (!window.confirm(`Delete demo account "${account.demoUsername}" and all of its events?`)) return;
+    if (!window.confirm(`Delete demo account "${account.demoUsername}" and all of its events?`))
+      return;
     setError(null);
     try {
       await deleteDemoAccount(account.id);
       setAccounts((current) => current.filter(({ id }) => id !== account.id));
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : 'Could not delete demo account');
+      setError(
+        caughtError instanceof Error ? caughtError.message : 'Could not delete demo account',
+      );
     }
   };
 
@@ -102,13 +109,21 @@ export default function DemoAccounts() {
         </form>
         {credentials && (
           <div className="demo-credentials" role="status">
-            <p><strong>Save these credentials now.</strong> The password cannot be shown again.</p>
+            <p>
+              <strong>Save these credentials now.</strong> The password cannot be shown again.
+            </p>
             <code>Username: {credentials.username}</code>
             <code>Password: {credentials.password}</code>
-            <button type="button" onClick={() => void copyCredentials()}>Copy credentials</button>
+            <button type="button" onClick={() => void copyCredentials()}>
+              Copy credentials
+            </button>
           </div>
         )}
-        {error && <p className="form-error" role="alert">{error}</p>}
+        {error && (
+          <p className="form-error" role="alert">
+            {error}
+          </p>
+        )}
       </section>
 
       <section className="demo-account-panel">
@@ -123,9 +138,15 @@ export default function DemoAccounts() {
               <li key={account.id}>
                 <div>
                   <strong>{account.name || account.demoUsername}</strong>
-                  <span>{account.demoUsername} · {account.eventCount} events</span>
+                  <span>
+                    {account.demoUsername} · {account.eventCount} events
+                  </span>
                 </div>
-                <button type="button" className="danger-button" onClick={() => void remove(account)}>
+                <button
+                  type="button"
+                  className="danger-button"
+                  onClick={() => void remove(account)}
+                >
                   Delete
                 </button>
               </li>

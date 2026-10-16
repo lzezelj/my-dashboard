@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from 'react';
+import ScrollableWindow from './ScrollableWindow';
 
 type ModalProps = {
   isOpen: boolean;
@@ -41,7 +42,7 @@ export default function Modal({
         onMouseDown={(event) => event.stopPropagation()}
       >
         <h2 id={titleId}>{title}</h2>
-        <div className="modal-content">{children}</div>
+        <ScrollableWindow className="modal-content">{children}</ScrollableWindow>
         <div className="modal-actions">
           {showCancel && (
             <button type="button" onClick={onCancel}>

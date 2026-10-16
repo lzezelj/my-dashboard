@@ -60,10 +60,7 @@ const responseMessage = async (response: Response, fallback: string) => {
   return body?.message ?? fallback;
 };
 
-export async function loginWithDemoAccount(
-  username: string,
-  password: string,
-): Promise<AuthUser> {
+export async function loginWithDemoAccount(username: string, password: string): Promise<AuthUser> {
   const response = await fetch(`${authUrl}/demo/login`, {
     method: 'POST',
     credentials: 'include',

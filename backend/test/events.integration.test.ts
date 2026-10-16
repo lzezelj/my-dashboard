@@ -31,13 +31,8 @@ beforeAll(async () => {
   const result = await prisma.$queryRaw<
     Array<{ current_database: string; current_schema: string }>
   >`SELECT current_database(), current_schema()`;
-  if (
-    result[0]?.current_database !== testDatabaseName ||
-    result[0]?.current_schema !== 'public'
-  )
-    throw new Error(
-      `Refusing to run integration tests outside ${testDatabaseName}.public`,
-    );
+  if (result[0]?.current_database !== testDatabaseName || result[0]?.current_schema !== 'public')
+    throw new Error(`Refusing to run integration tests outside ${testDatabaseName}.public`);
 });
 
 afterEach(async () => {
@@ -263,7 +258,12 @@ describe('JSON and ICS portability', () => {
       ].join('\r\n'),
     );
 
-    expect(event).toMatchObject({ date: '2026-03-29', startTime: null, timeZone: null, allDay: true });
+    expect(event).toMatchObject({
+      date: '2026-03-29',
+      startTime: null,
+      timeZone: null,
+      allDay: true,
+    });
   });
 
   it('round-trips all event data through JSON v2', async () => {
@@ -359,10 +359,7 @@ describe('recurrence expansion', () => {
       );
     }
 
-    const events = await getEventsService(
-      { from: '2026-10-15', upcoming: true },
-      user.id,
-    );
+    const events = await getEventsService({ from: '2026-10-15', upcoming: true }, user.id);
     for (const [recurring, expectedCount] of recurrences) {
       expect(events.filter((event) => event.recurring === recurring)).toHaveLength(expectedCount);
     }
@@ -380,7 +377,9 @@ describe('recurrence expansion', () => {
       },
       user.id,
     );
-    expect(await getEventsService({ from: '2026-10-01', to: '2026-10-31' }, user.id)).toHaveLength(3);
+    expect(await getEventsService({ from: '2026-10-01', to: '2026-10-31' }, user.id)).toHaveLength(
+      3,
+    );
   });
 
   it('stops date-limited recurrence on its end date', async () => {
@@ -395,7 +394,9 @@ describe('recurrence expansion', () => {
       },
       user.id,
     );
-    expect(await getEventsService({ from: '2026-10-01', to: '2026-10-31' }, user.id)).toHaveLength(3);
+    expect(await getEventsService({ from: '2026-10-01', to: '2026-10-31' }, user.id)).toHaveLength(
+      3,
+    );
   });
 
   it('bounds infinite recurrence to the requested date range', async () => {
@@ -409,14 +410,9 @@ describe('recurrence expansion', () => {
       },
       user.id,
     );
-    const events = await getEventsService(
-      { from: '2026-10-01', to: '2026-12-31' },
-      user.id,
-    );
-    expect(events.map((event) => ('occurrenceDate' in event ? event.occurrenceDate : null))).toEqual([
-      '2026-10-01',
-      '2026-11-01',
-      '2026-12-01',
-    ]);
+    const events = await getEventsService({ from: '2026-10-01', to: '2026-12-31' }, user.id);
+    expect(
+      events.map((event) => ('occurrenceDate' in event ? event.occurrenceDate : null)),
+    ).toEqual(['2026-10-01', '2026-11-01', '2026-12-01']);
   });
 });

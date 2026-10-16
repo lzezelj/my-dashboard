@@ -30,3 +30,12 @@ npm.cmd --prefix backend test
 
 Each test run resets only the `public` schema inside `dashboard_test`, applies all migrations, runs the tests, and leaves that test schema empty afterward. Safety checks require a local database whose name contains `test` and reject the development database URL. The local `backend/.env.test` file is ignored by Git.
 
+## API rate limiting
+
+The backend permits 300 API requests and 20 authentication attempts per client IP every 15 minutes by default. These optional backend environment variables override the defaults:
+
+```env
+API_RATE_LIMIT_WINDOW_MS=900000
+API_RATE_LIMIT_MAX=300
+AUTH_RATE_LIMIT_MAX=20
+```

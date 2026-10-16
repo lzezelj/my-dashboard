@@ -93,7 +93,14 @@ export const importIcs = (ics: string, selectedIndexes: number[]) =>
     body: JSON.stringify({ ics, selectedIndexes }),
   });
 export const checkImportDuplicates = (events: Array<Partial<EventInput>>) =>
-  request<{ duplicates: number[] }>(`${baseUrl}/import/duplicates`, {
+  request<{
+    duplicates: number[];
+    matches: Array<{
+      index: number;
+      existing: DashboardEvent | null;
+      duplicateOfIndex: number | null;
+    }>;
+  }>(`${baseUrl}/import/duplicates`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ events }),

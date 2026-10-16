@@ -63,7 +63,8 @@ describe('authentication sessions', () => {
     await loginWithGoogle(req, res);
 
     expect(res.cookie).toHaveBeenCalledOnce();
-    const [name, token, options] = (res.cookie as unknown as ReturnType<typeof vi.fn>).mock.calls[0]!;
+    const [name, token, options] = (res.cookie as unknown as ReturnType<typeof vi.fn>).mock
+      .calls[0]!;
     expect(name).toBe('auth_token');
     expect(jwt.verify(token as string, process.env.JWT_SECRET!)).toMatchObject({ userId: 7 });
     expect(options).toMatchObject({

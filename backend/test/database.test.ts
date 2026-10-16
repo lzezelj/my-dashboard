@@ -23,9 +23,7 @@ beforeAll(async () => {
     result.rows[0]?.current_database !== testDatabaseName ||
     result.rows[0]?.current_schema !== 'public'
   )
-    throw new Error(
-      `Refusing to run database tests outside ${testDatabaseName}.public`,
-    );
+    throw new Error(`Refusing to run database tests outside ${testDatabaseName}.public`);
 });
 
 afterEach(async () => {
@@ -75,10 +73,9 @@ describe('database configuration', () => {
   });
 
   it('enforces unique user emails', async () => {
-    await pool.query(
-      `INSERT INTO "User" ("email", "updatedAt") VALUES ($1, NOW())`,
-      ['unique@example.com'],
-    );
+    await pool.query(`INSERT INTO "User" ("email", "updatedAt") VALUES ($1, NOW())`, [
+      'unique@example.com',
+    ]);
 
     await expect(
       pool.query(`INSERT INTO "User" ("email", "updatedAt") VALUES ($1, NOW())`, [

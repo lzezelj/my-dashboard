@@ -36,10 +36,50 @@ vi.mock('../src/services/events.api', () => ({
 }));
 
 describe('EventManager bulk selection', () => {
+  it('shows the empty events message without empty pagination', async () => {
+    getEvents.mockResolvedValue([]);
+    render(
+      <MemoryRouter>
+        <EventManager />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('There are no events.')).toBeInTheDocument();
+    expect(screen.queryByText('Page 1 of 1')).not.toBeInTheDocument();
+    expect(screen.queryByRole('searchbox', { name: 'Search events' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add event' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Import Calendar' })).toBeInTheDocument();
+  });
+
+  it("opens on the page containing today's event, or the first upcoming event", async () => {
+    const manyEvents: DashboardEvent[] = Array.from({ length: 30 }, (_, index) => ({
+      ...events[0]!,
+      id: index + 1,
+      title: `Dated event ${index + 1}`,
+      date: `2026-10-${String(index + 1).padStart(2, '0')}`,
+    }));
+    getEvents.mockImplementation(async (filters = {}) =>
+      'upcoming' in filters ? [{ ...manyEvents[26]!, occurrenceDate: '2026-10-27' }] : manyEvents,
+    );
+
+    render(
+      <MemoryRouter>
+        <EventManager />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Dated event 27')).toBeInTheDocument();
+    expect(screen.queryByText('Dated event 1')).not.toBeInTheDocument();
+  });
+
   it('selects multiple events and asks for confirmation before deleting them', async () => {
     getEvents.mockResolvedValue(events);
     const user = userEvent.setup();
-    render(<MemoryRouter><EventManager /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <EventManager />
+      </MemoryRouter>,
+    );
 
     await waitFor(() => expect(screen.getByText('Event 1')).toBeInTheDocument());
     const checkboxes = screen.getAllByRole('checkbox', { name: 'Select for deletion' });
@@ -54,7 +94,12 @@ describe('EventManager bulk selection', () => {
   it('asks for confirmation before deleting all events', async () => {
     getEvents.mockResolvedValue(events);
     const user = userEvent.setup();
-    render(<MemoryRouter><EventManager /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <EventManager />
+      </MemoryRouter>,
+    );
+    await waitFor(() => expect(screen.getByText('Event 1')).toBeInTheDocument());
     await user.click(screen.getByText('Delete', { selector: 'summary' }));
     await user.click(screen.getByRole('button', { name: 'Delete all events' }));
     expect(screen.getByRole('dialog', { name: 'Delete all events?' })).toBeInTheDocument();

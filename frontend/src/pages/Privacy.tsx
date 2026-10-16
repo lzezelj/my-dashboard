@@ -70,6 +70,11 @@ export default function Privacy() {
           </li>
           <li>Compliance with legal obligations where applicable: Article 6(1)(c) GDPR.</li>
         </ul>
+        <p>
+          To prevent abuse, the backend temporarily counts requests associated with an IP address
+          within a 15-minute period. These in-memory counters expire automatically and are not used
+          for advertising or profiling.
+        </p>
 
         <h2>4. Authentication cookie</h2>
         <p>
@@ -84,9 +89,9 @@ export default function Privacy() {
         <p>
           Google Identity Services provides sign-in. The Google component is loaded when a sign-in
           button is displayed. Loading or using it may send technical information, including your IP
-          address, to Google. After successful sign-in, we
-          receive an ID token and store your Google account identifier, verified email address and,
-          when supplied, display name. Google processes data under its own responsibility. See the{' '}
+          address, to Google. After successful sign-in, we receive an ID token and store your Google
+          account identifier, verified email address and, when supplied, display name. Google
+          processes data under its own responsibility. See the{' '}
           <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">
             Google Privacy Policy
           </a>
@@ -106,8 +111,8 @@ export default function Privacy() {
             data. See the{' '}
             <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noreferrer">
               Cloudflare Privacy Policy
-            </a>
-            {' '}and{' '}
+            </a>{' '}
+            and{' '}
             <a
               href="https://www.cloudflare.com/cloudflare-customer-dpa/"
               target="_blank"
@@ -123,8 +128,8 @@ export default function Privacy() {
             data on our behalf. See the{' '}
             <a href="https://railway.com/legal/privacy" target="_blank" rel="noreferrer">
               Railway Privacy Policy
-            </a>
-            {' '}and{' '}
+            </a>{' '}
+            and{' '}
             <a href="https://railway.com/legal/dpa" target="_blank" rel="noreferrer">
               Railway DPA
             </a>
@@ -161,9 +166,9 @@ export default function Privacy() {
           may be retained where legally required or needed for legal claims.
         </p>
         <p>
-          Contact correspondence is retained only as long as needed to answer and handle the request,
-          unless legal retention duties or the establishment, exercise or defence of legal claims
-          require longer storage.
+          Contact correspondence is retained only as long as needed to answer and handle the
+          request, unless legal retention duties or the establishment, exercise or defence of legal
+          claims require longer storage.
         </p>
 
         <h2>8. Your rights</h2>

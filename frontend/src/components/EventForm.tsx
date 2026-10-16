@@ -6,9 +6,10 @@ import {
   recurrenceLabels,
   recurrences,
 } from '../types/events';
-import { createEvent, updateEvent } from '../services/events.api';
+import { checkImportDuplicates, createEvent, updateEvent } from '../services/events.api';
 import { localDateInputValue } from '../utils/dateUtils';
 import Modal from './Modal';
+import ScrollableWindow from './ScrollableWindow';
 
 const blankEvent = (category: EventCategory, date?: string): EventInput => ({
   category,
@@ -149,8 +150,11 @@ export default function EventForm({
       ? { ...event, date: event.date?.slice(0, 10) ?? null }
       : blankEvent(category ?? 'OTHER', initialDate),
   );
+  const [categorySelected, setCategorySelected] = useState(Boolean(category || event));
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [pendingCreate, setPendingCreate] = useState<EventInput | null>(null);
+  const [duplicateMatches, setDuplicateMatches] = useState<DashboardEvent[]>([]);
   const [recurrenceEnd, setRecurrenceEnd] = useState<'never' | 'date' | 'count'>(() =>
     event?.numberOfRecurrences ? 'count' : event?.recurrenceEndDate ? 'date' : 'never',
   );
@@ -185,26 +189,72 @@ export default function EventForm({
       recurring: form.recurring || null,
       numberOfRecurrences:
         form.recurring && recurrenceEnd === 'count' ? form.numberOfRecurrences : null,
-      recurrenceEndDate:
-        form.recurring && recurrenceEnd === 'date' ? form.recurrenceEndDate : null,
+      recurrenceEndDate: form.recurring && recurrenceEnd === 'date' ? form.recurrenceEndDate : null,
       recurrenceRule: form.recurring ? null : form.recurrenceRule,
     };
     try {
       if (event) await updateEvent(event.id, payload);
-      else await createEvent(payload);
+      else {
+        const duplicateResult = await checkImportDuplicates([payload]);
+        if (duplicateResult.duplicates.includes(0)) {
+          setPendingCreate(payload);
+          setDuplicateMatches(
+            duplicateResult.matches.flatMap((match) => (match.existing ? [match.existing] : [])),
+          );
+          return;
+        }
+        await createEvent(payload);
+      }
       setShowSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save event.');
     }
   };
   const isEditing = Boolean(event);
-  const categoryLabel = eventCategoryLabels[form.category];
+  const categoryLabel = categorySelected ? eventCategoryLabels[form.category] : 'event';
   const finishSaving = async () => {
     setShowSuccess(false);
     await onSaved();
   };
   return (
     <form className="event-form" onSubmit={submit}>
+      <Modal
+        isOpen={pendingCreate !== null}
+        title="Possible duplicate event"
+        confirmLabel="Create anyway"
+        destructive
+        onCancel={() => setPendingCreate(null)}
+        onConfirm={() => {
+          if (!pendingCreate) return;
+          void createEvent(pendingCreate)
+            .then(() => {
+              setPendingCreate(null);
+              setShowSuccess(true);
+            })
+            .catch((err: unknown) =>
+              setError(err instanceof Error ? err.message : 'Could not save event.'),
+            );
+        }}
+      >
+        <p>
+          An event with the same title and date already exists. Do you still want to create this
+          event?
+        </p>
+        <ScrollableWindow className="duplicate-results">
+          {duplicateMatches.length ? (
+            duplicateMatches.map((match) => (
+              <article className="duplicate-results__event" key={match.id}>
+                <strong>Existing</strong>
+                <span>{match.title}</span>
+                <span>{match.date?.slice(0, 10) ?? match.startTime?.slice(0, 10)}</span>
+                <span>{eventCategoryLabels[match.category]}</span>
+              </article>
+            ))
+          ) : (
+            <p>The duplicate is another event in the current batch.</p>
+          )}
+        </ScrollableWindow>
+      </Modal>
       <Modal
         isOpen={showSuccess}
         title={isEditing ? 'Event updated' : 'Event created'}
@@ -224,9 +274,11 @@ export default function EventForm({
           <h2>{isEditing ? `Edit ${categoryLabel}` : `Create ${categoryLabel}`}</h2>
           <p>{isEditing ? 'Update the details below.' : 'Add an event to Calendar Dashboard.'}</p>
         </div>
-        <button type="button" className="event-form__close" onClick={onCancel}>
-          Close
-        </button>
+        {isEditing && (
+          <button type="button" className="event-form__close" onClick={onCancel}>
+            Close
+          </button>
+        )}
       </header>
       {error && (
         <p className="form-error" role="alert">
@@ -234,22 +286,27 @@ export default function EventForm({
         </p>
       )}
       <div className="event-form-section event-form-section--details">
-        <h3>Details</h3>
+        {isEditing && <h3>Details</h3>}
         {!category && (
           <label className="form-field">
             Category
             <select
-              value={form.category}
-              onChange={(e) =>
+              required
+              value={categorySelected ? form.category : ''}
+              onChange={(e) => {
+                setCategorySelected(true);
                 setForm((current) => ({
                   ...current,
                   category: e.target.value as EventCategory,
                   details: null,
                   location: null,
                   url: null,
-                }))
-              }
+                }));
+              }}
             >
+              <option value="" disabled>
+                Select a category
+              </option>
               {eventCategories.map((item) => (
                 <option key={item} value={item}>
                   {eventCategoryLabels[item]}
@@ -258,195 +315,205 @@ export default function EventForm({
             </select>
           </label>
         )}
-        <label className="form-field">
-          {form.category === 'BIRTHDAY' ? 'Name' : 'Title'}
-          <input
-            required
-            name={form.category === 'BIRTHDAY' ? 'name' : 'title'}
-            value={form.title}
-            onChange={(e) => set('title', e.target.value)}
-          />
-        </label>
-        {categoriesWithPlace.has(form.category) && (
-          <label className="form-field">
-            Location
-            <input
-              value={form.location ?? ''}
-              placeholder={form.category === 'MOVIE' ? 'Cinema or venue' : undefined}
-              onChange={(e) => set('location', e.target.value || null)}
-            />
-          </label>
-        )}
-        {categoriesWithPlace.has(form.category) && (
-          <label className="form-field">
-            Related link
-            <input
-              type="url"
-              value={form.url ?? ''}
-              placeholder="https://..."
-              onChange={(e) => set('url', e.target.value || null)}
-            />
-          </label>
-        )}
-        {categoryDetailFields[form.category].map((field) => (
-          <label className="form-field" key={field.key}>
-            {field.label}
-            {field.type === 'select' ? (
-              <select
-                value={form.details?.[field.key] ?? ''}
-                onChange={(e) => setDetail(field.key, e.target.value)}
-              >
-                <option value="">Not specified</option>
-                {field.options?.map((option) => (
-                  <option value={option} key={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type={field.type ?? 'text'}
-                min={field.type === 'number' ? '0' : undefined}
-                value={form.details?.[field.key] ?? ''}
-                placeholder={field.placeholder}
-                onChange={(e) => setDetail(field.key, e.target.value)}
-              />
-            )}
-          </label>
-        ))}
-        <label className="form-field">
-          Description
-          <textarea
-            value={form.description ?? ''}
-            onChange={(e) => set('description', e.target.value || null)}
-          />
-        </label>
-      </div>
-      <div className="event-form-section event-form-section--schedule">
-        <h3>Schedule</h3>
-        <label className="calendar-checkbox">
-          <input
-            type="checkbox"
-            checked={Boolean(form.startTime)}
-            onChange={(e) =>
-              set(
-                'startTime',
-                e.target.checked ? new Date().toISOString().slice(0, 16) + ':00.000Z' : null,
-              )
-            }
-          />{' '}
-          Timed event
-        </label>
-        {form.startTime ? (
+        {categorySelected && (
           <>
             <label className="form-field">
-              Start
+              {form.category === 'BIRTHDAY' ? 'Name' : 'Title'}
               <input
                 required
-                type="datetime-local"
-                value={form.startTime.slice(0, 16)}
-                onChange={(e) => set('startTime', new Date(e.target.value).toISOString())}
+                name={form.category === 'BIRTHDAY' ? 'name' : 'title'}
+                value={form.title}
+                onChange={(e) => set('title', e.target.value)}
               />
             </label>
+            {categorySelected && categoriesWithPlace.has(form.category) && (
+              <label className="form-field">
+                Location (Optional)
+                <input
+                  value={form.location ?? ''}
+                  placeholder={form.category === 'MOVIE' ? 'Cinema or venue' : undefined}
+                  onChange={(e) => set('location', e.target.value || null)}
+                />
+              </label>
+            )}
+            {categorySelected && categoriesWithPlace.has(form.category) && (
+              <label className="form-field">
+                Related link (Optional)
+                <input
+                  type="url"
+                  value={form.url ?? ''}
+                  placeholder="https://..."
+                  onChange={(e) => set('url', e.target.value || null)}
+                />
+              </label>
+            )}
+            {(categorySelected ? categoryDetailFields[form.category] : []).map((field) => (
+              <label className="form-field" key={field.key}>
+                {field.label} (Optional)
+                {field.type === 'select' ? (
+                  <select
+                    value={form.details?.[field.key] ?? ''}
+                    onChange={(e) => setDetail(field.key, e.target.value)}
+                  >
+                    <option value="">Not specified</option>
+                    {field.options?.map((option) => (
+                      <option value={option} key={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={field.type ?? 'text'}
+                    min={field.type === 'number' ? '0' : undefined}
+                    value={form.details?.[field.key] ?? ''}
+                    placeholder={field.placeholder}
+                    onChange={(e) => setDetail(field.key, e.target.value)}
+                  />
+                )}
+              </label>
+            ))}
             <label className="form-field">
-              End
-              <input
-                type="datetime-local"
-                value={form.endTime?.slice(0, 16) ?? ''}
-                onChange={(e) =>
-                  set('endTime', e.target.value ? new Date(e.target.value).toISOString() : null)
-                }
+              Description (Optional)
+              <textarea
+                value={form.description ?? ''}
+                onChange={(e) => set('description', e.target.value || null)}
               />
             </label>
           </>
-        ) : (
-          <label className="form-field">
-            Date
-            <input
-              required
-              type="date"
-              value={form.date ?? ''}
-              onChange={(e) => set('date', e.target.value)}
-            />
-          </label>
         )}
       </div>
-      <div className="event-form-section event-form-section--options">
-        <h3>Options</h3>
-        {form.category === 'TODO' && (
+      {categorySelected && (
+        <div className="event-form-section event-form-section--schedule">
+          <h3>Schedule</h3>
           <label className="calendar-checkbox">
             <input
               type="checkbox"
-              checked={form.allowCompletion}
-              onChange={(e) => set('allowCompletion', e.target.checked)}
+              checked={Boolean(form.startTime)}
+              onChange={(e) =>
+                set(
+                  'startTime',
+                  e.target.checked ? new Date().toISOString().slice(0, 16) + ':00.000Z' : null,
+                )
+              }
             />{' '}
-            Allow completion
+            Timed event (Optional)
           </label>
-        )}
-        <label className="form-field">
-          Recurrence
-          <select
-            value={form.recurring ?? ''}
-            onChange={(e) => set('recurring', (e.target.value || null) as Recurrence | null)}
-          >
-            <option value="">One-time</option>
-            {recurrences.map((item) => (
-              <option key={item} value={item}>
-                {recurrenceLabels[item]}
-              </option>
-            ))}
-          </select>
-        </label>
-        {form.recurring && (
-          <>
+          {form.startTime ? (
+            <>
+              <label className="form-field">
+                Start
+                <input
+                  required
+                  type="datetime-local"
+                  value={form.startTime.slice(0, 16)}
+                  onChange={(e) => set('startTime', new Date(e.target.value).toISOString())}
+                />
+              </label>
+              <label className="form-field">
+                End (Optional)
+                <input
+                  type="datetime-local"
+                  value={form.endTime?.slice(0, 16) ?? ''}
+                  onChange={(e) =>
+                    set('endTime', e.target.value ? new Date(e.target.value).toISOString() : null)
+                  }
+                />
+              </label>
+            </>
+          ) : (
             <label className="form-field">
-              Ends
-              <select
-                value={recurrenceEnd}
-                onChange={(e) =>
-                  setRecurrenceEnd(e.target.value as 'never' | 'date' | 'count')
-                }
-              >
-                <option value="never">Never</option>
-                <option value="date">On a date</option>
-                <option value="count">After a number of occurrences</option>
-              </select>
+              Date
+              <input
+                required
+                type="date"
+                value={form.date ?? ''}
+                onChange={(e) => set('date', e.target.value)}
+              />
             </label>
-            {recurrenceEnd === 'count' && (
+          )}
+        </div>
+      )}
+      {categorySelected && (
+        <div className="event-form-section event-form-section--options">
+          <h3>Options</h3>
+          {form.category === 'TODO' && (
+            <label className="calendar-checkbox">
+              <input
+                type="checkbox"
+                checked={form.allowCompletion}
+                onChange={(e) => set('allowCompletion', e.target.checked)}
+              />{' '}
+              Allow completion (Optional)
+            </label>
+          )}
+          <label className="form-field">
+            Repeat (Optional)
+            <select
+              value={form.recurring ?? ''}
+              onChange={(e) => set('recurring', (e.target.value || null) as Recurrence | null)}
+            >
+              <option value="">Does not repeat</option>
+              {recurrences.map((item) => (
+                <option key={item} value={item}>
+                  {recurrenceLabels[item]}
+                </option>
+              ))}
+            </select>
+          </label>
+          {form.recurring && (
+            <>
               <label className="form-field">
-                Occurrences
-                <input
-                  required
-                  min="1"
-                  type="number"
-                  value={form.numberOfRecurrences ?? 1}
-                  onChange={(e) => set('numberOfRecurrences', Number(e.target.value))}
-                />
+                Ends (Optional)
+                <select
+                  value={recurrenceEnd}
+                  onChange={(e) => setRecurrenceEnd(e.target.value as 'never' | 'date' | 'count')}
+                >
+                  <option value="never">Never</option>
+                  <option value="date">On a date</option>
+                  <option value="count">After a number of repeats</option>
+                </select>
               </label>
-            )}
-            {recurrenceEnd === 'date' && (
-              <label className="form-field">
-                End date
-                <input
-                  required
-                  type="date"
-                  min={form.date ?? form.startTime?.slice(0, 10) ?? undefined}
-                  value={form.recurrenceEndDate ?? ''}
-                  onChange={(e) => set('recurrenceEndDate', e.target.value || null)}
-                />
-              </label>
-            )}
-          </>
-        )}
-      </div>
-      <div className="event-form__actions">
-        <button className="primary-button" type="submit">
-          {isEditing ? `Update ${categoryLabel}` : `Create ${categoryLabel}`}
-        </button>
-        <button type="button" onClick={onCancel}>
-          Cancel
-        </button>
-      </div>
+              {recurrenceEnd === 'count' && (
+                <label className="form-field">
+                  Number of repeats
+                  <input
+                    required
+                    min="1"
+                    type="number"
+                    value={form.numberOfRecurrences ?? 1}
+                    onFocus={(event) => event.currentTarget.select()}
+                    onClick={(event) => event.currentTarget.select()}
+                    onChange={(e) => set('numberOfRecurrences', Number(e.target.value))}
+                  />
+                </label>
+              )}
+              {recurrenceEnd === 'date' && (
+                <label className="form-field">
+                  End date
+                  <input
+                    required
+                    type="date"
+                    min={form.date ?? form.startTime?.slice(0, 10) ?? undefined}
+                    value={form.recurrenceEndDate ?? ''}
+                    onChange={(e) => set('recurrenceEndDate', e.target.value || null)}
+                  />
+                </label>
+              )}
+            </>
+          )}
+        </div>
+      )}
+      {categorySelected && (
+        <div className="event-form__actions">
+          <button className="primary-button" type="submit">
+            {isEditing ? `Update ${categoryLabel}` : `Create ${categoryLabel}`}
+          </button>
+          <button type="button" onClick={onCancel}>
+            Cancel
+          </button>
+        </div>
+      )}
     </form>
   );
 }

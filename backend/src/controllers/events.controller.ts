@@ -49,7 +49,8 @@ export async function getEvents(req: AuthenticatedRequest, res: Response) {
       typeof req.query.category === 'string' ? (req.query.category as EventCategory) : undefined;
     if (category && !Object.values(EventCategory).includes(category))
       return res.status(400).json({ message: 'category is invalid.' });
-    const filters: { category?: EventCategory; from?: string; to?: string; upcoming?: boolean } = {};
+    const filters: { category?: EventCategory; from?: string; to?: string; upcoming?: boolean } =
+      {};
     if (category) filters.category = category;
     if (typeof req.query.from === 'string') filters.from = req.query.from;
     if (typeof req.query.to === 'string') filters.to = req.query.to;
@@ -107,7 +108,7 @@ export async function checkImportDuplicates(req: AuthenticatedRequest, res: Resp
   if (!Array.isArray(req.body.events))
     return res.status(400).json({ message: 'events must be an array.' });
   try {
-    return res.json({ duplicates: await findImportDuplicatesService(req.body.events, userId) });
+    return res.json(await findImportDuplicatesService(req.body.events, userId));
   } catch (error) {
     return fail(res, error);
   }

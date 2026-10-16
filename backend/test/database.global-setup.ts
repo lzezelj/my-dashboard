@@ -47,7 +47,10 @@ export default async function setup() {
       .sort((first, second) => first.name.localeCompare(second.name));
 
     for (const entry of entries) {
-      const sql = await readFile(path.join(migrationsDirectory, entry.name, 'migration.sql'), 'utf8');
+      const sql = await readFile(
+        path.join(migrationsDirectory, entry.name, 'migration.sql'),
+        'utf8',
+      );
       await client.query(sql);
     }
   } catch (error) {

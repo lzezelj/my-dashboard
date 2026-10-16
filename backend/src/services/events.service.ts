@@ -117,7 +117,8 @@ export function validateEventInput(input: EventInput, partial = false): EventInp
   if (input.url) {
     try {
       const url = new URL(input.url);
-      if (url.protocol !== 'http:' && url.protocol !== 'https:') invalid('url must use HTTP or HTTPS.');
+      if (url.protocol !== 'http:' && url.protocol !== 'https:')
+        invalid('url must use HTTP or HTTPS.');
     } catch {
       invalid('url must be a valid HTTP or HTTPS URL.');
     }
@@ -134,7 +135,10 @@ export function validateEventInput(input: EventInput, partial = false): EventInp
     ['recurrenceDates', input.recurrenceDates],
     ['exclusionDates', input.exclusionDates],
   ] as const)
-    if (value !== undefined && (!Array.isArray(value) || value.some((item) => typeof item !== 'string')))
+    if (
+      value !== undefined &&
+      (!Array.isArray(value) || value.some((item) => typeof item !== 'string'))
+    )
       invalid(`${field} must be an array of strings.`);
   if (
     input.details !== undefined &&
@@ -259,30 +263,59 @@ export async function findImportDuplicatesService(
 ) {
   const existing = await prisma.event.findMany({
     where: { userId },
-    select: { title: true, date: true, startTime: true },
+    select: {
+      id: true,
+      title: true,
+      category: true,
+      date: true,
+      startTime: true,
+      description: true,
+    },
   });
   const key = (title: string, date: string) => `${title.trim().toLocaleLowerCase()}\u0000${date}`;
-  const existingKeys = new Set(
+  const existingByKey = new Map(
     existing.flatMap((event) => {
       const date =
         event.date?.toISOString().slice(0, 10) ?? event.startTime?.toISOString().slice(0, 10);
-      return date ? [key(event.title, date)] : [];
+      return date
+        ? [
+            [
+              key(event.title, date),
+              {
+                ...event,
+                date: event.date?.toISOString() ?? null,
+                startTime: event.startTime?.toISOString() ?? null,
+              },
+            ] as const,
+          ]
+        : [];
     }),
   );
-  const seenKeys = new Set(existingKeys);
-  return importedEvents.flatMap((event, index) => {
+  const seenKeys = new Map<string, number>();
+  const duplicates: number[] = [];
+  const matches: Array<{
+    index: number;
+    existing: (typeof existingByKey extends Map<string, infer V> ? V : never) | null;
+    duplicateOfIndex: number | null;
+  }> = [];
+  importedEvents.forEach((event, index) => {
     const date =
       typeof event.date === 'string'
         ? event.date
         : typeof event.startTime === 'string'
           ? event.startTime.slice(0, 10)
           : null;
-    if (typeof event.title !== 'string' || !date) return [];
+    if (typeof event.title !== 'string' || !date) return;
     const eventKey = key(event.title, date);
-    const duplicate = seenKeys.has(eventKey);
-    seenKeys.add(eventKey);
-    return duplicate ? [index] : [];
+    const saved = existingByKey.get(eventKey) ?? null;
+    const duplicateOfIndex = seenKeys.get(eventKey) ?? null;
+    if (saved || duplicateOfIndex !== null) {
+      duplicates.push(index);
+      matches.push({ index, existing: saved, duplicateOfIndex });
+    }
+    if (!seenKeys.has(eventKey)) seenKeys.set(eventKey, index);
   });
+  return { duplicates, matches };
 }
 
 type ImportOccurrenceOverride = {
@@ -458,11 +491,7 @@ export async function createEventService(input: EventInput, userId: number) {
   data.user = { connect: { id: userId } };
   return prisma.event.create({ data });
 }
-export async function updateEventService(
-  id: number,
-  input: Partial<EventInput>,
-  userId: number,
-) {
+export async function updateEventService(id: number, input: Partial<EventInput>, userId: number) {
   const current = await getEventService(id, userId);
   if (!current) return null;
   const existing: EventInput = {
@@ -549,13 +578,13 @@ export async function updateOccurrenceService(
   const original = event.date ?? event.startTime;
   const validOccurrence = Boolean(
     original &&
-      isOccurrenceDate(
-        original,
-        recurrence,
-        occurrence,
-        event.numberOfRecurrences,
-        event.recurrenceEndDate?.toISOString().slice(0, 10),
-      ),
+    isOccurrenceDate(
+      original,
+      recurrence,
+      occurrence,
+      event.numberOfRecurrences,
+      event.recurrenceEndDate?.toISOString().slice(0, 10),
+    ),
   );
   if (!validOccurrence) invalid('The occurrence does not belong to this event.');
   await prisma.eventOccurrenceOverride.upsert({

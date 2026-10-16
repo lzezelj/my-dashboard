@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { checkImportDuplicates, importEvents } from '../services/events.api';
 import { eventCategories, eventCategoryLabels } from '../types/events';
 import type { EventCategory, EventInput } from '../types/events';
 import Modal from './Modal';
+import Pagination from './Pagination';
+import ScrollableWindow from './ScrollableWindow';
+
+const EVENTS_PER_PAGE = 25;
 
 type ImportedEvent = Partial<EventInput> & { occurrenceOverrides?: unknown[] };
 type Candidate = {
@@ -52,18 +56,18 @@ const repairableFields = [
   ['allDay', 'All-day status'],
   ['location', 'Location'],
   ['url', 'URL'],
-  ['recurrenceRule', 'Recurrence rule'],
+  ['recurrenceRule', 'Repeat rule'],
   ['status', 'Status'],
   ['sequence', 'Sequence'],
   ['originalIcs', 'Original ICS'],
-  ['recurrenceDates', 'Additional recurrence dates'],
-  ['exclusionDates', 'Excluded recurrence dates'],
-  ['recurring', 'Recurrence'],
-  ['numberOfRecurrences', 'Number of recurrences'],
-  ['recurrenceEndDate', 'Recurrence end date'],
+  ['recurrenceDates', 'Additional repeat dates'],
+  ['exclusionDates', 'Excluded repeat dates'],
+  ['recurring', 'Repeat'],
+  ['numberOfRecurrences', 'Number of repeats'],
+  ['recurrenceEndDate', 'Repeat end date'],
   ['allowCompletion', 'Allow completion'],
   ['completed', 'Completed'],
-  ['occurrenceOverrides', 'Occurrence overrides'],
+  ['occurrenceOverrides', 'Repeat overrides'],
 ] as const;
 const dateOnly = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -86,51 +90,70 @@ function problems(event: ImportedEvent) {
   return result;
 }
 
-export default function ImportPreview({ onImported }: { onImported?: () => void } = {}) {
+export default function ImportPreview({
+  onImported,
+  onCancel,
+}: { onImported?: () => void; onCancel?: () => void } = {}) {
   const fileInput = useRef<HTMLInputElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [repairTargets, setRepairTargets] = useState<Record<string, string>>({});
   const [duplicates, setDuplicates] = useState<number[]>([]);
+  const [duplicateMatches, setDuplicateMatches] = useState<
+    Array<{
+      candidateIndex: number;
+      existing: Awaited<ReturnType<typeof checkImportDuplicates>>['matches'][number]['existing'];
+    }>
+  >([]);
+  const [showDuplicates, setShowDuplicates] = useState(false);
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [showImportConfirmation, setShowImportConfirmation] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{
     imported: number;
     skipped: Array<{ index: number; message: string }>;
   } | null>(null);
-  useEffect(() => {
+  const checkDuplicates = async () => {
     const valid = candidates.filter((candidate) => problems(candidate.data).length === 0);
     if (!valid.length) {
-      const timer = window.setTimeout(() => setDuplicates([]), 0);
-      return () => window.clearTimeout(timer);
+      setDuplicates([]);
+      setDuplicateMatches([]);
+      setShowDuplicates(true);
+      return;
     }
-    const timer = window.setTimeout(
-      () =>
-        void checkImportDuplicates(valid.map((candidate) => candidate.data))
-          .then((result) => {
-            const duplicateIndexes = result.duplicates
-              .map((index) => valid[index]?.index)
-              .filter((index): index is number => index !== undefined);
-            setDuplicates(duplicateIndexes);
-            setCandidates((items) => {
-              let changed = false;
-              const updated = items.map((item) => {
-                if (item.selection !== 'auto' || item.imported) return item;
-                const keep =
-                  problems(item.data).length === 0 && !duplicateIndexes.includes(item.index);
-                if (item.keep === keep) return item;
-                changed = true;
-                return { ...item, keep };
-              });
-              return changed ? updated : items;
-            });
-          })
-          .catch(() => setDuplicates([])),
-      250,
-    );
-    return () => window.clearTimeout(timer);
-  }, [candidates]);
+    try {
+      const result = await checkImportDuplicates(valid.map((candidate) => candidate.data));
+      const duplicateIndexes = result.duplicates
+        .map((index) => valid[index]?.index)
+        .filter((index): index is number => index !== undefined);
+      setDuplicates(duplicateIndexes);
+      setDuplicateMatches(
+        result.matches.map((match) => ({
+          candidateIndex: valid[match.index]?.index ?? -1,
+          existing: match.existing,
+        })),
+      );
+      setShowDuplicates(true);
+    } catch (error) {
+      setFileError(error instanceof Error ? error.message : 'Could not check for duplicates.');
+    }
+  };
+
+  const cancelImport = () => {
+    setShowCancelConfirmation(false);
+    setCandidates([]);
+    setDuplicates([]);
+    setDuplicateMatches([]);
+    setImportResult(null);
+    setFileError(null);
+    setSearch('');
+    setPage(1);
+    onCancel?.();
+  };
   const loadFile = async (file?: File) => {
     if (!file) return;
     try {
@@ -158,6 +181,8 @@ export default function ImportPreview({ onImported }: { onImported?: () => void 
         }),
       );
       setImportResult(null);
+      setDuplicateMatches([]);
+      setPage(1);
       setFileError(null);
     } catch (error) {
       setCandidates([]);
@@ -172,10 +197,7 @@ export default function ImportPreview({ onImported }: { onImported?: () => void 
         return {
           ...item,
           data,
-          keep:
-            item.selection === 'auto'
-              ? problems(data).length === 0 && !duplicates.includes(item.index)
-              : item.keep,
+          keep: item.selection === 'auto' ? problems(data).length === 0 : item.keep,
         };
       }),
     );
@@ -188,10 +210,7 @@ export default function ImportPreview({ onImported }: { onImported?: () => void 
         return {
           ...item,
           data,
-          keep:
-            item.selection === 'auto'
-              ? problems(data).length === 0 && !duplicates.includes(item.index)
-              : item.keep,
+          keep: item.selection === 'auto' ? problems(data).length === 0 : item.keep,
         };
       }),
     );
@@ -199,6 +218,23 @@ export default function ImportPreview({ onImported }: { onImported?: () => void 
   const eventsToImport = candidates.filter(
     (candidate) => candidate.keep && !candidate.imported && problems(candidate.data).length === 0,
   );
+  const matchingCandidates = candidates.filter((candidate) =>
+    `${candidate.data.title ?? ''} ${candidate.data.description ?? ''}`
+      .toLocaleLowerCase()
+      .includes(search.trim().toLocaleLowerCase()),
+  );
+  const pageCount = Math.max(1, Math.ceil(matchingCandidates.length / EVENTS_PER_PAGE));
+  const currentPage = Math.min(page, pageCount);
+  const visibleCandidates = matchingCandidates.slice(
+    (currentPage - 1) * EVENTS_PER_PAGE,
+    currentPage * EVENTS_PER_PAGE,
+  );
+  const changePage = (nextPage: number) => {
+    setPage(nextPage);
+    window.requestAnimationFrame(() =>
+      previewRef.current?.scrollTo({ top: 0, behavior: 'smooth' }),
+    );
+  };
   const submitImport = async () => {
     setImporting(true);
     setFileError(null);
@@ -229,7 +265,77 @@ export default function ImportPreview({ onImported }: { onImported?: () => void 
     }
   };
   return (
-    <section className="import-preview" aria-label="Import preview">
+    <ScrollableWindow className="import-preview" aria-label="Import preview" ref={previewRef}>
+      <Modal
+        isOpen={showCancelConfirmation}
+        title="Cancel import?"
+        confirmLabel="Cancel import"
+        destructive
+        onCancel={() => setShowCancelConfirmation(false)}
+        onConfirm={cancelImport}
+      >
+        <p>Your current selection and preview changes will be discarded.</p>
+      </Modal>
+      <Modal
+        isOpen={showDuplicates}
+        title="Duplicate check results"
+        confirmLabel={duplicates.length === 0 ? 'Close' : 'Exclude duplicates'}
+        showCancel={duplicates.length > 0}
+        onCancel={() => setShowDuplicates(false)}
+        onConfirm={() => {
+          if (duplicates.length === 0) {
+            setShowDuplicates(false);
+            return;
+          }
+          setCandidates((items) =>
+            items.map((item) =>
+              duplicates.includes(item.index)
+                ? { ...item, keep: false, selection: 'manual' as const }
+                : item,
+            ),
+          );
+          setShowDuplicates(false);
+        }}
+      >
+        {duplicates.length === 0 ? (
+          <p>No duplicate events were found.</p>
+        ) : (
+          <>
+            <p>
+              Review the suspected duplicates below. Exclude them from the import, or cancel to keep
+              your current selection.
+            </p>
+            <ScrollableWindow className="duplicate-results">
+              {duplicateMatches.map((match) => {
+                const item = candidates.find(
+                  (candidate) => candidate.index === match.candidateIndex,
+                );
+                return (
+                  <section className="duplicate-results__group" key={match.candidateIndex}>
+                    <article className="duplicate-results__event">
+                      <strong>Import #{match.candidateIndex}</strong>
+                      <span>{item?.data.title}</span>
+                      <span>{item?.data.date ?? item?.data.startTime?.slice(0, 10)}</span>
+                      <span>{item?.data.category}</span>
+                    </article>
+                    {match.existing && (
+                      <article className="duplicate-results__event">
+                        <strong>Existing</strong>
+                        <span>{match.existing.title}</span>
+                        <span>
+                          {match.existing.date?.slice(0, 10) ??
+                            match.existing.startTime?.slice(0, 10)}
+                        </span>
+                        <span>{match.existing.category}</span>
+                      </article>
+                    )}
+                  </section>
+                );
+              })}
+            </ScrollableWindow>
+          </>
+        )}
+      </Modal>
       <Modal
         isOpen={showImportConfirmation}
         title="Import selected events?"
@@ -241,10 +347,10 @@ export default function ImportPreview({ onImported }: { onImported?: () => void 
       >
         <p>Each selected event will be added as a new event. Existing events are not changed.</p>
       </Modal>
-      <header>
+      <header className="import-preview__header">
         <div>
           <h2>Import JSON</h2>
-          <p>Review and repair events before importing them.</p>
+          <p>Review and repair a Calendar Dashboard backup before importing it.</p>
         </div>
         <button type="button" onClick={() => fileInput.current?.click()}>
           Choose JSON file
@@ -257,6 +363,11 @@ export default function ImportPreview({ onImported }: { onImported?: () => void 
           onChange={(e) => void loadFile(e.target.files?.[0])}
         />
       </header>
+      <p className="import-preview__format-note">
+        <strong>JSON is primarily the Calendar Dashboard backup format.</strong> JSON import and
+        export preserve app-specific information. Use ICS when moving events to or from another
+        calendar application.
+      </p>
       {fileError && <p className="form-error">{fileError}</p>}
       {importResult && (
         <div className="import-preview__result" role="status">
@@ -277,7 +388,24 @@ export default function ImportPreview({ onImported }: { onImported?: () => void 
           {validCount} ready to import · {candidates.length - validCount} need attention
         </p>
       )}
-      {candidates.map((candidate) => {
+      {candidates.length > 0 && (
+        <label className="import-preview__search">
+          Search imported events
+          <input
+            type="search"
+            value={search}
+            placeholder="Search title or description"
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(1);
+            }}
+          />
+        </label>
+      )}
+      {candidates.length > 0 && (
+        <Pagination currentPage={currentPage} pageCount={pageCount} onChange={changePage} />
+      )}
+      {visibleCandidates.map((candidate) => {
         const errors = problems(candidate.data);
         const recurring = Boolean(candidate.data.recurring);
         const duplicate = duplicates.includes(candidate.index);
@@ -426,17 +554,20 @@ export default function ImportPreview({ onImported }: { onImported?: () => void 
                           )
                         }
                       />{' '}
-                      Preserve overrides
+                      Preserve repeat overrides
                     </label>
                     <details className="import-preview__overrides">
                       <summary>
-                        Occurrence overrides ({candidate.data.occurrenceOverrides?.length ?? 0})
+                        Repeat overrides ({candidate.data.occurrenceOverrides?.length ?? 0})
                       </summary>
                       {(candidate.data.occurrenceOverrides ?? [])
                         .map((override, index) => ({ override, index }))
                         .sort(({ override: first }, { override: second }) => {
                           const firstItem = first as { occurrenceDate?: unknown; date?: unknown };
-                          const secondItem = second as { occurrenceDate?: unknown; date?: unknown };
+                          const secondItem = second as {
+                            occurrenceDate?: unknown;
+                            date?: unknown;
+                          };
                           const firstDate =
                             typeof firstItem.date === 'string'
                               ? firstItem.date
@@ -481,17 +612,32 @@ export default function ImportPreview({ onImported }: { onImported?: () => void 
         );
       })}
       {candidates.length > 0 && (
+        <Pagination currentPage={currentPage} pageCount={pageCount} onChange={changePage} />
+      )}
+      {candidates.length > 0 && (
         <div className="import-preview__actions">
+          <div className="import-preview__primary-actions">
+            <button
+              className="primary-button"
+              type="button"
+              disabled={eventsToImport.length === 0 || importing}
+              onClick={() => setShowImportConfirmation(true)}
+            >
+              Import {eventsToImport.length} selected events
+            </button>
+            <button type="button" onClick={() => void checkDuplicates()}>
+              Check for duplicates
+            </button>
+          </div>
           <button
-            className="primary-button"
+            className="import-preview__cancel"
             type="button"
-            disabled={eventsToImport.length === 0 || importing}
-            onClick={() => setShowImportConfirmation(true)}
+            onClick={() => setShowCancelConfirmation(true)}
           >
-            Import {eventsToImport.length} selected events
+            Cancel
           </button>
         </div>
       )}
-    </section>
+    </ScrollableWindow>
   );
 }

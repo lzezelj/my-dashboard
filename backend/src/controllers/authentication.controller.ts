@@ -169,7 +169,8 @@ export const createDemoAccount = async (req: Request, res: Response) => {
   const { username, label } = req.body ?? {};
   if (typeof username !== 'string' || !isValidDemoUsername(username)) {
     return res.status(400).json({
-      message: 'Username must be 3-64 characters using letters, numbers, dots, dashes or underscores',
+      message:
+        'Username must be 3-64 characters using letters, numbers, dots, dashes or underscores',
     });
   }
   if (label !== undefined && (typeof label !== 'string' || label.trim().length > 100)) {
