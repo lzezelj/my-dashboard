@@ -14,6 +14,10 @@ export type DemoAccount = {
   name: string | null;
   createdAt: string;
   eventCount: number;
+  applicationSalutation: string | null;
+  applicationPosition: string | null;
+  applicationSource: string | null;
+  applicationCompanyAddress: string | null;
 };
 
 const authUrl = `${apiUrl}/api/auth`;
@@ -85,12 +89,18 @@ export async function getDemoAccounts(): Promise<DemoAccount[]> {
 export async function createDemoAccount(
   username: string,
   label: string,
+  application: {
+    salutation: string;
+    position: string;
+    source: string;
+    companyAddress: string;
+  },
 ): Promise<{ account: DemoAccount; password: string }> {
   const response = await fetch(`${authUrl}/demo-accounts`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, label }),
+    body: JSON.stringify({ username, label, ...application }),
   });
   if (!response.ok) {
     throw new Error(await responseMessage(response, 'Could not create demo account'));

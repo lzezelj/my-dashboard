@@ -120,9 +120,25 @@ describe('demo account authentication and owner access', () => {
     const res = response();
 
     await createDemoAccount(
-      { body: { username: 'Example-Company', label: 'Example Company' } } as Request,
+      {
+        body: {
+          username: 'Example-Company',
+          label: 'Example Company',
+          salutation: 'Sehr geehrte Frau Beispiel',
+          position: 'Softwareentwickler',
+          source: 'Ihre Stellenanzeige auf der Firmenwebsite',
+          companyAddress: 'Musterstraße 1',
+        },
+      } as Request,
       res,
     );
+
+    expect(authService.createDemoUser).toHaveBeenCalledWith('Example-Company', 'Example Company', {
+      salutation: 'Sehr geehrte Frau Beispiel',
+      position: 'Softwareentwickler',
+      source: 'Ihre Stellenanzeige auf der Firmenwebsite',
+      companyAddress: 'Musterstraße 1',
+    });
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(

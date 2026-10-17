@@ -3,7 +3,7 @@ export default function Privacy() {
     <main className="legal-page">
       <article className="legal-document">
         <h1>Privacy Policy</h1>
-        <p className="legal-document__updated">Last updated: 15 October 2026</p>
+        <p className="legal-document__updated">Last updated: 17 October 2026</p>
         <p>This policy explains how Calendar Dashboard processes personal data.</p>
 
         <h2>1. Controller</h2>
@@ -24,7 +24,8 @@ export default function Privacy() {
             name;
           </li>
           <li>
-            for operator-created demo accounts, a demo username, optional company label and a
+            for operator-created demo accounts, a demo username, optional company and application
+            details (such as company address, salutation, position and job-listing source), and a
             salted, one-way password hash; the plaintext password is not stored;
           </li>
           <li>
@@ -159,11 +160,15 @@ export default function Privacy() {
           calendar as JSON or ICS.
         </p>
         <p>
+          Company and application details associated with a demo account remain until the operator
+          deletes that demo account, normally after the relevant application process has ended.
+        </p>
+        <p>
           The app currently creates no separate backups controlled by the operator. Railway's DPA
-          documents daily infrastructure backups and multi-region redundancy. Railway, Cloudflare
-          and Google may also retain operational logs or copies under their respective contracts and
-          retention schedules. Their exact deletion delay is not controlled by this app. Information
-          may be retained where legally required or needed for legal claims.
+          documents regular infrastructure backups and redundancy across locations. Railway,
+          Cloudflare and Google may also retain operational logs or copies under their respective
+          contracts and retention schedules. Their exact deletion delay is not controlled by this
+          app. Information may be retained where legally required or needed for legal claims.
         </p>
         <p>
           Contact correspondence is retained only as long as needed to answer and handle the

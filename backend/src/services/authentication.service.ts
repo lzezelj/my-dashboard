@@ -73,7 +73,18 @@ export async function authenticateDemoUser(username: string, password: string) {
   return user;
 }
 
-export async function createDemoUser(username: string, label: string | null) {
+export type DemoApplicationDetails = {
+  salutation: string | null;
+  position: string | null;
+  source: string | null;
+  companyAddress: string | null;
+};
+
+export async function createDemoUser(
+  username: string,
+  label: string | null,
+  application: DemoApplicationDetails,
+) {
   const password = randomBytes(18).toString('base64url');
   const user = await prisma.user.create({
     data: {
@@ -81,12 +92,20 @@ export async function createDemoUser(username: string, label: string | null) {
       passwordHash: await hashDemoPassword(password),
       isDemo: true,
       name: label,
+      applicationSalutation: application.salutation,
+      applicationPosition: application.position,
+      applicationSource: application.source,
+      applicationCompanyAddress: application.companyAddress,
     },
     select: {
       id: true,
       demoUsername: true,
       name: true,
       createdAt: true,
+      applicationSalutation: true,
+      applicationPosition: true,
+      applicationSource: true,
+      applicationCompanyAddress: true,
     },
   });
 
@@ -101,6 +120,10 @@ export function listDemoUsers() {
       demoUsername: true,
       name: true,
       createdAt: true,
+      applicationSalutation: true,
+      applicationPosition: true,
+      applicationSource: true,
+      applicationCompanyAddress: true,
       _count: { select: { events: true } },
     },
     orderBy: { createdAt: 'desc' },

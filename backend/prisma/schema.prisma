@@ -18,6 +18,7 @@ enum Recurrence {
   MONTHLY
   YEARLY
 }
+
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -26,28 +27,34 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
 model User {
-  id           Int      @id @default(autoincrement())
-  googleId     String?  @unique
-  email        String?  @unique
-  name         String?
-  demoUsername String?  @unique
-  passwordHash String?
-  isDemo       Boolean  @default(false)
-  events       Event[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                        Int      @id @default(autoincrement())
+  googleId                  String?  @unique
+  email                     String?  @unique
+  name                      String?
+  demoUsername              String?  @unique
+  passwordHash              String?
+  isDemo                    Boolean  @default(false)
+  sessionVersion            Int      @default(0)
+  applicationSalutation     String?
+  applicationPosition       String?
+  applicationSource         String?
+  applicationCompanyAddress String?
+  events                    Event[]
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
 }
 
 model Event {
-  id                  Int           @id @default(autoincrement())
+  id                  Int                       @id @default(autoincrement())
   // Nullable only during the authentication migration. It becomes required after legacy ownership is backfilled.
   userId              Int?
-  user                User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User?                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   category            EventCategory
   title               String
   // PostgreSQL DATE preserves a calendar date; it is not an instant in time.
-  date                DateTime?     @db.Date
+  date                DateTime?                 @db.Date
   startTime           DateTime?
   endTime             DateTime?
   description         String?
@@ -55,7 +62,7 @@ model Event {
   // Interoperability metadata used by iCalendar imports and exports.
   externalUid         String?
   timeZone            String?
-  allDay              Boolean       @default(false)
+  allDay              Boolean                   @default(false)
   location            String?
   url                 String?
   recurrenceRule      String?
@@ -65,10 +72,10 @@ model Event {
   recurring           Recurrence?
   numberOfRecurrences Int?
   recurrenceEndDate   DateTime?                 @db.Date
-  allowCompletion     Boolean       @default(false)
-  completed           Boolean       @default(false)
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  allowCompletion     Boolean                   @default(false)
+  completed           Boolean                   @default(false)
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
   occurrenceOverrides EventOccurrenceOverride[]
   recurrenceDates     EventRecurrenceDate[]
   exclusionDates      EventExclusionDate[]
@@ -100,12 +107,12 @@ model EventExclusionDate {
 }
 
 model EventOccurrenceOverride {
-  id             Int      @id @default(autoincrement())
+  id             Int       @id @default(autoincrement())
   eventId        Int
-  occurrenceDate DateTime @db.Date
+  occurrenceDate DateTime  @db.Date
   date           DateTime? @db.Date
   description    String?
-  event          Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event          Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, occurrenceDate])
 }

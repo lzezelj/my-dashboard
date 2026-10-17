@@ -28,10 +28,12 @@ export type AggregateUser = {
 
 export type UserAvgAggregateOutputType = {
   id: number | null
+  sessionVersion: number | null
 }
 
 export type UserSumAggregateOutputType = {
   id: number | null
+  sessionVersion: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -42,6 +44,11 @@ export type UserMinAggregateOutputType = {
   demoUsername: string | null
   passwordHash: string | null
   isDemo: boolean | null
+  sessionVersion: number | null
+  applicationSalutation: string | null
+  applicationPosition: string | null
+  applicationSource: string | null
+  applicationCompanyAddress: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,6 +61,11 @@ export type UserMaxAggregateOutputType = {
   demoUsername: string | null
   passwordHash: string | null
   isDemo: boolean | null
+  sessionVersion: number | null
+  applicationSalutation: string | null
+  applicationPosition: string | null
+  applicationSource: string | null
+  applicationCompanyAddress: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -66,6 +78,11 @@ export type UserCountAggregateOutputType = {
   demoUsername: number
   passwordHash: number
   isDemo: number
+  sessionVersion: number
+  applicationSalutation: number
+  applicationPosition: number
+  applicationSource: number
+  applicationCompanyAddress: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -74,10 +91,12 @@ export type UserCountAggregateOutputType = {
 
 export type UserAvgAggregateInputType = {
   id?: true
+  sessionVersion?: true
 }
 
 export type UserSumAggregateInputType = {
   id?: true
+  sessionVersion?: true
 }
 
 export type UserMinAggregateInputType = {
@@ -88,6 +107,11 @@ export type UserMinAggregateInputType = {
   demoUsername?: true
   passwordHash?: true
   isDemo?: true
+  sessionVersion?: true
+  applicationSalutation?: true
+  applicationPosition?: true
+  applicationSource?: true
+  applicationCompanyAddress?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +124,11 @@ export type UserMaxAggregateInputType = {
   demoUsername?: true
   passwordHash?: true
   isDemo?: true
+  sessionVersion?: true
+  applicationSalutation?: true
+  applicationPosition?: true
+  applicationSource?: true
+  applicationCompanyAddress?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -112,6 +141,11 @@ export type UserCountAggregateInputType = {
   demoUsername?: true
   passwordHash?: true
   isDemo?: true
+  sessionVersion?: true
+  applicationSalutation?: true
+  applicationPosition?: true
+  applicationSource?: true
+  applicationCompanyAddress?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -211,6 +245,11 @@ export type UserGroupByOutputType = {
   demoUsername: string | null
   passwordHash: string | null
   isDemo: boolean
+  sessionVersion: number
+  applicationSalutation: string | null
+  applicationPosition: string | null
+  applicationSource: string | null
+  applicationCompanyAddress: string | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -246,6 +285,11 @@ export type UserWhereInput = {
   demoUsername?: Prisma.StringNullableFilter<"User"> | string | null
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   isDemo?: Prisma.BoolFilter<"User"> | boolean
+  sessionVersion?: Prisma.IntFilter<"User"> | number
+  applicationSalutation?: Prisma.StringNullableFilter<"User"> | string | null
+  applicationPosition?: Prisma.StringNullableFilter<"User"> | string | null
+  applicationSource?: Prisma.StringNullableFilter<"User"> | string | null
+  applicationCompanyAddress?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   events?: Prisma.EventListRelationFilter
@@ -259,6 +303,11 @@ export type UserOrderByWithRelationInput = {
   demoUsername?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   isDemo?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
+  applicationSalutation?: Prisma.SortOrderInput | Prisma.SortOrder
+  applicationPosition?: Prisma.SortOrderInput | Prisma.SortOrder
+  applicationSource?: Prisma.SortOrderInput | Prisma.SortOrder
+  applicationCompanyAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   events?: Prisma.EventOrderByRelationAggregateInput
@@ -275,6 +324,11 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringNullableFilter<"User"> | string | null
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   isDemo?: Prisma.BoolFilter<"User"> | boolean
+  sessionVersion?: Prisma.IntFilter<"User"> | number
+  applicationSalutation?: Prisma.StringNullableFilter<"User"> | string | null
+  applicationPosition?: Prisma.StringNullableFilter<"User"> | string | null
+  applicationSource?: Prisma.StringNullableFilter<"User"> | string | null
+  applicationCompanyAddress?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   events?: Prisma.EventListRelationFilter
@@ -288,6 +342,11 @@ export type UserOrderByWithAggregationInput = {
   demoUsername?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   isDemo?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
+  applicationSalutation?: Prisma.SortOrderInput | Prisma.SortOrder
+  applicationPosition?: Prisma.SortOrderInput | Prisma.SortOrder
+  applicationSource?: Prisma.SortOrderInput | Prisma.SortOrder
+  applicationCompanyAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -308,6 +367,11 @@ export type UserScalarWhereWithAggregatesInput = {
   demoUsername?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   passwordHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   isDemo?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  sessionVersion?: Prisma.IntWithAggregatesFilter<"User"> | number
+  applicationSalutation?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  applicationPosition?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  applicationSource?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  applicationCompanyAddress?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -319,6 +383,11 @@ export type UserCreateInput = {
   demoUsername?: string | null
   passwordHash?: string | null
   isDemo?: boolean
+  sessionVersion?: number
+  applicationSalutation?: string | null
+  applicationPosition?: string | null
+  applicationSource?: string | null
+  applicationCompanyAddress?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.EventCreateNestedManyWithoutUserInput
@@ -332,6 +401,11 @@ export type UserUncheckedCreateInput = {
   demoUsername?: string | null
   passwordHash?: string | null
   isDemo?: boolean
+  sessionVersion?: number
+  applicationSalutation?: string | null
+  applicationPosition?: string | null
+  applicationSource?: string | null
+  applicationCompanyAddress?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.EventUncheckedCreateNestedManyWithoutUserInput
@@ -344,6 +418,11 @@ export type UserUpdateInput = {
   demoUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  applicationSalutation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationSource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationCompanyAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.EventUpdateManyWithoutUserNestedInput
@@ -357,6 +436,11 @@ export type UserUncheckedUpdateInput = {
   demoUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  applicationSalutation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationSource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationCompanyAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.EventUncheckedUpdateManyWithoutUserNestedInput
@@ -370,6 +454,11 @@ export type UserCreateManyInput = {
   demoUsername?: string | null
   passwordHash?: string | null
   isDemo?: boolean
+  sessionVersion?: number
+  applicationSalutation?: string | null
+  applicationPosition?: string | null
+  applicationSource?: string | null
+  applicationCompanyAddress?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -381,6 +470,11 @@ export type UserUpdateManyMutationInput = {
   demoUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  applicationSalutation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationSource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationCompanyAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -393,6 +487,11 @@ export type UserUncheckedUpdateManyInput = {
   demoUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  applicationSalutation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationSource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationCompanyAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -405,12 +504,18 @@ export type UserCountOrderByAggregateInput = {
   demoUsername?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   isDemo?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
+  applicationSalutation?: Prisma.SortOrder
+  applicationPosition?: Prisma.SortOrder
+  applicationSource?: Prisma.SortOrder
+  applicationCompanyAddress?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -421,6 +526,11 @@ export type UserMaxOrderByAggregateInput = {
   demoUsername?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   isDemo?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
+  applicationSalutation?: Prisma.SortOrder
+  applicationPosition?: Prisma.SortOrder
+  applicationSource?: Prisma.SortOrder
+  applicationCompanyAddress?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -433,12 +543,18 @@ export type UserMinOrderByAggregateInput = {
   demoUsername?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   isDemo?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
+  applicationSalutation?: Prisma.SortOrder
+  applicationPosition?: Prisma.SortOrder
+  applicationSource?: Prisma.SortOrder
+  applicationCompanyAddress?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
 }
 
 export type UserNullableScalarRelationFilter = {
@@ -454,16 +570,16 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
-}
-
 export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
 }
 
 export type UserCreateNestedOneWithoutEventsInput = {
@@ -489,6 +605,11 @@ export type UserCreateWithoutEventsInput = {
   demoUsername?: string | null
   passwordHash?: string | null
   isDemo?: boolean
+  sessionVersion?: number
+  applicationSalutation?: string | null
+  applicationPosition?: string | null
+  applicationSource?: string | null
+  applicationCompanyAddress?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -501,6 +622,11 @@ export type UserUncheckedCreateWithoutEventsInput = {
   demoUsername?: string | null
   passwordHash?: string | null
   isDemo?: boolean
+  sessionVersion?: number
+  applicationSalutation?: string | null
+  applicationPosition?: string | null
+  applicationSource?: string | null
+  applicationCompanyAddress?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -528,6 +654,11 @@ export type UserUpdateWithoutEventsInput = {
   demoUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  applicationSalutation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationSource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationCompanyAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -540,6 +671,11 @@ export type UserUncheckedUpdateWithoutEventsInput = {
   demoUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  applicationSalutation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationSource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationCompanyAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -583,6 +719,11 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   demoUsername?: boolean
   passwordHash?: boolean
   isDemo?: boolean
+  sessionVersion?: boolean
+  applicationSalutation?: boolean
+  applicationPosition?: boolean
+  applicationSource?: boolean
+  applicationCompanyAddress?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   events?: boolean | Prisma.User$eventsArgs<ExtArgs>
@@ -597,6 +738,11 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   demoUsername?: boolean
   passwordHash?: boolean
   isDemo?: boolean
+  sessionVersion?: boolean
+  applicationSalutation?: boolean
+  applicationPosition?: boolean
+  applicationSource?: boolean
+  applicationCompanyAddress?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -609,6 +755,11 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   demoUsername?: boolean
   passwordHash?: boolean
   isDemo?: boolean
+  sessionVersion?: boolean
+  applicationSalutation?: boolean
+  applicationPosition?: boolean
+  applicationSource?: boolean
+  applicationCompanyAddress?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -621,11 +772,16 @@ export type UserSelectScalar = {
   demoUsername?: boolean
   passwordHash?: boolean
   isDemo?: boolean
+  sessionVersion?: boolean
+  applicationSalutation?: boolean
+  applicationPosition?: boolean
+  applicationSource?: boolean
+  applicationCompanyAddress?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "googleId" | "email" | "name" | "demoUsername" | "passwordHash" | "isDemo" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "googleId" | "email" | "name" | "demoUsername" | "passwordHash" | "isDemo" | "sessionVersion" | "applicationSalutation" | "applicationPosition" | "applicationSource" | "applicationCompanyAddress" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   events?: boolean | Prisma.User$eventsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -646,6 +802,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     demoUsername: string | null
     passwordHash: string | null
     isDemo: boolean
+    sessionVersion: number
+    applicationSalutation: string | null
+    applicationPosition: string | null
+    applicationSource: string | null
+    applicationCompanyAddress: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1079,6 +1240,11 @@ export interface UserFieldRefs {
   readonly demoUsername: Prisma.FieldRef<"User", 'String'>
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
   readonly isDemo: Prisma.FieldRef<"User", 'Boolean'>
+  readonly sessionVersion: Prisma.FieldRef<"User", 'Int'>
+  readonly applicationSalutation: Prisma.FieldRef<"User", 'String'>
+  readonly applicationPosition: Prisma.FieldRef<"User", 'String'>
+  readonly applicationSource: Prisma.FieldRef<"User", 'String'>
+  readonly applicationCompanyAddress: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }

@@ -552,6 +552,17 @@ details[open] > summary:first-child {
   width: 100%;
 }
 
+.google-login-control {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.google-login-control__error {
+  margin: 0;
+  text-align: center;
+}
+
 .demo-login__title {
   color: var(--text-h);
   font-weight: 600;
@@ -568,7 +579,8 @@ details[open] > summary:first-child {
 }
 
 .demo-login input,
-.demo-account-form input {
+.demo-account-form input,
+.demo-account-form textarea {
   min-width: 0;
   min-height: 42px;
   padding: 8px 10px;
@@ -3256,6 +3268,14 @@ details[open] > summary:first-child {
   cursor: pointer;
 }
 
+.demo-account-form__wide {
+  grid-column: 1 / -1;
+}
+
+.demo-account-form textarea {
+  resize: vertical;
+}
+
 .demo-credentials {
   display: grid;
   gap: 10px;
@@ -3272,6 +3292,155 @@ details[open] > summary:first-child {
 
 .demo-credentials button {
   justify-self: start;
+}
+
+.demo-credentials__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cover-letter-modal {
+  width: min(900px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+}
+
+.cover-letter-preview-help {
+  margin-top: 0;
+}
+
+.cover-letter-print-area {
+  width: min(100%, 210mm);
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 16mm;
+  color: #111;
+  background: #fff;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 25%);
+  box-sizing: border-box;
+}
+
+.cover-letter-document {
+  color: #172033;
+  font:
+    10.5pt/1.25 Arial,
+    sans-serif;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.cover-letter-document__header {
+  margin-bottom: 7mm;
+}
+
+.cover-letter-document address {
+  display: grid;
+  gap: 0.5mm;
+  font-style: normal;
+}
+
+.cover-letter-document__sender strong {
+  color: #183c63;
+  font-size: 13pt;
+}
+
+.cover-letter-document__recipient {
+  min-height: 14mm;
+  margin-bottom: 4mm;
+}
+
+.cover-letter-document__date {
+  margin: 0 0 5mm;
+  text-align: right;
+}
+
+.cover-letter-document h1 {
+  margin: 0 0 5mm;
+  padding-bottom: 2mm;
+  border-bottom: 1px solid #a8b8c8;
+  color: #183c63;
+  font-size: 13pt;
+}
+
+.cover-letter-document p {
+  margin: 0 0 3.5mm;
+}
+
+.cover-letter-document a {
+  color: #155da5;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 1.5px;
+}
+
+.cover-letter-document__access {
+  margin: 1mm 0 3.5mm;
+  padding: 3mm 4mm;
+  border-left: 3px solid #285d91;
+  background: #eef4fa;
+}
+
+.cover-letter-document__access > strong {
+  display: block;
+  margin-bottom: 1.5mm;
+  color: #183c63;
+}
+
+.cover-letter-document__access dl {
+  display: grid;
+  gap: 1mm;
+  margin: 0;
+}
+
+.cover-letter-document__access dl div {
+  display: grid;
+  grid-template-columns: 27mm 1fr;
+  gap: 2mm;
+}
+
+.cover-letter-document__access dt {
+  font-weight: 700;
+}
+
+.cover-letter-document__access dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.cover-letter-document__signature {
+  margin-top: 5mm !important;
+  font-weight: 600;
+}
+
+.cover-letter-print-root {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+
+  body > * {
+    display: none !important;
+  }
+
+  body > .cover-letter-print-root {
+    display: block !important;
+  }
+
+  .cover-letter-print-root {
+    margin: 0;
+    padding: 0;
+    color: #111;
+    background: #fff;
+  }
+
+  .cover-letter-document a {
+    color: #155da5 !important;
+  }
 }
 
 .demo-account-list {

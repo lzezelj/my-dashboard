@@ -144,6 +144,8 @@ describe('Calendar month grid', () => {
     ]);
     render(<Calendar />);
 
+    await user.click(await screen.findByRole('button', { name: /16.*3 events/i }));
+
     const timeline = await screen.findByLabelText('Hourly schedule');
     const oneOClock = within(timeline).getByText('01:00').closest('.selected-day-hour');
     expect(oneOClock).not.toBeNull();

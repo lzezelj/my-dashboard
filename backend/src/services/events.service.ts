@@ -35,6 +35,19 @@ export type EventInput = {
 export type EventOccurrence = Event & { occurrenceDate: string; sourceOccurrenceDate: string };
 type EventWithOverrides = Event & { occurrenceOverrides: EventOccurrenceOverride[] };
 const dateOnly = /^\d{4}-\d{2}-\d{2}$/;
+const MAX_IMPORT_EVENTS = 5_000;
+const MAX_RECURRENCE_VALUES = 10_000;
+const stringLimits: Partial<Record<keyof EventInput, number>> = {
+  title: 200,
+  description: 20_000,
+  externalUid: 1_000,
+  timeZone: 100,
+  location: 1_000,
+  url: 2_048,
+  recurrenceRule: 2_000,
+  status: 100,
+  originalIcs: 1_000_000,
+};
 const invalid = (message: string): never => {
   const error = new Error(message);
   error.name = 'ValidationError';
@@ -62,6 +75,13 @@ export function validateEventInput(input: EventInput, partial = false): EventInp
     (typeof input.title !== 'string' || !input.title.trim())
   )
     invalid('title is required.');
+  for (const [field, maximum] of Object.entries(stringLimits) as Array<
+    [keyof EventInput, number]
+  >) {
+    const value = input[field];
+    if (typeof value === 'string' && value.length > maximum)
+      invalid(`${field} must be ${maximum} characters or fewer.`);
+  }
   if (input.date !== undefined && input.date !== null && typeof input.date !== 'string')
     invalid('date must be a string.');
   if (
@@ -89,7 +109,9 @@ export function validateEventInput(input: EventInput, partial = false): EventInp
       !Object.values(Recurrence).includes(input.recurring) ||
       (input.numberOfRecurrences !== undefined &&
         input.numberOfRecurrences !== null &&
-        (!Number.isInteger(input.numberOfRecurrences) || input.numberOfRecurrences < 1))
+        (!Number.isInteger(input.numberOfRecurrences) ||
+          input.numberOfRecurrences < 1 ||
+          input.numberOfRecurrences > 100_000))
     )
       invalid('numberOfRecurrences must be a positive integer when provided.');
     if (input.recurrenceEndDate) parseDate(input.recurrenceEndDate);
@@ -137,7 +159,9 @@ export function validateEventInput(input: EventInput, partial = false): EventInp
   ] as const)
     if (
       value !== undefined &&
-      (!Array.isArray(value) || value.some((item) => typeof item !== 'string'))
+      (!Array.isArray(value) ||
+        value.length > MAX_RECURRENCE_VALUES ||
+        value.some((item) => typeof item !== 'string' || item.length > 1_000))
     )
       invalid(`${field} must be an array of strings.`);
   if (
@@ -148,6 +172,14 @@ export function validateEventInput(input: EventInput, partial = false): EventInp
       Object.values(input.details).some((value) => typeof value !== 'string'))
   )
     invalid('details must be an object containing string values.');
+  if (input.details) {
+    const entries = Object.entries(input.details);
+    if (
+      entries.length > 50 ||
+      entries.some(([key, value]) => key.length > 100 || value.length > 2_000)
+    )
+      invalid('details may contain at most 50 fields with bounded keys and values.');
+  }
   return { ...input, title: input.title?.trim() };
 }
 const toData = (input: Partial<EventInput>) => ({
@@ -261,6 +293,8 @@ export async function findImportDuplicatesService(
   importedEvents: Array<{ title?: unknown; date?: unknown; startTime?: unknown }>,
   userId: number,
 ) {
+  if (importedEvents.length > MAX_IMPORT_EVENTS)
+    invalid(`An import may contain at most ${MAX_IMPORT_EVENTS} events.`);
   const existing = await prisma.event.findMany({
     where: { userId },
     select: {
@@ -339,6 +373,8 @@ function parseImportOverrides(
   if (value === undefined) return [];
   if (!Array.isArray(value)) invalid('occurrenceOverrides must be an array.');
   const rawOverrides = value as unknown[];
+  if (rawOverrides.length > MAX_RECURRENCE_VALUES)
+    invalid(`occurrenceOverrides may contain at most ${MAX_RECURRENCE_VALUES} entries.`);
   if (rawOverrides.length === 0) return [];
   if (!event.recurring) invalid('Only recurring events can contain occurrence overrides.');
 
@@ -390,6 +426,8 @@ function parseImportOverrides(
 }
 
 export async function importEventsService(items: unknown[], userId: number) {
+  if (items.length > MAX_IMPORT_EVENTS)
+    invalid(`An import may contain at most ${MAX_IMPORT_EVENTS} events.`);
   const skipped: Array<{ index: number; message: string }> = [];
   let imported = 0;
 
@@ -557,6 +595,8 @@ export async function updateOccurrenceService(
     typeof input.description !== 'string'
   )
     invalid('description must be a string.');
+  if (typeof input.description === 'string' && input.description.length > 20_000)
+    invalid('description must be 20000 characters or fewer.');
   if (input.date !== undefined && input.date !== null && typeof input.date !== 'string')
     invalid('date must be a valid YYYY-MM-DD value.');
   const descriptionValue =

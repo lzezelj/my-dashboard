@@ -53,9 +53,10 @@ const createSession = (
     name: string | null;
     googleId?: string | null;
     isDemo?: boolean;
+    sessionVersion?: number;
   },
 ) => {
-  const token = generateJwt(user.id);
+  const token = generateJwt(user.id, user.sessionVersion ?? 0);
   res.cookie('auth_token', token, {
     ...sessionCookieOptions(),
     maxAge: 24 * 60 * 60 * 1000,
@@ -166,7 +167,7 @@ export const requireDemoAccountOwner = async (
 };
 
 export const createDemoAccount = async (req: Request, res: Response) => {
-  const { username, label } = req.body ?? {};
+  const { username, label, salutation, position, source, companyAddress } = req.body ?? {};
   if (typeof username !== 'string' || !isValidDemoUsername(username)) {
     return res.status(400).json({
       message:
@@ -176,9 +177,24 @@ export const createDemoAccount = async (req: Request, res: Response) => {
   if (label !== undefined && (typeof label !== 'string' || label.trim().length > 100)) {
     return res.status(400).json({ message: 'Label must be 100 characters or fewer' });
   }
+  for (const [field, value, maximum] of [
+    ['Salutation', salutation, 150],
+    ['Position', position, 150],
+    ['Source', source, 300],
+    ['Company address', companyAddress, 500],
+  ] as const) {
+    if (value !== undefined && (typeof value !== 'string' || value.trim().length > maximum)) {
+      return res.status(400).json({ message: `${field} must be ${maximum} characters or fewer` });
+    }
+  }
 
   try {
-    const result = await createDemoUser(username, label?.trim() || null);
+    const result = await createDemoUser(username, label?.trim() || null, {
+      salutation: salutation?.trim() || null,
+      position: position?.trim() || null,
+      source: source?.trim() || null,
+      companyAddress: companyAddress?.trim() || null,
+    });
     return res.status(201).json({
       account: {
         ...result.user,
@@ -248,13 +264,23 @@ export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) =
   }
 };
 
-export const logout = (_req: Request, res: Response) => {
+export const logout = async (req: AuthenticatedRequest, res: Response) => {
+  if (req.userId !== undefined) {
+    await prisma.user.updateMany({
+      where: { id: req.userId },
+      data: { sessionVersion: { increment: 1 } },
+    });
+  }
   res.clearCookie('auth_token', sessionCookieOptions());
   return res.status(200).json({ message: 'Logged out successfully' });
 };
 
 export const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
   if (req.userId === undefined) return res.status(401).json({ message: 'Authentication required' });
+  const fifteenMinutes = 15 * 60;
+  if (!req.authIssuedAt || Math.floor(Date.now() / 1000) - req.authIssuedAt > fifteenMinutes) {
+    return res.status(401).json({ message: 'Please sign in again before deleting your account' });
+  }
   const userId = req.userId;
 
   try {
