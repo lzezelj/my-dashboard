@@ -2320,10 +2320,15 @@ details[open] > summary:first-child {
 }
 
 .selected-day-timeline {
-  position: relative;
+  overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--bg);
+}
+
+.selected-day-timeline__content {
+  position: relative;
+  min-width: max(100%, var(--timeline-min-width));
 }
 
 .selected-day-hour {

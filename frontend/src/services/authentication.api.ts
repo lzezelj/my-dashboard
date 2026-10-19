@@ -1,4 +1,5 @@
 import { apiUrl } from '../config';
+import { fetchWithWakeRetry } from '../utils/fetchWithWakeRetry';
 
 export type AuthUser = {
   id: number;
@@ -23,7 +24,7 @@ export type DemoAccount = {
 const authUrl = `${apiUrl}/api/auth`;
 
 export async function getCurrentUser(): Promise<AuthUser | null> {
-  const response = await fetch(`${authUrl}/me`, { credentials: 'include' });
+  const response = await fetchWithWakeRetry(`${authUrl}/me`, { credentials: 'include' });
 
   if (response.status === 401) {
     return null;
@@ -65,7 +66,7 @@ const responseMessage = async (response: Response, fallback: string) => {
 };
 
 export async function loginWithDemoAccount(username: string, password: string): Promise<AuthUser> {
-  const response = await fetch(`${authUrl}/demo/login`, {
+  const response = await fetchWithWakeRetry(`${authUrl}/demo/login`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

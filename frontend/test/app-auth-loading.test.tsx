@@ -37,4 +37,19 @@ describe('App authentication loading state', () => {
     expect(screen.queryByText(/Welcome back/)).not.toBeInTheDocument();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
+
+  it.each(['/', '/events', '/events/add', '/welcome', '/unknown-page'])(
+    'redirects a signed-out visitor from %s to home',
+    async (path) => {
+      authentication.getCurrentUser.mockResolvedValue(null);
+
+      render(
+        <MemoryRouter initialEntries={[path]}>
+          <App />
+        </MemoryRouter>,
+      );
+
+      expect(await screen.findByText('Keep your plans in one place.')).toBeInTheDocument();
+    },
+  );
 });

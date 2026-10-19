@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import type { DashboardEvent, EventCategory } from '../types/events';
 import {
   eventCategories,
@@ -287,6 +287,10 @@ export default function Calendar() {
       (first, second) => timedEventRange(first).startMinutes - timedEventRange(second).startMinutes,
     );
   const timedEventLines = layoutTimedEventLines(timedSelectedDayEvents);
+  const timedEventColumnCount = Math.max(1, ...timedEventLines.map(({ column }) => column + 1));
+  const timelineStyle = {
+    '--timeline-min-width': `${148 + timedEventColumnCount * 14}px`,
+  } as CSSProperties;
   const allDaySelectedDayEvents = selectedDayEvents.filter(
     (event) => event.allDay || !event.startTime || Number.isNaN(Date.parse(event.startTime ?? '')),
   );
@@ -451,82 +455,91 @@ export default function Calendar() {
             <p className="event-list-empty">No events scheduled for this day.</p>
           ) : (
             <div className="selected-day-agenda">
-              <ScrollableWindow className="selected-day-timeline" aria-label="Hourly schedule">
-                {Array.from({ length: 24 }, (_, hour) => {
-                  return (
-                    <div className="selected-day-hour" key={hour}>
-                      <time dateTime={`${String(hour).padStart(2, '0')}:00`}>
-                        {String(hour).padStart(2, '0')}:00
-                      </time>
-                      <div className="selected-day-hour__events" />
-                      <button
-                        className="selected-day-hour__add"
-                        type="button"
-                        aria-label={`Add event at ${String(hour).padStart(2, '0')}:00`}
-                        title={`Add event at ${String(hour).padStart(2, '0')}:00`}
-                        onClick={() => {
-                          setCreateStartTime(
-                            new Date(
-                              `${selected}T${String(hour).padStart(2, '0')}:00`,
-                            ).toISOString(),
-                          );
-                          setShowCreateForm(true);
-                        }}
-                      >
-                        <span aria-hidden="true">+</span>
-                      </button>
-                    </div>
-                  );
-                })}
-                <div className="selected-day-timed-events">
-                  {timedEventLines.map(
-                    ({ event, column, colorIndex, startMinutes, durationMinutes }) => {
-                      const color = overlapMarkerColors[colorIndex % overlapMarkerColors.length];
-                      return (
+              <ScrollableWindow
+                className="selected-day-timeline"
+                aria-label="Hourly schedule"
+                style={timelineStyle}
+              >
+                <div className="selected-day-timeline__content">
+                  {Array.from({ length: 24 }, (_, hour) => {
+                    return (
+                      <div className="selected-day-hour" key={hour}>
+                        <time dateTime={`${String(hour).padStart(2, '0')}:00`}>
+                          {String(hour).padStart(2, '0')}:00
+                        </time>
+                        <div className="selected-day-hour__events" />
                         <button
-                          className="timed-event-line"
-                          style={{
-                            top: (startMinutes / 60) * HOUR_ROW_HEIGHT,
-                            left: 10 + column * 14,
-                            height: (durationMinutes / 60) * HOUR_ROW_HEIGHT,
-                            backgroundColor: color,
-                          }}
+                          className="selected-day-hour__add"
                           type="button"
-                          aria-label={`${event.title}, ${eventTime(event.startTime!)}${event.endTime ? ` to ${eventTime(event.endTime)}` : ' to end of day'}`}
-                          key={`${event.id}-${event.occurrenceDate ?? selected}`}
-                          onPointerMove={(pointerEvent) =>
-                            setTimedEventTooltip({
-                              event,
-                              color,
-                              x: Math.max(
-                                12,
-                                Math.min(pointerEvent.clientX + 16, window.innerWidth - 340),
-                              ),
-                              y: Math.max(
-                                12,
-                                Math.min(pointerEvent.clientY + 16, window.innerHeight - 90),
-                              ),
-                            })
-                          }
-                          onPointerLeave={() => setTimedEventTooltip(null)}
-                          onFocus={(focusEvent) => {
-                            const bounds = focusEvent.currentTarget.getBoundingClientRect();
-                            setTimedEventTooltip({
-                              event,
-                              color,
-                              x: Math.max(12, Math.min(bounds.right + 16, window.innerWidth - 340)),
-                              y: Math.max(12, Math.min(bounds.top + 8, window.innerHeight - 90)),
-                            });
-                          }}
-                          onBlur={() => setTimedEventTooltip(null)}
+                          aria-label={`Add event at ${String(hour).padStart(2, '0')}:00`}
+                          title={`Add event at ${String(hour).padStart(2, '0')}:00`}
                           onClick={() => {
-                            setTimedEventTooltip(null);
-                            setSelectedEvent(event);
+                            setCreateStartTime(
+                              new Date(
+                                `${selected}T${String(hour).padStart(2, '0')}:00`,
+                              ).toISOString(),
+                            );
+                            setShowCreateForm(true);
                           }}
-                        />
-                      );
-                    },
-                  )}
+                        >
+                          <span aria-hidden="true">+</span>
+                        </button>
+                      </div>
+                    );
+                  })}
+                  <div className="selected-day-timed-events">
+                    {timedEventLines.map(
+                      ({ event, column, colorIndex, startMinutes, durationMinutes }) => {
+                        const color = overlapMarkerColors[colorIndex % overlapMarkerColors.length];
+                        return (
+                          <button
+                            className="timed-event-line"
+                            style={{
+                              top: (startMinutes / 60) * HOUR_ROW_HEIGHT,
+                              left: 10 + column * 14,
+                              height: (durationMinutes / 60) * HOUR_ROW_HEIGHT,
+                              backgroundColor: color,
+                            }}
+                            type="button"
+                            aria-label={`${event.title}, ${eventTime(event.startTime!)}${event.endTime ? ` to ${eventTime(event.endTime)}` : ' to end of day'}`}
+                            key={`${event.id}-${event.occurrenceDate ?? selected}`}
+                            onPointerMove={(pointerEvent) =>
+                              setTimedEventTooltip({
+                                event,
+                                color,
+                                x: Math.max(
+                                  12,
+                                  Math.min(pointerEvent.clientX + 16, window.innerWidth - 340),
+                                ),
+                                y: Math.max(
+                                  12,
+                                  Math.min(pointerEvent.clientY + 16, window.innerHeight - 90),
+                                ),
+                              })
+                            }
+                            onPointerLeave={() => setTimedEventTooltip(null)}
+                            onFocus={(focusEvent) => {
+                              const bounds = focusEvent.currentTarget.getBoundingClientRect();
+                              setTimedEventTooltip({
+                                event,
+                                color,
+                                x: Math.max(
+                                  12,
+                                  Math.min(bounds.right + 16, window.innerWidth - 340),
+                                ),
+                                y: Math.max(12, Math.min(bounds.top + 8, window.innerHeight - 90)),
+                              });
+                            }}
+                            onBlur={() => setTimedEventTooltip(null)}
+                            onClick={() => {
+                              setTimedEventTooltip(null);
+                              setSelectedEvent(event);
+                            }}
+                          />
+                        );
+                      },
+                    )}
+                  </div>
                 </div>
               </ScrollableWindow>
               <aside className="selected-day-all-day" aria-label="All-day events">

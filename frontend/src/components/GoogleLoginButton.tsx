@@ -2,6 +2,7 @@ import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 import { useState } from 'react';
 import type { AuthUser } from '../services/authentication.api';
 import { apiUrl } from '../config';
+import { fetchWithWakeRetry } from '../utils/fetchWithWakeRetry';
 
 type GoogleLoginButtonProps = {
   onLogin: (user: AuthUser, isNewUser: boolean) => void;
@@ -26,7 +27,7 @@ function GoogleLoginButtonContent({ onLogin }: GoogleLoginButtonProps) {
 
           try {
             const authenticate = (endpoint: 'login' | 'register') =>
-              fetch(`${apiUrl}/api/auth/google/${endpoint}`, {
+              fetchWithWakeRetry(`${apiUrl}/api/auth/google/${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -37,13 +38,21 @@ function GoogleLoginButtonContent({ onLogin }: GoogleLoginButtonProps) {
             const isNewUser = response.status === 404;
             if (isNewUser) response = await authenticate('register');
 
-            const data = (await response.json()) as { message?: string; user?: AuthUser };
+            const data = (await response.json().catch(() => null)) as {
+              message?: string;
+              user?: AuthUser;
+            } | null;
 
             if (!response.ok) {
-              throw new Error(data.message || 'Backend authentication failed');
+              throw new Error(
+                data?.message ||
+                  ([502, 503, 504].includes(response.status)
+                    ? 'The service is still waking up. Please try again in a moment.'
+                    : 'Backend authentication failed'),
+              );
             }
 
-            if (!data.user) {
+            if (!data?.user) {
               throw new Error('Backend did not return a user');
             }
 

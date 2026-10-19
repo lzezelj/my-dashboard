@@ -17,6 +17,7 @@ import Pagination from './Pagination';
 import ScrollableWindow from './ScrollableWindow';
 
 const EVENTS_PER_PAGE = 25;
+const MAX_IMPORT_FILE_BYTES = 5 * 1024 * 1024;
 
 export default function IcsImportPreview({
   onImported,
@@ -43,6 +44,7 @@ export default function IcsImportPreview({
   const load = async (file?: File) => {
     if (!file) return;
     try {
+      if (file.size > MAX_IMPORT_FILE_BYTES) throw new Error('The ICS file exceeds 5 MB.');
       const ics = await file.text();
       const preview = await previewIcsImport(ics);
       setEvents(preview.events);

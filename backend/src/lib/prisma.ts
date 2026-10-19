@@ -8,6 +8,10 @@ if (testSchema && !/^dashboard_test_\d+_\d+$/.test(testSchema))
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
+  connectionTimeoutMillis: 10_000,
+  idleTimeoutMillis: 10_000,
+  allowExitOnIdle: true,
+  max: 5,
   ...(testSchema ? { options: `-c search_path=${testSchema}` } : {}),
 });
 

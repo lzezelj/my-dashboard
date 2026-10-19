@@ -157,6 +157,7 @@ export default function ImportPreview({
   const loadFile = async (file?: File) => {
     if (!file) return;
     try {
+      if (file.size > 5 * 1024 * 1024) throw new Error('The JSON file exceeds 5 MB.');
       const parsed: unknown = JSON.parse(await file.text());
       if (
         !parsed ||

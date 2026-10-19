@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Edit from './pages/Edit.tsx';
 import Home from './pages/Home.tsx';
@@ -10,7 +10,6 @@ import {
   logout,
   type AuthUser,
 } from './services/authentication.api';
-import Unauthorized from './pages/Unauthorized.tsx';
 import Import from './pages/Import.tsx';
 import Welcome from './pages/Welcome.tsx';
 import Privacy from './pages/Privacy.tsx';
@@ -24,7 +23,6 @@ function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isAuthenticationResolved, setIsAuthenticationResolved] = useState(false);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
-  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,8 +65,7 @@ function App() {
     }
   };
 
-  const isPublicLegalPage = location.pathname === '/privacy' || location.pathname === '/imprint';
-  const showNavbar = user !== null || (location.pathname !== '/home' && !isPublicLegalPage);
+  const showNavbar = user !== null;
   const handleLogin = (authenticatedUser: AuthUser, isNewUser: boolean) => {
     setUser(authenticatedUser);
     if (isNewUser) navigate('/welcome', { replace: true });
@@ -87,6 +84,7 @@ function App() {
     <>
       {showNavbar && <Navbar user={user} onLogin={handleLogin} onLogout={handleLogout} />}
       <Routes>
+        <Route path="/" element={<Navigate to="/home" replace />} />
         <Route
           path="/home"
           element={
@@ -98,8 +96,11 @@ function App() {
             />
           }
         />
-        <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/welcome" element={<Welcome user={user} />} />
+        <Route path="/unauthorized" element={<Navigate to="/home" replace />} />
+        <Route
+          path="/welcome"
+          element={user ? <Welcome user={user} /> : <Navigate to="/home" replace />}
+        />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/imprint" element={<Imprint />} />
         <Route
@@ -116,8 +117,8 @@ function App() {
             )
           }
         />
-        <Route path="/edit/*" element={<Navigate to="/events" replace />} />
-        <Route path="/events" element={<Edit />}>
+        <Route path="/edit/*" element={<Navigate to={user ? '/events' : '/home'} replace />} />
+        <Route path="/events" element={user ? <Edit /> : <Navigate to="/home" replace />}>
           <Route index element={<EventManager />} />
           <Route path="add" element={<AddEvent />} />
           <Route path="import" element={<Import />} />
@@ -141,6 +142,7 @@ function App() {
           <Route path="work" element={<EventManager key="work" initialCategory="WORK" />} />
           <Route path="school" element={<EventManager key="school" initialCategory="SCHOOL" />} />
         </Route>
+        <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
       <Footer />
     </>
