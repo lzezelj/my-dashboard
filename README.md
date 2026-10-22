@@ -8,24 +8,13 @@ The Railway backend must set `NODE_ENV=production`, `DATABASE_URL`, `GOOGLE_CLIE
 frontend origin without a trailing slash. Keep `ALLOWED_GOOGLE_EMAILS` restricted to explicitly
 approved Google accounts.
 
+The Cloudflare frontend should set `VITE_API_URL` to the Railway backend origin and
+`VITE_CANONICAL_ORIGIN` to the custom frontend origin, both without a trailing slash. Requests to
+the former `my-dashboard.lovro-zezelj.workers.dev` address are redirected in the browser to the
+canonical origin while preserving the path, query string, and fragment.
+
 Run `npx prisma migrate deploy` during deployment so security-related schema migrations are applied.
 Use Railway's private database connection where available, require TLS for external connections,
 and keep the PostgreSQL service off the public network unless access is explicitly needed.
 
 See [SECURITY.md](SECURITY.md) for vulnerability reporting.
-
-Node.js has to be installed and has to be added to PATH.\
-Docker and wsl need to be installed\
-Docker is turned on by: \
-&nbsp;&nbsp;&nbsp;&nbsp; docker compose up\
-Turning on frontend: \
-&nbsp;&nbsp;&nbsp;&nbsp;cd frontend/  
-&nbsp;&nbsp;&nbsp;&nbsp;npm run dev\
-Turning on backend: \
-&nbsp;&nbsp;&nbsp;&nbsp;cd backend/\
-&nbsp;&nbsp;&nbsp;&nbsp;npm run dev\
-In order to run the database scheme, .env file needs to be created in backend with: DATABASE_URL="postgresql://dashboard:dashboard_dev_password@localhost:5432/personal_dashboard?schema=public"\
-When in backend, set up the database, run:\
-&nbsp;&nbsp;&nbsp;&nbsp;npx prisma generate\
-&nbsp;&nbsp;&nbsp;&nbsp;npx prisma migrate deploy\
-&nbsp;&nbsp;&nbsp;&nbsp;(optional) npx prisma studio\
