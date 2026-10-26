@@ -3,7 +3,7 @@ export default function Privacy() {
     <main className="legal-page">
       <article className="legal-document">
         <h1>Privacy Policy</h1>
-        <p className="legal-document__updated">Last updated: 17 October 2026</p>
+        <p className="legal-document__updated">Last updated: 26 October 2026</p>
         <p>This policy explains how Calendar Dashboard processes personal data.</p>
 
         <h2>1. Controller</h2>
@@ -124,15 +124,21 @@ export default function Privacy() {
             .
           </li>
           <li>
-            Railway Corp. hosts the backend and PostgreSQL database. The selected deployment region
-            is EU West in Amsterdam, Netherlands. Railway processes account, calendar and request
-            data on our behalf. See the{' '}
-            <a href="https://railway.com/legal/privacy" target="_blank" rel="noreferrer">
-              Railway Privacy Policy
+            Hetzner Online GmbH hosts the backend and PostgreSQL database. Hetzner processes
+            account, calendar, demo-account/application and technical request data on our behalf
+            under a data processing agreement pursuant to Article 28 GDPR.
+            The processing location depends on the Hetzner server location selected for this
+            service. See the{' '}
+            <a
+              href="https://www.hetzner.com/legal/privacy-policy/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Hetzner Privacy Policy
             </a>{' '}
             and{' '}
-            <a href="https://railway.com/legal/dpa" target="_blank" rel="noreferrer">
-              Railway DPA
+            <a href="https://www.hetzner.com/AV/DPA_en.pdf" target="_blank" rel="noreferrer">
+              Hetzner Data Processing Agreement
             </a>
             .
           </li>
@@ -142,14 +148,10 @@ export default function Privacy() {
           </li>
         </ul>
         <p>
-          Although the backend and database are deployed in Railway's EU West region in Amsterdam,
-          selecting that region does not mean that all processing is restricted exclusively to the
-          European Union or European Economic Area. Railway states that its primary processing
-          operations take place in the United States and may use subprocessors in other countries.
-          Railway's DPA provides for the EU-US Data Privacy Framework where applicable and EU
-          Standard Contractual Clauses otherwise. Cloudflare's DPA likewise incorporates transfer
-          safeguards including the EU Standard Contractual Clauses. Google may process data
-          internationally under the safeguards described in its privacy documentation.
+          Hetzner states that data on non-cloud products is processed and stored within the EU; for
+          cloud products, the processing location depends on the selected location. Cloudflare and
+          Google may process data internationally under the safeguards described in their privacy
+          documentation, including applicable transfer safeguards.
         </p>
 
         <h2>7. Retention, export and deletion</h2>
@@ -164,11 +166,11 @@ export default function Privacy() {
           deletes that demo account, normally after the relevant application process has ended.
         </p>
         <p>
-          The app currently creates no separate backups controlled by the operator. Railway's DPA
-          documents regular infrastructure backups and redundancy across locations. Railway,
-          Cloudflare and Google may also retain operational logs or copies under their respective
-          contracts and retention schedules. Their exact deletion delay is not controlled by this
-          app. Information may be retained where legally required or needed for legal claims.
+          Database backups are created for disaster recovery and may retain account and calendar
+          data for a limited period after deletion from the active database. Hetzner, Cloudflare and
+          Google may also retain operational logs or copies under their respective contracts and
+          retention schedules. Their exact deletion delay is not controlled by this app. Information
+          may be retained where legally required or needed for legal claims.
         </p>
         <p>
           Contact correspondence is retained only as long as needed to answer and handle the
