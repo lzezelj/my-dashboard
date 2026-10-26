@@ -1,33 +1,22 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useState, type FormEvent } from 'react';
 import {
   createDemoAccount,
   deleteDemoAccount,
   getDemoAccounts,
   type DemoAccount,
 } from '../services/authentication.api';
-import { createGermanCoverLetter, type CreatedCredentials } from '../utils/createGermanCoverLetter';
-import Modal from '../components/Modal';
-import CoverLetterDocument from '../components/CoverLetterDocument';
 
 export default function DemoAccounts() {
   const [accounts, setAccounts] = useState<DemoAccount[]>([]);
   const [username, setUsername] = useState('');
   const [companyName, setCompanyName] = useState('');
-  const [salutation, setSalutation] = useState('Sehr geehrte Damen und Herren');
   const [position, setPosition] = useState('');
-  const [source, setSource] = useState('');
-  const [companyAddress, setCompanyAddress] = useState('');
-  const [applicationUrl, setApplicationUrl] = useState(() => window.location.origin);
-  const [credentials, setCredentials] = useState<CreatedCredentials | null>(null);
+  const [credentials, setCredentials] = useState<{ account: DemoAccount; password: string } | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const coverLetter = useMemo(
-    () => (credentials ? createGermanCoverLetter(credentials, applicationUrl) : ''),
-    [credentials, applicationUrl],
-  );
 
   useEffect(() => {
     void getDemoAccounts()
@@ -47,10 +36,10 @@ export default function DemoAccounts() {
     setIsSubmitting(true);
     try {
       const result = await createDemoAccount(username, companyName, {
-        salutation,
+        salutation: '',
         position,
-        source,
-        companyAddress,
+        source: '',
+        companyAddress: '',
       });
       setAccounts((current) => [result.account, ...current]);
       setCredentials({ account: result.account, password: result.password });
@@ -79,13 +68,12 @@ export default function DemoAccounts() {
   };
 
   const copy = (value: string) => navigator.clipboard.writeText(value);
-  const saveLetterAsPdf = () => window.print();
 
   return (
     <main className="demo-accounts-page">
       <header className="demo-accounts-page__header">
         <h1>Demo accounts</h1>
-        <p>Create an isolated account and a tailored German cover letter for a job application.</p>
+        <p>Create isolated demo accounts for reviewers who request access.</p>
       </header>
 
       <section className="demo-account-panel">
@@ -108,36 +96,6 @@ export default function DemoAccounts() {
               maxLength={150}
               onChange={(event) => setPosition(event.target.value)}
               placeholder="Junior Softwareentwickler"
-              required
-            />
-          </label>
-          <label>
-            Salutation
-            <input
-              value={salutation}
-              maxLength={150}
-              onChange={(event) => setSalutation(event.target.value)}
-              placeholder="Sehr geehrte Frau Müller"
-              required
-            />
-          </label>
-          <label>
-            Job listing source
-            <input
-              value={source}
-              maxLength={300}
-              onChange={(event) => setSource(event.target.value)}
-              placeholder="StepStone oder Ihre Stellenanzeige auf ..."
-            />
-          </label>
-          <label className="demo-account-form__wide">
-            Company address
-            <textarea
-              value={companyAddress}
-              maxLength={500}
-              rows={3}
-              onChange={(event) => setCompanyAddress(event.target.value)}
-              placeholder={'Musterstraße 1\n12345 Musterstadt'}
             />
           </label>
           <label>
@@ -152,26 +110,15 @@ export default function DemoAccounts() {
               required
             />
           </label>
-          <label>
-            Deployed website URL
-            <input
-              type="url"
-              value={applicationUrl}
-              maxLength={2048}
-              onChange={(event) => setApplicationUrl(event.target.value)}
-              required
-            />
-          </label>
           <button type="submit" className="primary-button" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating…' : 'Create account and cover letter'}
+            {isSubmitting ? 'Creating…' : 'Create demo account'}
           </button>
         </form>
 
         {credentials && (
           <div className="demo-credentials" role="status">
             <p>
-              <strong>Save these credentials and the letter now.</strong> The password cannot be
-              shown again.
+              <strong>Save these credentials now.</strong> The password cannot be shown again.
             </p>
             <code>Username: {credentials.account.demoUsername}</code>
             <code>Password: {credentials.password}</code>
@@ -185,12 +132,6 @@ export default function DemoAccounts() {
                 }
               >
                 Copy credentials
-              </button>
-              <button type="button" onClick={() => void copy(coverLetter)}>
-                Copy cover letter
-              </button>
-              <button type="button" onClick={() => setIsPreviewOpen(true)}>
-                Preview and save as PDF
               </button>
             </div>
           </div>
@@ -231,30 +172,6 @@ export default function DemoAccounts() {
           </ul>
         )}
       </section>
-
-      <Modal
-        isOpen={isPreviewOpen && credentials !== null}
-        title="Cover letter preview"
-        confirmLabel="Save as PDF"
-        cancelLabel="Close"
-        onConfirm={saveLetterAsPdf}
-        onCancel={() => setIsPreviewOpen(false)}
-        className="cover-letter-modal"
-      >
-        <p className="cover-letter-preview-help">
-          Select &quot;Save as PDF&quot; as the destination in the browser print dialog.
-        </p>
-        <article className="cover-letter-print-area" aria-label="German cover letter preview">
-          <CoverLetterDocument content={coverLetter} />
-        </article>
-      </Modal>
-      {credentials &&
-        createPortal(
-          <div className="cover-letter-print-root" aria-hidden="true">
-            <CoverLetterDocument content={coverLetter} />
-          </div>,
-          document.body,
-        )}
     </main>
   );
 }
