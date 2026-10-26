@@ -1,0 +1,75 @@
+name: calendar-dashboard
+
+services:
+  calendar-postgres:
+    image: postgres:18-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: calendar
+      POSTGRES_USER: calendar
+      POSTGRES_PASSWORD: ${CALENDAR_DB_PASSWORD:?Set CALENDAR_DB_PASSWORD}
+    volumes:
+      - calendar_postgres_data:/var/lib/postgresql
+    networks:
+      - calendar-backend
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U calendar -d calendar']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  calendar-migrate:
+    build:
+      context: ./backend
+      target: migrate
+    restart: 'no'
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL}
+    depends_on:
+      calendar-postgres:
+        condition: service_healthy
+    networks:
+      - calendar-backend
+
+  calendar-api:
+    build:
+      context: ./backend
+      target: runtime
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?Set GOOGLE_CLIENT_ID}
+      FRONTEND_ORIGIN: https://calendar.lzezelj.com
+      OWNER_GOOGLE_EMAIL: ${OWNER_GOOGLE_EMAIL:?Set OWNER_GOOGLE_EMAIL}
+      ALLOWED_GOOGLE_EMAILS: ${ALLOWED_GOOGLE_EMAILS:?Set ALLOWED_GOOGLE_EMAILS}
+    depends_on:
+      calendar-postgres:
+        condition: service_healthy
+    networks:
+      - calendar-backend
+      - calendar-proxy
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  calendar-backend:
+    internal: true
+  calendar-proxy:
+    external: true
+    name: calendar-proxy
+
+volumes:
+  calendar_postgres_data:

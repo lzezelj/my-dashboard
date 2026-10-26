@@ -1,5 +1,8 @@
 # Calendar Dashboard
 
+For the backend/database deployment beside LC with the frontend remaining on
+Cloudflare, see [the Hetzner deployment guide](deploy/hetzner.md).
+
 ## Production security configuration
 
 The Railway backend must set `NODE_ENV=production`, `DATABASE_URL`, `GOOGLE_CLIENT_ID`,
